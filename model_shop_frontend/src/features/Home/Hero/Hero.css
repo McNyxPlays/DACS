@@ -1,0 +1,5 @@
+.hero-section {
+  background-image: url("https://readdy.ai/api/search-image?query=high-quality%20professional%20photograph%20of%20a%20modern%20workspace%20with%20model%20kits%2C%20featuring%20Gundam%20models%20and%20anime%20figures%20displayed%20on%20shelves%2C%20with%20painting%20tools%20and%20assembly%20equipment%20neatly%20arranged%20on%20a%20clean%20desk.%20The%20scene%20has%20soft%20natural%20lighting%20from%20the%20left%20side%2C%20creating%20a%20gradient%20effect%20with%20more%20light%20on%20the%20left%20and%20a%20focus%20on%20detailed%20models%20on%20the%20right.%20Perfect%20for%20a%20hero%20banner%20for%20a%20model%20kit%20website.&width=1920&height=800&seq=1234&orientation=landscape");
+  background-size: cover;
+  background-position: center;
+}
