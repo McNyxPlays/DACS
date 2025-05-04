@@ -1,30 +1,26 @@
 <?php
+
 class Database {
     private $host = 'localhost';
     private $dbname = 'model_shop';
     private $username = 'root';
     private $password = '';
-    private $conn;
 
     public function getConnection() {
-        $this->conn = null;
         try {
-            $this->conn = new PDO(
-                "mysql:host=$this->host;dbname=$this->dbname",
+            $conn = new PDO(
+                "mysql:host=$this->host;dbname=$this->dbname;charset=utf8",
                 $this->username,
                 $this->password
             );
-            $this->conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+            $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+            return $conn;
         } catch (PDOException $e) {
             error_log("Connection failed: " . $e->getMessage());
-            http_response_code(500);
-            echo json_encode(['message' => 'Connection failed: ' . $e->getMessage()]);
-            exit;
+            return null;
         }
-        return $this->conn;
     }
 
-    // Hàm kiểm tra kết nối (dùng để debug)
     public function testConnection() {
         try {
             $this->getConnection();
@@ -34,4 +30,10 @@ class Database {
         }
     }
 }
+
+function db_connect() {
+    $db = new Database();
+    return $db->getConnection();
+}
+
 ?>

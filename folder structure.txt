@@ -1,0 +1,117 @@
+model_shop_backend
+│   .htaccess
+│
+├───api
+│       categories.php
+│       index.php
+│       login.php
+│       products.php
+│       register.php
+│       user.php
+│       Users.php
+│
+├───config
+│       database.php
+│       functions.php
+│
+└───includes
+
+model_shop_frontend
+|
+├───public
+│       favicon.ico
+│       vite.svg
+│
+└───src
+    │   App.jsx
+    │   jsconfig.json
+    │   main.jsx
+    │
+    ├───api
+    │       index.js
+    │
+    ├───assets
+    │   │   react.svg
+    │   │
+    │   ├───fonts
+    │   └───images
+    ├───components
+    │   │   BackToTop.jsx
+    │   │   Footer.jsx
+    │   │   Header.jsx
+    │   │
+    │   └───LoginModal
+    │           LoginModal.css
+    │           LoginModal.jsx
+    │
+    ├───features
+    │   ├───Admin
+    │   │   │   Admin.jsx
+    │   │   │   ErrorBoundary.jsx
+    │   │   │
+    │   │   ├───CategoriesManagement
+    │   │   │       AddCategories.jsx
+    │   │   │       CategoriesManagement.jsx
+    │   │   │       EditCategories.jsx
+    │   │   │
+    │   │   ├───ProductManagement
+    │   │   │       AddProduct.jsx
+    │   │   │       EditProduct.jsx
+    │   │   │       ProductManagement.jsx
+    │   │   │
+    │   │   └───UserManagement
+    │   │           AddUser.jsx
+    │   │           EditUser.jsx
+    │   │           UserManagement.jsx
+    │   │
+    │   ├───Community
+    │   │       Community.jsx
+    │   │       FeaturedContent.jsx
+    │   │       FeaturedPosts.jsx
+    │   │       ForumsSection.jsx
+    │   │       LeftSidebar.jsx
+    │   │       RightSidebar.jsx
+    │   │       Showcase.jsx
+    │   │       ShowcaseSection.jsx
+    │   │       TutorialsEvents.jsx
+    │   │
+    │   ├───Home
+    │   │   │   Categories.jsx
+    │   │   │   FeaturedProducts.jsx
+    │   │   │   Home.jsx
+    │   │   │   NewsCommunity.jsx
+    │   │   │   RecentlyViewed.jsx
+    │   │   │
+    │   │   └───Hero
+    │   │           Hero.css
+    │   │           Hero.jsx
+    │   │
+    │   ├───Shop
+    │   │       FiltersSidebar.jsx
+    │   │       MobileFilterSidebar.jsx
+    │   │       ProductsGrid.jsx
+    │   │       QuickViewModal.jsx
+    │   │       Shop.jsx
+    │   │       ShopBanner.jsx
+    │   │
+    │   └───UserProfile
+    │       ├───AccountSettings
+    │       │       AccountManagement.jsx
+    │       │       AccountSettings.jsx
+    │       │       DisplaySettings.jsx
+    │       │       NotificationSettings.jsx
+    │       │       PrivacySettings.jsx
+    │       │       ProfileSettings.jsx
+    │       │
+    │       └───UserProfileOverview
+    │               MainContent.jsx
+    │               ProfileBanner.jsx
+    │               ProfileStats.jsx
+    │               SidebarLeft.jsx
+    │               SidebarRight.jsx
+    │               UserProfileOverview.jsx
+    │
+    └───styles
+            App.css
+            CommunityHub.module.css
+            index.css

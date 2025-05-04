@@ -2,7 +2,6 @@ import { useState } from "react";
 import FiltersSidebar from "./FiltersSidebar";
 import MobileFilterSidebar from "./MobileFilterSidebar";
 import ProductsGrid from "./ProductsGrid";
-import RecentlyViewed from "../Home/RecentlyViewed";
 import ShopBanner from "./ShopBanner";
 
 function Shop() {
@@ -22,7 +21,6 @@ function Shop() {
           </div>
         </div>
       </section>
-      <RecentlyViewed />
     </div>
   );
 }

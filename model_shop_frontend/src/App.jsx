@@ -7,8 +7,9 @@ import BackToTop from "./components/BackToTop";
 import Home from "./features/Home/Home";
 import Shop from "./features/Shop/Shop";
 import Community from "./features/Community/Community";
-import UserProfileOverview from "./features/UserProfile/UserProfileOverview";
-import AccountSettings from "./features/UserProfile/AccountSettings";
+import UserProfileOverview from "./features/UserProfile/UserProfileOverview/UserProfileOverview";
+import AccountSettings from "./features/UserProfile/AccountSettings/AccountSettings";
+import Admin from "./features/Admin/Admin";
 import api from "./api/index";
 
 const Layout = ({ isLoginModalOpen, setIsLoginModalOpen, user, setUser }) => (
@@ -26,7 +27,7 @@ const Layout = ({ isLoginModalOpen, setIsLoginModalOpen, user, setUser }) => (
         localStorage.setItem("user", JSON.stringify(userData));
       }}
     />
-    <Outlet />
+    <Outlet context={{ user }} />
     <Footer />
     <BackToTop />
   </div>
@@ -42,7 +43,7 @@ const App = () => {
       api
         .get("/user.php")
         .then((response) => {
-          if (response.data.user) {
+          if (response.data.status === "success" && response.data.user) {
             setUser(response.data.user);
             localStorage.setItem("user", JSON.stringify(response.data.user));
           } else {
@@ -57,6 +58,11 @@ const App = () => {
         });
     }
   }, []);
+
+  const handleUserUpdate = (updatedUser) => {
+    setUser(updatedUser);
+    localStorage.setItem("user", JSON.stringify(updatedUser));
+  };
 
   return (
     <Routes>
@@ -73,8 +79,14 @@ const App = () => {
         <Route path="/" element={<Home />} />
         <Route path="/shop" element={<Shop />} />
         <Route path="/community" element={<Community />} />
-        <Route path="/profile" element={<UserProfileOverview />} />
-        <Route path="/settings" element={<AccountSettings />} />
+        <Route path="/profile" element={<UserProfileOverview user={user} />} />
+        <Route
+          path="/settings"
+          element={
+            <AccountSettings user={user} onUserUpdate={handleUserUpdate} />
+          }
+        />
+        <Route path="/admin/*" element={<Admin />} />
       </Route>
     </Routes>
   );

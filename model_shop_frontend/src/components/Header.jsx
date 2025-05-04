@@ -1,42 +1,64 @@
-import React, { useState } from "react";
-import { NavLink } from "react-router-dom";
+import React, { useState, useEffect, useRef } from "react";
+import { NavLink, useNavigate } from "react-router-dom";
 import api from "../api/index";
 
 const Header = ({ setIsLoginModalOpen, user, setUser }) => {
   const [isNavOpen, setIsNavOpen] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const navigate = useNavigate();
+  const dropdownRef = useRef(null);
 
   const toggleNav = () => {
-    setIsNavOpen(!isNavOpen);
-    document.body.style.overflow = isNavOpen ? "auto" : "hidden";
+    setIsNavOpen((prev) => {
+      document.body.style.overflow = !prev ? "hidden" : "auto";
+      return !prev;
+    });
   };
 
   const toggleDropdown = () => {
     setIsDropdownOpen(!isDropdownOpen);
   };
 
-  // Hàm xử lý đăng xuất
   const handleLogout = async () => {
     try {
       await api.post("/user.php");
       setUser(null);
       localStorage.removeItem("user");
-      toggleNav();
+      setIsNavOpen(false);
       setIsDropdownOpen(false);
+      document.body.style.overflow = "auto";
+      navigate("/");
     } catch (err) {
       console.error("Logout error:", err);
+      setUser(null);
+      localStorage.removeItem("user");
+      setIsNavOpen(false);
+      setIsDropdownOpen(false);
+      document.body.style.overflow = "auto";
+      navigate("/");
     }
   };
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setIsDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   return (
     <header className="bg-white shadow-sm sticky top-0 z-50">
       <div className="container mx-auto px-4 py-3 flex items-center justify-between">
-        {/* Logo */}
         <div className="flex items-center gap-12">
           <NavLink to="/" className="text-3xl font-['Pacifico'] text-primary">
             Scraptify
           </NavLink>
-          {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center space-x-8">
             <NavLink
               to="/"
@@ -74,34 +96,9 @@ const Header = ({ setIsLoginModalOpen, user, setUser }) => {
             >
               Community
             </NavLink>
-            <NavLink
-              to="/tutorials"
-              className={({ isActive }) =>
-                `font-medium transition ${
-                  isActive
-                    ? "text-primary border-b-2 border-primary"
-                    : "text-gray-600 hover:text-primary"
-                }`
-              }
-            >
-              Tutorials
-            </NavLink>
-            <NavLink
-              to="/about"
-              className={({ isActive }) =>
-                `font-medium transition ${
-                  isActive
-                    ? "text-primary border-b-2 border-primary"
-                    : "text-gray-600 hover:text-primary"
-                }`
-              }
-            >
-              About
-            </NavLink>
           </nav>
         </div>
 
-        {/* Search and Icons */}
         <div className="flex items-center gap-4">
           <div className="relative hidden md:block w-64">
             <input
@@ -127,9 +124,17 @@ const Header = ({ setIsLoginModalOpen, user, setUser }) => {
               </span>
             </button>
 
-            {/* Hiển thị thông tin người dùng hoặc nút Sign In */}
+            {user && user.role === "admin" && (
+              <NavLink
+                to="/admin"
+                className="hidden md:flex items-center gap-2 text-gray-700 hover:text-primary transition"
+              >
+                <i className="ri-shield-user-line ri-lg"></i>
+              </NavLink>
+            )}
+
             {user ? (
-              <div className="hidden md:block relative">
+              <div className="hidden md:block relative" ref={dropdownRef}>
                 <button
                   onClick={toggleDropdown}
                   className="flex items-center gap-2 text-gray-700 hover:text-primary transition"
@@ -144,7 +149,7 @@ const Header = ({ setIsLoginModalOpen, user, setUser }) => {
                     <i className="ri-user-line ri-lg text-gray-700"></i>
                   )}
                   <span className="text-gray-700 font-medium">
-                    {user.full_name || user.email}
+                    {user.full_name || user.email || "User"}
                   </span>
                   <i
                     className={`ri-arrow-${
@@ -153,7 +158,6 @@ const Header = ({ setIsLoginModalOpen, user, setUser }) => {
                   ></i>
                 </button>
 
-                {/* Dropdown Menu */}
                 {isDropdownOpen && (
                   <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg z-50">
                     <div className="flex flex-col">
@@ -236,7 +240,6 @@ const Header = ({ setIsLoginModalOpen, user, setUser }) => {
         </div>
       </div>
 
-      {/* Mobile Navigation */}
       <div
         className={`md:hidden bg-white shadow-lg absolute top-full left-0 w-full transition-all duration-300 ${
           isNavOpen
@@ -278,28 +281,6 @@ const Header = ({ setIsLoginModalOpen, user, setUser }) => {
           >
             Community
           </NavLink>
-          <NavLink
-            to="/tutorials"
-            className={({ isActive }) =>
-              `font-medium py-2 ${
-                isActive ? "text-primary" : "text-gray-600 hover:text-primary"
-              }`
-            }
-            onClick={toggleNav}
-          >
-            Tutorials
-          </NavLink>
-          <NavLink
-            to="/about"
-            className={({ isActive }) =>
-              `font-medium py-2 ${
-                isActive ? "text-primary" : "text-gray-600 hover:text-primary"
-              }`
-            }
-            onClick={toggleNav}
-          >
-            About
-          </NavLink>
 
           <div className="relative mt-4">
             <input
@@ -312,7 +293,16 @@ const Header = ({ setIsLoginModalOpen, user, setUser }) => {
             </div>
           </div>
 
-          {/* Hiển thị thông tin người dùng và menu trên mobile */}
+          {user && user.role === "admin" && (
+            <NavLink
+              to="/admin"
+              className="flex items-center gap-2 py-2 text-gray-700 hover:text-primary"
+              onClick={toggleNav}
+            >
+              <i className="ri-shield-user-line"></i>
+            </NavLink>
+          )}
+
           {user ? (
             <div className="flex flex-col gap-2">
               <div className="flex items-center gap-2 py-2">
@@ -326,7 +316,7 @@ const Header = ({ setIsLoginModalOpen, user, setUser }) => {
                   <i className="ri-user-line ri-lg text-gray-700"></i>
                 )}
                 <span className="text-gray-700 font-medium">
-                  {user.full_name || user.email}
+                  {user.full_name || user.email || "User"}
                 </span>
               </div>
               <NavLink
