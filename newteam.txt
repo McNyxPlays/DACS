@@ -1,0 +1,10 @@
+Clone project về máy:
+git clone https://github.com/McNyxPlays/DACS.git
+cd model_shop_backend
+cd model_shop_frontend
+====================================================
+Sau khi sửa và muốn đẩy code:
+git pull origin main       # Luôn kéo trước
+git add .
+git commit -m "Fix/Update: ..."
+git push origin main

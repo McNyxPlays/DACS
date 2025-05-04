@@ -1,0 +1,25 @@
+npm install
+npm i -D tailwindcss@3 postcss autoprefixer
+npm i axios
+npm run dev
+=============================================================
+Up code của bạn lên GitHub:
+# Khởi tạo Git nếu chưa có
+git init
+# Kết nối đến GitHub (chỉ cần 1 lần)
+git remote add origin https://github.com/USERNAME/REPO.git
+# Bỏ qua file không cần đẩy
+echo "node_modules/\ndist/\n.vite/\n.env*" > .gitignore
+------------------------------------------------------------
+# Thêm và commit file
+git add .
+git commit -m "Initial commit"
+
+# Đẩy lên GitHub (main hoặc branch đang dùng)
+git push -u origin main
+==============================================================
+Sau khi làm thay đổi và muốn đẩy lần sau:
+git add .
+git commit -m "Update: nội dung gì đó"
+git pull origin main   # Kéo về trước để tránh xung đột
+git push origin main   # Đẩy lên sau
