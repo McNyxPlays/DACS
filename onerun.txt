@@ -3,6 +3,9 @@ npm i -D tailwindcss@3 postcss autoprefixer
 npm i axios
 npm run dev
 =============================================================
+git config --global user.name "Tên của bạn"
+git config --global user.email "email@example.com"
+=============================================================
 Up code của bạn lên GitHub:
 # Khởi tạo Git nếu chưa có
 git init
