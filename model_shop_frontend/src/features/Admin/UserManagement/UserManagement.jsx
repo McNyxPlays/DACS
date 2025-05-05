@@ -29,7 +29,7 @@ const UserManagement = ({ user }) => {
       setError("");
       const params = { search };
       if (isActive >= 0) params.is_active = isActive;
-      const response = await api.get("/Users.php", { params });
+      const response = await api.get("/Usersmana.php", { params });
 
       console.log("API Response:", response.data);
 
@@ -75,7 +75,7 @@ const UserManagement = ({ user }) => {
   const handleDelete = async (userId) => {
     if (!window.confirm("Are you sure you want to delete this user?")) return;
     try {
-      const response = await api.delete("/Users.php?id=" + userId);
+      const response = await api.delete("/Usersmana.php?id=" + userId);
       if (response.data.status === "success") {
         setUsers(users.filter((user) => user.user_id !== userId));
         setError("");
@@ -137,7 +137,7 @@ const UserManagement = ({ user }) => {
     e.preventDefault();
     try {
       if (modalMode === "add") {
-        const response = await api.post("/Users.php", formData);
+        const response = await api.post("/Usersmana.php", formData);
         if (response.data.status === "success") {
           fetchUsers(); // Tải lại danh sách người dùng
           closeModal();
@@ -145,7 +145,10 @@ const UserManagement = ({ user }) => {
           setError(response.data.message || "Failed to add user");
         }
       } else {
-        const response = await api.put(`/Users.php?id=${editUserId}`, formData);
+        const response = await api.put(
+          `/Usersmana.php?id=${editUserId}`,
+          formData
+        );
         if (response.data.status === "success") {
           fetchUsers(); // Tải lại danh sách người dùng
           closeModal();

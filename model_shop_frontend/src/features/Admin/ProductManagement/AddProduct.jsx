@@ -6,19 +6,21 @@ const AddProduct = () => {
   const [formData, setFormData] = useState({
     name: "",
     category_id: 0,
+    brand_id: 0,
     price: "",
     description: "",
     status: "new",
   });
   const [images, setImages] = useState([]);
   const [categories, setCategories] = useState([]);
+  const [brands, setBrands] = useState([]);
   const [error, setError] = useState("");
   const navigate = useNavigate();
 
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const response = await api.get("/categories.php");
+        const response = await api.get("/categoriesmana.php");
         if (
           response.data.status === "success" &&
           Array.isArray(response.data.data)
@@ -35,7 +37,27 @@ const AddProduct = () => {
         console.error(err);
       }
     };
+
+    const fetchBrands = async () => {
+      try {
+        const response = await api.get("/brandsmana.php");
+        if (
+          response.data.status === "success" &&
+          Array.isArray(response.data.data)
+        ) {
+          setBrands(response.data.data);
+        } else {
+          setBrands([]);
+          setError("Invalid brands response format");
+        }
+      } catch (err) {
+        setError("Failed to fetch brands: " + (err.message || "Unknown error"));
+        console.error(err);
+      }
+    };
+
     fetchCategories();
+    fetchBrands();
   }, []);
 
   const handleChange = (e) => {
@@ -79,6 +101,7 @@ const AddProduct = () => {
     const data = new FormData();
     data.append("name", formData.name);
     data.append("category_id", formData.category_id);
+    data.append("brand_id", formData.brand_id);
     data.append("price", formData.price);
     data.append("description", formData.description);
     data.append("status", formData.status);
@@ -87,7 +110,7 @@ const AddProduct = () => {
     }
 
     try {
-      const response = await api.post("/products.php", data, {
+      const response = await api.post("/productsmana.php", data, {
         headers: { "Content-Type": "multipart/form-data" },
       });
       if (response.data.success) {
@@ -139,6 +162,23 @@ const AddProduct = () => {
           </select>
         </div>
         <div className="mb-4">
+          <label className="block text-gray-700 mb-2">Brand</label>
+          <select
+            name="brand_id"
+            value={formData.brand_id}
+            onChange={handleChange}
+            required
+            className="w-full px-4 py-2 rounded-lg border focus:outline-none focus:ring-2 focus:ring-primary"
+          >
+            <option value={0}>Select Brand</option>
+            {brands.map((brand) => (
+              <option key={brand.brand_id} value={brand.brand_id}>
+                {brand.name}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div className="mb-4">
           <label className="block text-gray-700 mb-2">Price</label>
           <input
             type="number"
@@ -171,6 +211,9 @@ const AddProduct = () => {
             <option value="new">New</option>
             <option value="used">Used</option>
             <option value="custom">Custom</option>
+            <option value="hot">Hot</option>
+            <option value="available">Available</option>
+            <option value="sale">Sale</option>
           </select>
         </div>
         <div className="mb-4">

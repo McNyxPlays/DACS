@@ -26,19 +26,19 @@ export const register = (email, password, full_name) =>
   api.post("/register.php", { email, password, full_name });
 
 // Lấy danh sách tất cả người dùng (admin)
-export const getUsers = () => api.get("/Users.php");
+export const getUsers = () => api.get("/Usersmana.php");
 
 // Lấy thông tin một người dùng theo ID (admin)
-export const getUserById = (id) => api.get(`/Users.php?id=${id}`);
+export const getUserById = (id) => api.get(`/Usersmana.php?id=${id}`);
 
 // Thêm người dùng mới (admin)
-export const addUser = (userData) => api.post("/Users.php", userData);
+export const addUser = (userData) => api.post("/Usersmana.php", userData);
 
 // Cập nhật thông tin người dùng (admin)
 export const updateUserById = (id, userData) =>
   api.put(`/Users.php?id=${id}`, userData);
 
 // Xóa người dùng (admin)
-export const deleteUser = (id) => api.delete(`/Users.php?id=${id}`);
+export const deleteUser = (id) => api.delete(`/Usersmana.php?id=${id}`);
 
 export default api;

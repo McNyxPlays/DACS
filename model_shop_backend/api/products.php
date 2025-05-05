@@ -4,224 +4,376 @@ require_once '../config/functions.php';
 
 header('Content-Type: application/json');
 header('Access-Control-Allow-Origin: http://localhost:5173');
-header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE');
+header('Access-Control-Allow-Methods: GET');
 header('Access-Control-Allow-Headers: Content-Type');
 header('Access-Control-Allow-Credentials: true');
 
 $conn = db_connect();
 if (!$conn) {
     http_response_code(500);
-    echo json_encode(['success' => false, 'error' => 'Database connection failed']);
+    echo json_encode(['status' => 'error', 'message' => 'Database connection failed']);
     exit;
 }
 
-session_start();
-if (!isset($_SESSION['user_id'])) {
-    http_response_code(403);
-    echo json_encode(['success' => false, 'error' => 'Unauthorized']);
-    $conn = null;
-    exit;
-}
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
 
-$user_id = $_SESSION['user_id'];
-try {
-    $stmt = $conn->prepare("SELECT role FROM users WHERE user_id = ?");
-    $stmt->execute([$user_id]);
-    $user = $stmt->fetch(PDO::FETCH_ASSOC);
-} catch (PDOException $e) {
-    http_response_code(500);
-    echo json_encode(['success' => false, 'error' => 'Failed to check user role: ' . $e->getMessage()]);
-    $conn = null;
-    exit;
-}
-
-if (!$user || $user['role'] !== 'admin') {
-    http_response_code(403);
-    echo json_encode(['success' => false, 'error' => 'Unauthorized - Not an admin']);
-    $conn = null;
-    exit;
+// Log errors to a file for debugging
+function logError($message, $query = null, $params = null) {
+    $logFile = '../logs/error.log';
+    $timestamp = date('Y-m-d H:i:s');
+    $logMessage = "[$timestamp] $message";
+    if ($query) {
+        $logMessage .= "\nQuery: $query";
+        if ($params) {
+            $logMessage .= "\nParams: " . json_encode($params);
+        }
+    }
+    $logMessage .= "\n";
+    file_put_contents($logFile, $logMessage, FILE_APPEND);
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
-    if (isset($_GET['id'])) {
-        $id = intval($_GET['id']);
-        try {
-            $stmt = $conn->prepare("
-                SELECT p.*, c.name AS category_name, 
-                       (SELECT JSON_ARRAYAGG(JSON_OBJECT('image_id', pi.image_id, 'image_url', pi.image_url, 'is_main', pi.is_main))
-                        FROM product_images pi WHERE pi.product_id = p.product_id) AS images
-                FROM products p
-                LEFT JOIN categories c ON p.category_id = c.category_id
-                WHERE p.product_id = ?
-            ");
-            $stmt->execute([$id]);
-            $product = $stmt->fetch(PDO::FETCH_ASSOC);
-            if ($product) {
-                $product['images'] = json_decode($product['images'], true) ?? [];
-                echo json_encode(['success' => true, 'data' => [$product]]);
-            } else {
-                http_response_code(404);
-                echo json_encode(['success' => false, 'error' => 'Product not found']);
-            }
-        } catch (PDOException $e) {
-            http_response_code(500);
-            echo json_encode(['success' => false, 'error' => 'Failed to fetch product: ' . $e->getMessage()]);
+    if (isset($_GET['action'])) {
+        switch ($_GET['action']) {
+            case 'categories':
+                try {
+                    $stmt = $conn->prepare("
+                        SELECT c.category_id, c.name, COUNT(p.product_id) as product_count
+                        FROM categories c
+                        LEFT JOIN products p ON c.category_id = p.category_id
+                        GROUP BY c.category_id, c.name
+                    ");
+                    $stmt->execute();
+                    $categories = $stmt->fetchAll(PDO::FETCH_ASSOC);
+                    echo json_encode(['status' => 'success', 'data' => $categories]);
+                } catch (PDOException $e) {
+                    logError('Failed to fetch categories: ' . $e->getMessage());
+                    http_response_code(500);
+                    echo json_encode(['status' => 'error', 'message' => 'Failed to fetch categories']);
+                }
+                break;
+
+            case 'brands':
+                try {
+                    $stmt = $conn->prepare("
+                        SELECT b.brand_id, b.name, COUNT(p.product_id) as product_count
+                        FROM brands b
+                        LEFT JOIN products p ON b.brand_id = b.brand_id
+                        GROUP BY b.brand_id, b.name
+                    ");
+                    $stmt->execute();
+                    $brands = $stmt->fetchAll(PDO::FETCH_ASSOC);
+                    echo json_encode(['status' => 'success', 'data' => $brands]);
+                } catch (PDOException $e) {
+                    logError('Failed to fetch brands: ' . $e->getMessage());
+                    http_response_code(500);
+                    echo json_encode(['status' => 'error', 'message' => 'Failed to fetch brands']);
+                }
+                break;
+
+            case 'product':
+                $id = isset($_GET['id']) ? intval($_GET['id']) : 0;
+                if ($id <= 0) {
+                    http_response_code(400);
+                    echo json_encode(['status' => 'error', 'message' => 'Invalid product ID']);
+                    exit;
+                }
+                try {
+                    $stmt = $conn->prepare("
+                        SELECT p.product_id, p.name, p.description, p.price, p.status, p.stock_quantity, p.discount,
+                               c.name as category_name, b.name as brand_name,
+                               COALESCE(AVG(r.rating), 0) as rating, COUNT(r.rating_id) as review_count,
+                               p.created_at
+                        FROM products p
+                        LEFT JOIN categories c ON p.category_id = c.category_id
+                        LEFT JOIN brands b ON p.brand_id = b.brand_id
+                        LEFT JOIN ratings r ON p.product_id = r.product_id
+                        WHERE p.product_id = ?
+                        GROUP BY p.product_id, p.name, p.description, p.price, p.status, p.stock_quantity, p.discount,
+                                 c.name, b.name, p.created_at
+                    ");
+                    $stmt->execute([$id]);
+                    $product = $stmt->fetch(PDO::FETCH_ASSOC);
+
+                    if ($product) {
+                        $images = [];
+                        try {
+                            $stmt = $conn->prepare("
+                                SELECT image_url
+                                FROM product_images
+                                WHERE product_id = ?
+                                ORDER BY is_main DESC, image_id ASC
+                            ");
+                            $stmt->execute([$id]);
+                            $imgs = $stmt->fetchAll(PDO::FETCH_ASSOC);
+                            foreach ($imgs as $img) {
+                                $images[] = '/Uploads/' . $img['image_url'];
+                            }
+                            if (empty($images)) {
+                                $images[] = '/placeholder.jpg';
+                            }
+                        } catch (PDOException $e) {
+                            logError('Failed to fetch images: ' . $e->getMessage());
+                            $images[] = '/placeholder.jpg';
+                        }
+                        $product['images'] = $images;
+
+                        if ($product['stock_quantity'] <= 0) {
+                            $product['badge'] = 'Out of Stock';
+                            $product['badgeColor'] = 'bg-red-500';
+                        } elseif ($product['discount'] > 0) {
+                            $product['badge'] = 'On Sale';
+                            $product['badgeColor'] = 'bg-green-500';
+                        } elseif (strtotime($product['created_at']) >= strtotime('-30 days')) {
+                            $product['badge'] = 'New Arrival';
+                            $product['badgeColor'] = 'bg-primary';
+                        } else {
+                            $product['badge'] = null;
+                            $product['badgeColor'] = null;
+                        }
+
+                        $product['created_at'] = date('c', strtotime($product['created_at']));
+
+                        echo json_encode(['status' => 'success', 'data' => $product]);
+                    } else {
+                        http_response_code(404);
+                        echo json_encode(['status' => 'error', 'message' => 'Product not found']);
+                    }
+                } catch (PDOException $e) {
+                    logError('Failed to fetch product: ' . $e->getMessage());
+                    http_response_code(500);
+                    echo json_encode(['status' => 'error', 'message' => 'Failed to fetch product: ' . $e->getMessage()]);
+                }
+                break;
+
+            default:
+                http_response_code(400);
+                echo json_encode(['status' => 'error', 'message' => 'Invalid action']);
+                break;
         }
     } else {
         $search = isset($_GET['search']) ? '%' . $_GET['search'] . '%' : '%';
-        $category_id = isset($_GET['category_id']) ? intval($_GET['category_id']) : 0;
-        $status = isset($_GET['status']) ? $_GET['status'] : '';
+        $category_ids = isset($_GET['category_ids']) ? explode(',', $_GET['category_ids']) : [];
+        $brand_ids = isset($_GET['brand_ids']) ? explode(',', $_GET['brand_ids']) : [];
+        $min_rating = isset($_GET['min_rating']) ? floatval($_GET['min_rating']) : 0;
+        $status_new = isset($_GET['status_new']) ? filter_var($_GET['status_new'], FILTER_VALIDATE_BOOLEAN) : false;
+        $status_available = isset($_GET['status_available']) ? filter_var($_GET['status_available'], FILTER_VALIDATE_BOOLEAN) : false;
+        $status_sale = isset($_GET['status_sale']) ? filter_var($_GET['status_sale'], FILTER_VALIDATE_BOOLEAN) : false;
+        $sort = isset($_GET['sort']) ? $_GET['sort'] : 'popularity';
+        $page = isset
+($_GET['page']) ? max(1, intval($_GET['page'])) : 1;
+        $limit = 12;
+        $offset = ($page - 1) * $limit;
 
-        $query = "SELECT p.*, c.name AS category_name
-                  FROM products p
-                  LEFT JOIN categories c ON p.category_id = c.category_id
-                  WHERE p.name LIKE ?";
-        $params = [$search];
-
-        if ($category_id > 0) {
-            $query .= " AND p.category_id = ?";
-            $params[] = $category_id;
-        }
-
-        if (!empty($status)) {
-            $query .= " AND p.status = ?";
-            $params[] = $status;
-        }
+        $validSorts = ['price_low', 'price_high', 'rating', 'newest', 'popularity'];
+        $sort = in_array($sort, $validSorts) ? $sort : 'popularity';
 
         try {
+            // Precompute ratings
+            $ratingsQuery = "
+                SELECT product_id, COALESCE(AVG(rating), 0) as avg_rating, COUNT(rating_id) as review_count
+                FROM ratings
+                GROUP BY product_id
+            ";
+            $ratingsStmt = $conn->prepare($ratingsQuery);
+            $ratingsStmt->execute();
+            $ratingsData = $ratingsStmt->fetchAll(PDO::FETCH_ASSOC);
+            $ratingsMap = [];
+            foreach ($ratingsData as $row) {
+                $ratingsMap[$row['product_id']] = [
+                    'rating' => $row['avg_rating'],
+                    'review_count' => $row['review_count']
+                ];
+            }
+
+            // Precompute popularity scores
+            $popularityQuery = "
+                SELECT product_id, COUNT(*) as popularity_score
+                FROM order_details
+                GROUP BY product_id
+            ";
+            $popularityStmt = $conn->prepare($popularityQuery);
+            $popularityStmt->execute();
+            $popularityData = $popularityStmt->fetchAll(PDO::FETCH_ASSOC);
+            $popularityMap = [];
+            foreach ($popularityData as $row) {
+                $popularityMap[$row['product_id']] = $row['popularity_score'];
+            }
+
+            // Main query
+            $query = "
+                SELECT p.product_id, p.name, p.description, p.price, p.status, p.stock_quantity, p.discount,
+                       c.name as category_name, b.name as brand_name,
+                       p.created_at,
+                       (SELECT image_url FROM product_images pi WHERE pi.product_id = p.product_id AND pi.is_main = 1 LIMIT 1) as image_url,
+                       (SELECT COUNT(*) FROM order_details od WHERE od.product_id = p.product_id) as popularity_score
+                FROM products p
+                LEFT JOIN categories c ON p.category_id = c.category_id
+                LEFT JOIN brands b ON p.brand_id = b.brand_id
+                WHERE p.name LIKE ?
+            ";
+            $params = [$search];
+
+            if (!empty($category_ids) && $category_ids[0] !== '') {
+                $placeholders = implode(',', array_fill(0, count($category_ids), '?'));
+                $query .= " AND p.category_id IN ($placeholders)";
+                $params = array_merge($params, array_map('intval', $category_ids));
+            }
+
+            if (!empty($brand_ids) && $brand_ids[0] !== '') {
+                $placeholders = implode(',', array_fill(0, count($brand_ids), '?'));
+                $query .= " AND p.brand_id IN ($placeholders)";
+                $params = array_merge($params, array_map('intval', $brand_ids));
+            }
+
+            // Filter by status
+            $statusConditions = [];
+            if ($status_new) {
+                $statusConditions[] = "p.status = 'new'";
+            }
+            if ($status_available) {
+                $statusConditions[] = "p.status = 'available'";
+            }
+            if ($status_sale) {
+                $statusConditions[] = "p.status = 'sale'";
+            }
+            if (!empty($statusConditions)) {
+                $query .= " AND (" . implode(" OR ", $statusConditions) . ")";
+            }
+
+            // Apply sorting
+            switch ($sort) {
+                case 'price_low':
+                    $query .= " ORDER BY p.price ASC";
+                    break;
+                case 'price_high':
+                    $query .= " ORDER BY p.price DESC";
+                    break;
+                case 'rating':
+                    $query .= " ORDER BY (
+                        SELECT COALESCE(AVG(rating), 0)
+                        FROM ratings r
+                        WHERE r.product_id = p.product_id
+                    ) DESC";
+                    break;
+                case 'newest':
+                    $query .= " ORDER BY p.created_at DESC";
+                    break;
+                case 'popularity':
+                default:
+                    $query .= " ORDER BY (
+                        SELECT COUNT(*)
+                        FROM order_details od
+                        WHERE od.product_id = p.product_id
+                    ) DESC";
+                    break;
+            }
+
+            $count_query = "
+                SELECT COUNT(*) as total
+                FROM products p
+                WHERE p.name LIKE ?
+            ";
+            $count_params = [$search];
+
+            if (!empty($category_ids) && $category_ids[0] !== '') {
+                $placeholders = implode(',', array_fill(0, count($category_ids), '?'));
+                $count_query .= " AND p.category_id IN ($placeholders)";
+                $count_params = array_merge($count_params, array_map('intval', $category_ids));
+            }
+
+            if (!empty($brand_ids) && $brand_ids[0] !== '') {
+                $placeholders = implode(',', array_fill(0, count($brand_ids), '?'));
+                $count_query .= " AND p.brand_id IN ($placeholders)";
+                $count_params = array_merge($count_params, array_map('intval', $brand_ids));
+            }
+
+            if (!empty($statusConditions)) {
+                $count_query .= " AND (" . implode(" OR ", $statusConditions) . ")";
+            }
+
+            $stmt = $conn->prepare($count_query);
+            $stmt->execute($count_params);
+            $total_products = $stmt->fetch(PDO::FETCH_ASSOC)['total'];
+            $total_pages = ceil($total_products / $limit);
+
+            // Append LIMIT and OFFSET as literals
+            $query .= " LIMIT $limit OFFSET $offset";
+
             $stmt = $conn->prepare($query);
             $stmt->execute($params);
+
             $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
-            echo json_encode(['success' => true, 'data' => $products]);
+
+            // Fetch images for each product
+            foreach ($products as &$product) {
+                try {
+                    $stmt = $conn->prepare("
+                        SELECT image_url
+                        FROM product_images
+                        WHERE product_id = ?
+                        ORDER BY is_main DESC, image_id ASC
+                    ");
+                    $stmt->execute([$product['product_id']]);
+                    $images = $stmt->fetchAll(PDO::FETCH_ASSOC);
+                    $product['images'] = array_map(function($img) {
+                        return '/Uploads/' . $img['image_url'];
+                    }, $images);
+                    if (empty($product['images'])) {
+                        $product['images'] = ['/placeholder.jpg'];
+                    }
+                } catch (PDOException $e) {
+                    logError('Failed to fetch images for product ' . $product['product_id'] . ': ' . $e->getMessage());
+                    $product['images'] = ['/placeholder.jpg'];
+                }
+                $product['image'] = $product['images'][0];
+                unset($product['image_url']);
+                $product['rating'] = isset($ratingsMap[$product['product_id']])
+                    ? $ratingsMap[$product['product_id']]['rating']
+                    : 0;
+                $product['review_count'] = isset($ratingsMap[$product['product_id']])
+                    ? $ratingsMap[$product['product_id']]['review_count']
+                    : 0;
+                $product['popularity_score'] = isset($popularityMap[$product['product_id']])
+                    ? $popularityMap[$product['product_id']]
+                    : 0;
+
+                if ($product['stock_quantity'] <= 0) {
+                    $product['badge'] = 'Out of Stock';
+                    $product['badgeColor'] = 'bg-red-500';
+                } elseif ($product['discount'] > 0) {
+                    $product['badge'] = 'On Sale';
+                    $product['badgeColor'] = 'bg-green-500';
+                } elseif (strtotime($product['created_at']) >= strtotime('-30 days')) {
+                    $product['badge'] = 'New Arrival';
+                    $product['badgeColor'] = 'bg-primary';
+                } else {
+                    $product['badge'] = null;
+                    $product['badgeColor'] = null;
+                }
+
+                $product['created_at'] = date('c', strtotime($product['created_at']));
+            }
+
+            echo json_encode([
+                'status' => 'success',
+                'data' => $products,
+                'pagination' => [
+                    'current_page' => $page,
+                    'total_pages' => $total_pages,
+                    'total_products' => $total_products
+                ]
+            ]);
         } catch (PDOException $e) {
+            logError('Failed to fetch products: ' . $e->getMessage(), $query, $params);
             http_response_code(500);
-            echo json_encode(['success' => false, 'error' => 'Failed to fetch products: ' . $e->getMessage()]);
+            echo json_encode(['status' => 'error', 'message' => 'Failed to fetch products: ' . $e->getMessage()]);
+        } catch (Exception $e) {
+            logError('Unexpected error: ' . $e->getMessage(), $query, $params);
+            http_response_code(500);
+            echo json_encode(['status' => 'error', 'message' => 'An unexpected error occurred']);
         }
-    }
-}
-
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $name = $_POST['name'] ?? '';
-    $category_id = intval($_POST['category_id'] ?? 0);
-    $price = floatval($_POST['price'] ?? 0);
-    $description = $_POST['description'] ?? '';
-    $status = $_POST['status'] ?? 'new';
-
-    if (empty($name) || $category_id <= 0 || $price <= 0) {
-        http_response_code(400);
-        echo json_encode(['success' => false, 'error' => 'Invalid input']);
-        $conn = null;
-        exit;
-    }
-
-    try {
-        $stmt = $conn->prepare("INSERT INTO products (name, category_id, price, description, status) VALUES (?, ?, ?, ?, ?)");
-        $stmt->execute([$name, $category_id, $price, $description, $status]);
-        $product_id = $conn->lastInsertId();
-
-        if (!empty($_FILES['images']['name'][0])) {
-            $upload_dir = '../Uploads/products/';
-            if (!is_dir($upload_dir)) {
-                mkdir($upload_dir, 0777, true);
-            }
-
-            foreach ($_FILES['images']['tmp_name'] as $key => $tmp_name) {
-                $file_name = uniqid() . '_' . basename($_FILES['images']['name'][$key]);
-                $file_path = $upload_dir . $file_name;
-                if (move_uploaded_file($tmp_name, $file_path)) {
-                    $stmt = $conn->prepare("INSERT INTO product_images (product_id, image_url, is_main) VALUES (?, ?, ?)");
-                    $is_main = ($key === 0) ? 1 : 0;
-                    $stmt->execute([$product_id, $file_name, $is_main]);
-                }
-            }
-        }
-
-        echo json_encode(['success' => true, 'message' => 'Product added', 'product_id' => $product_id]);
-    } catch (PDOException $e) {
-        http_response_code(500);
-        echo json_encode(['success' => false, 'error' => 'Failed to add product: ' . $e->getMessage()]);
-    }
-}
-
-if ($_SERVER['REQUEST_METHOD'] === 'PUT') {
-    $id = isset($_GET['id']) ? intval($_GET['id']) : 0;
-    $name = $_POST['name'] ?? '';
-    $category_id = intval($_POST['category_id'] ?? 0);
-    $price = floatval($_POST['price'] ?? 0);
-    $description = $_POST['description'] ?? '';
-    $status = $_POST['status'] ?? 'new';
-
-    if (empty($name) || $category_id <= 0 || $price <= 0 || $id <= 0) {
-        http_response_code(400);
-        echo json_encode(['success' => false, 'error' => 'Invalid input']);
-        $conn = null;
-        exit;
-    }
-
-    try {
-        $stmt = $conn->prepare("UPDATE products SET name = ?, category_id = ?, price = ?, description = ?, status = ? WHERE product_id = ?");
-        $stmt->execute([$name, $category_id, $price, $description, $status, $id]);
-
-        if (!empty($_FILES['images']['name'][0])) {
-            $upload_dir = '../Uploads/products/';
-            if (!is_dir($upload_dir)) {
-                mkdir($upload_dir, 0777, true);
-            }
-
-            foreach ($_FILES['images']['tmp_name'] as $key => $tmp_name) {
-                $file_name = uniqid() . '_' . basename($_FILES['images']['name'][$key]);
-                $file_path = $upload_dir . $file_name;
-                if (move_uploaded_file($tmp_name, $file_path)) {
-                    $stmt = $conn->prepare("INSERT INTO product_images (product_id, image_url, is_main) VALUES (?, ?, ?)");
-                    $is_main = ($key === 0) ? 1 : 0;
-                    $stmt->execute([$id, $file_name, $is_main]);
-                }
-            }
-        }
-
-        echo json_encode(['success' => true, 'message' => 'Product updated']);
-    } catch (PDOException $e) {
-        http_response_code(500);
-        echo json_encode(['success' => false, 'error' => 'Failed to update product: ' . $e->getMessage()]);
-    }
-}
-
-if ($_SERVER['REQUEST_METHOD'] === 'DELETE') {
-    $id = isset($_GET['id']) ? intval($_GET['id']) : 0;
-    if ($id <= 0) {
-        http_response_code(400);
-        echo json_encode(['success' => false, 'error' => 'Invalid product ID']);
-        $conn = null;
-        exit;
-    }
-
-    try {
-        $stmt = $conn->prepare("SELECT image_url FROM product_images WHERE product_id = ?");
-        $stmt->execute([$id]);
-        $images = $stmt->fetchAll(PDO::FETCH_ASSOC);
-        
-        foreach ($images as $image) {
-            $file_path = '../Uploads/products/' . $image['image_url'];
-            if (file_exists($file_path)) {
-                unlink($file_path);
-            }
-        }
-
-        $stmt = $conn->prepare("DELETE FROM product_images WHERE product_id = ?");
-        $stmt->execute([$id]);
-
-        $stmt = $conn->prepare("DELETE FROM products WHERE product_id = ?");
-        $stmt->execute([$id]);
-
-        if ($stmt->rowCount() > 0) {
-            echo json_encode(['success' => true, 'message' => 'Product deleted']);
-        } else {
-            http_response_code(404);
-            echo json_encode(['success' => false, 'error' => 'Product not found']);
-        }
-    } catch (PDOException $e) {
-        http_response_code(500);
-        echo json_encode(['success' => false, 'error' => 'Failed to delete product: ' . $e->getMessage()]);
     }
 }
 

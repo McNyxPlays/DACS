@@ -6,8 +6,10 @@ const ProductManagement = () => {
   const [products, setProducts] = useState([]);
   const [search, setSearch] = useState("");
   const [categoryId, setCategoryId] = useState(0);
+  const [brandId, setBrandId] = useState(0);
   const [status, setStatus] = useState("");
   const [categories, setCategories] = useState([]);
+  const [brands, setBrands] = useState([]);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
@@ -15,6 +17,7 @@ const ProductManagement = () => {
   const [formData, setFormData] = useState({
     name: "",
     category_id: 0,
+    brand_id: 0,
     price: "",
     description: "",
     status: "new",
@@ -24,12 +27,13 @@ const ProductManagement = () => {
 
   useEffect(() => {
     fetchCategories();
+    fetchBrands();
     fetchProducts();
-  }, [search, categoryId, status]);
+  }, [search, categoryId, brandId, status]);
 
   const fetchCategories = async () => {
     try {
-      const response = await api.get("/categories.php");
+      const response = await api.get("/categoriesmana.php");
       if (
         response.data.status === "success" &&
         Array.isArray(response.data.data)
@@ -48,14 +52,34 @@ const ProductManagement = () => {
     }
   };
 
+  const fetchBrands = async () => {
+    try {
+      const response = await api.get("/brandsmana.php");
+      if (
+        response.data.status === "success" &&
+        Array.isArray(response.data.data)
+      ) {
+        setBrands(response.data.data);
+      } else {
+        setBrands([]);
+        setError("Invalid brands response format");
+      }
+    } catch (err) {
+      setBrands([]);
+      setError("Failed to fetch brands: " + (err.message || "Unknown error"));
+      console.error(err);
+    }
+  };
+
   const fetchProducts = async () => {
     try {
       setLoading(true);
       setError("");
       const params = { search };
       if (categoryId > 0) params.category_id = categoryId;
+      if (brandId > 0) params.brand_id = brandId;
       if (status) params.status = status;
-      const response = await api.get("/products.php", { params });
+      const response = await api.get("/productsmana.php", { params });
       if (response.data.success && Array.isArray(response.data.data)) {
         setProducts(response.data.data);
         setError("");
@@ -89,6 +113,7 @@ const ProductManagement = () => {
     setFormData({
       name: "",
       category_id: 0,
+      brand_id: 0,
       price: "",
       description: "",
       status: "new",
@@ -104,6 +129,7 @@ const ProductManagement = () => {
     setFormData({
       name: product.name || "",
       category_id: product.category_id || 0,
+      brand_id: product.brand_id || 0,
       price: product.price || "",
       description: product.description || "",
       status: product.status || "new",
@@ -160,6 +186,7 @@ const ProductManagement = () => {
     const data = new FormData();
     data.append("name", formData.name);
     data.append("category_id", formData.category_id);
+    data.append("brand_id", formData.brand_id);
     data.append("price", formData.price);
     data.append("description", formData.description);
     data.append("status", formData.status);
@@ -169,7 +196,7 @@ const ProductManagement = () => {
 
     try {
       if (modalMode === "add") {
-        const response = await api.post("/products.php", data, {
+        const response = await api.post("/productsmana.php", data, {
           headers: { "Content-Type": "multipart/form-data" },
         });
         if (response.data.success) {
@@ -180,7 +207,7 @@ const ProductManagement = () => {
         }
       } else {
         const response = await api.put(
-          `/products.php?id=${editProductId}`,
+          `/productsmana.php?id=${editProductId}`,
           data,
           {
             headers: { "Content-Type": "multipart/form-data" },
@@ -211,7 +238,7 @@ const ProductManagement = () => {
     if (!window.confirm("Are you sure you want to delete this product?"))
       return;
     try {
-      const response = await api.delete(`/products.php?id=${productId}`);
+      const response = await api.delete(`/productsmana.php?id=${productId}`);
       if (response.data.success) {
         setProducts(
           products.filter((product) => product.product_id !== productId)
@@ -256,6 +283,18 @@ const ProductManagement = () => {
           ))}
         </select>
         <select
+          value={brandId}
+          onChange={(e) => setBrandId(parseInt(e.target.value))}
+          className="w-full sm:w-1/4 px-4 py-2 rounded-lg border focus:outline-none focus:ring-2 focus:ring-primary"
+        >
+          <option value={0}>All Brands</option>
+          {brands.map((brand) => (
+            <option key={brand.brand_id} value={brand.brand_id}>
+              {brand.name}
+            </option>
+          ))}
+        </select>
+        <select
           value={status}
           onChange={(e) => setStatus(e.target.value)}
           className="w-full sm:w-1/4 px-4 py-2 rounded-lg border focus:outline-none focus:ring-2 focus:ring-primary"
@@ -264,6 +303,9 @@ const ProductManagement = () => {
           <option value="new">New</option>
           <option value="used">Used</option>
           <option value="custom">Custom</option>
+          <option value="hot">Hot</option>
+          <option value="available">Available</option>
+          <option value="sale">Sale</option>
         </select>
         <button
           onClick={openAddModal}
@@ -283,6 +325,7 @@ const ProductManagement = () => {
                 <th className="px-4 py-2 border">ID</th>
                 <th className="px-4 py-2 border">Name</th>
                 <th className="px-4 py-2 border">Category</th>
+                <th className="px-4 py-2 border">Brand</th>
                 <th className="px-4 py-2 border">Price</th>
                 <th className="px-4 py-2 border">Status</th>
                 <th className="px-4 py-2 border">Actions</th>
@@ -296,6 +339,9 @@ const ProductManagement = () => {
                     <td className="px-4 py-2 border">{product.name}</td>
                     <td className="px-4 py-2 border">
                       {product.category_name || "-"}
+                    </td>
+                    <td className="px-4 py-2 border">
+                      {product.brand_name || "-"}
                     </td>
                     <td className="px-4 py-2 border">
                       ${parseFloat(product.price).toFixed(2)}
@@ -319,7 +365,7 @@ const ProductManagement = () => {
                 ))
               ) : (
                 <tr>
-                  <td colSpan="6" className="px-4 py-2 border text-center">
+                  <td colSpan="7" className="px-4 py-2 border text-center">
                     No products found
                   </td>
                 </tr>
@@ -369,6 +415,23 @@ const ProductManagement = () => {
                 </select>
               </div>
               <div className="mb-4">
+                <label className="block text-gray-700 mb-2">Brand</label>
+                <select
+                  name="brand_id"
+                  value={formData.brand_id}
+                  onChange={handleChange}
+                  required
+                  className="w-full px-4 py-2 rounded-lg border focus:outline-none focus:ring-2 focus:ring-primary"
+                >
+                  <option value={0}>Select Brand</option>
+                  {brands.map((brand) => (
+                    <option key={brand.brand_id} value={brand.brand_id}>
+                      {brand.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="mb-4">
                 <label className="block text-gray-700 mb-2">Price</label>
                 <input
                   type="number"
@@ -401,6 +464,9 @@ const ProductManagement = () => {
                   <option value="new">New</option>
                   <option value="used">Used</option>
                   <option value="custom">Custom</option>
+                  <option value="hot">Hot</option>
+                  <option value="available">Available</option>
+                  <option value="sale">Sale</option>
                 </select>
               </div>
               <div className="mb-4">

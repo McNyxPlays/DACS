@@ -10,30 +10,35 @@ import EditProduct from "./ProductManagement/EditProduct";
 import CategoriesManagement from "./CategoriesManagement/CategoriesManagement";
 import AddCategories from "./CategoriesManagement/AddCategories";
 import EditCategories from "./CategoriesManagement/EditCategories";
+import BrandsManagement from "./BrandsManagement/BrandsManagement";
+import AddBrand from "./BrandsManagement/AddBrand";
+import EditBrand from "./BrandsManagement/EditBrand";
 import ErrorBoundary from "./ErrorBoundary";
 
 const Admin = () => {
   const { user } = useOutletContext() || {};
-  const [stats, setStats] = useState({ users: 0, products: 0, categories: 0 });
+  const [stats, setStats] = useState({
+    users: 0,
+    products: 0,
+    categories: 0,
+    brands: 0,
+  });
   const [error, setError] = useState("");
 
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const [usersRes, productsRes, categoriesRes] = await Promise.all([
-          api.get("/Users.php"),
-          api.get("/products.php"),
-          api.get("/categories.php"),
-        ]);
-        setStats({
-          users: Array.isArray(usersRes.data) ? usersRes.data.length : 0,
-          products: Array.isArray(productsRes.data)
-            ? productsRes.data.length
-            : 0,
-          categories: Array.isArray(categoriesRes.data)
-            ? categoriesRes.data.length
-            : 0,
-        });
+        const response = await api.get("/count.php");
+        if (response.data.status === "success") {
+          setStats({
+            users: response.data.data.users || 0,
+            products: response.data.data.products || 0,
+            categories: response.data.data.categories || 0,
+            brands: response.data.data.brands || 0,
+          });
+        } else {
+          throw new Error(response.data.message || "Failed to fetch stats");
+        }
       } catch (err) {
         setError("Failed to fetch dashboard stats");
         console.error(err);
@@ -97,6 +102,18 @@ const Admin = () => {
         >
           Categories Management
         </NavLink>
+        <NavLink
+          to="/admin/brands"
+          className={({ isActive }) =>
+            `px-4 py-2 rounded-lg ${
+              isActive
+                ? "bg-primary text-white"
+                : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+            }`
+          }
+        >
+          Brands Management
+        </NavLink>
       </div>
       <Routes>
         <Route
@@ -105,7 +122,7 @@ const Admin = () => {
             <div className="bg-white p-6 rounded-lg shadow-md">
               <h2 className="text-xl font-semibold mb-4">Dashboard Overview</h2>
               {error && <p className="text-red-500 mb-4">{error}</p>}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
                 <div className="p-4 bg-gray-100 rounded-lg">
                   <p className="text-lg font-medium">Total Users</p>
                   <p className="text-2xl">{stats.users}</p>
@@ -117,6 +134,10 @@ const Admin = () => {
                 <div className="p-4 bg-gray-100 rounded-lg">
                   <p className="text-lg font-medium">Total Categories</p>
                   <p className="text-2xl">{stats.categories}</p>
+                </div>
+                <div className="p-4 bg-gray-100 rounded-lg">
+                  <p className="text-lg font-medium">Total Brands</p>
+                  <p className="text-2xl">{stats.brands}</p>
                 </div>
               </div>
             </div>
@@ -138,6 +159,9 @@ const Admin = () => {
         <Route path="/categories" element={<CategoriesManagement />} />
         <Route path="/categories/add" element={<AddCategories />} />
         <Route path="/categories/edit/:id" element={<EditCategories />} />
+        <Route path="/brands" element={<BrandsManagement />} />
+        <Route path="/brands/add" element={<AddBrand />} />
+        <Route path="/brands/edit/:id" element={<EditBrand />} />
       </Routes>
     </div>
   );

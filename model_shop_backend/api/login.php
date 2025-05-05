@@ -1,7 +1,7 @@
 <?php
 session_start([
     'cookie_samesite' => 'None',
-    'cookie_secure' => false, // Đặt false vì không dùng HTTPS
+    'cookie_secure' => false,
 ]);
 header('Content-Type: application/json');
 header('Access-Control-Allow-Origin: http://localhost:5173');

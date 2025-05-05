@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
 import api from "../../../api/index";
 
-const CategoriesManagement = () => {
-  const [categories, setCategories] = useState([]);
+const BrandsManagement = () => {
+  const [brands, setBrands] = useState([]);
   const [search, setSearch] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
@@ -12,42 +12,40 @@ const CategoriesManagement = () => {
     name: "",
     description: "",
   });
-  const [editCategoryId, setEditCategoryId] = useState(null);
+  const [editBrandId, setEditBrandId] = useState(null);
 
   useEffect(() => {
-    fetchCategories();
+    fetchBrands();
   }, [search]);
 
-  const fetchCategories = async () => {
+  const fetchBrands = async () => {
     try {
       setLoading(true);
       setError("");
       const params = { search };
-      const response = await api.get("/categoriesmana.php", { params });
+      const response = await api.get("/brandsmana.php", { params });
       if (
         response.data.status === "success" &&
         Array.isArray(response.data.data)
       ) {
-        setCategories(response.data.data);
+        setBrands(response.data.data);
         setError("");
       } else {
-        setCategories([]);
+        setBrands([]);
         setError("Invalid response format from server");
       }
     } catch (err) {
-      setCategories([]);
+      setBrands([]);
       if (err.response) {
         if (err.response.status === 403) {
           setError("You do not have permission to access this page.");
         } else if (err.response.data && err.response.data.message) {
           setError(err.response.data.message);
         } else {
-          setError("Failed to fetch categories");
+          setError("Failed to fetch brands");
         }
       } else {
-        setError(
-          "Failed to fetch categories: " + (err.message || "Unknown error")
-        );
+        setError("Failed to fetch brands: " + (err.message || "Unknown error"));
       }
       console.error(err);
     } finally {
@@ -65,12 +63,12 @@ const CategoriesManagement = () => {
     setError("");
   };
 
-  const openEditModal = (category) => {
+  const openEditModal = (brand) => {
     setModalMode("edit");
-    setEditCategoryId(category.category_id);
+    setEditBrandId(brand.brand_id);
     setFormData({
-      name: category.name,
-      description: category.description || "",
+      name: brand.name,
+      description: brand.description || "",
     });
     setShowModal(true);
     setError("");
@@ -78,7 +76,7 @@ const CategoriesManagement = () => {
 
   const closeModal = () => {
     setShowModal(false);
-    setEditCategoryId(null);
+    setEditBrandId(null);
     setError("");
   };
 
@@ -91,23 +89,23 @@ const CategoriesManagement = () => {
     e.preventDefault();
     try {
       if (modalMode === "add") {
-        const response = await api.post("/categoriesmana.php", formData);
+        const response = await api.post("/brandsmana.php", formData);
         if (response.data.status === "success") {
-          fetchCategories();
+          fetchBrands();
           closeModal();
         } else {
-          setError(response.data.message || "Failed to add category");
+          setError(response.data.message || "Failed to add brand");
         }
       } else {
         const response = await api.put(
-          `/categoriesmana.php?id=${editCategoryId}`,
+          `/brandsmana.php?id=${editBrandId}`,
           formData
         );
         if (response.data.status === "success") {
-          fetchCategories();
+          fetchBrands();
           closeModal();
         } else {
-          setError(response.data.message || "Failed to update category");
+          setError(response.data.message || "Failed to update brand");
         }
       }
     } catch (err) {
@@ -115,35 +113,28 @@ const CategoriesManagement = () => {
         setError(err.response.data.message);
       } else {
         setError(
-          modalMode === "add"
-            ? "Failed to add category"
-            : "Failed to update category"
+          modalMode === "add" ? "Failed to add brand" : "Failed to update brand"
         );
       }
       console.error(err);
     }
   };
 
-  const handleDelete = async (categoryId) => {
-    if (!window.confirm("Are you sure you want to delete this category?"))
-      return;
+  const handleDelete = async (brandId) => {
+    if (!window.confirm("Are you sure you want to delete this brand?")) return;
     try {
-      const response = await api.delete(`/categoriesmana.php?id=${categoryId}`);
+      const response = await api.delete(`/brandsmana.php?id=${brandId}`);
       if (response.data.status === "success") {
-        setCategories(
-          categories.filter((cat) => cat.category_id !== categoryId)
-        );
+        setBrands(brands.filter((brand) => brand.brand_id !== brandId));
         setError("");
       } else {
-        setError(response.data.message || "Failed to delete category");
+        setError(response.data.message || "Failed to delete brand");
       }
     } catch (err) {
       if (err.response && err.response.status === 403) {
         setError("You do not have permission to perform this action.");
       } else {
-        setError(
-          "Failed to delete category: " + (err.message || "Unknown error")
-        );
+        setError("Failed to delete brand: " + (err.message || "Unknown error"));
       }
       console.error(err);
     }
@@ -151,11 +142,11 @@ const CategoriesManagement = () => {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <h1 className="text-2xl font-bold mb-6">Categories Management</h1>
+      <h1 className="text-2xl font-bold mb-6">Brands Management</h1>
       <div className="mb-4 flex flex-col sm:flex-row gap-4">
         <input
           type="text"
-          placeholder="Search categories..."
+          placeholder="Search brands..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           className="w-full sm:w-1/3 px-4 py-2 rounded-lg border focus:outline-none focus:ring-2 focus:ring-primary"
@@ -164,12 +155,12 @@ const CategoriesManagement = () => {
           onClick={openAddModal}
           className="bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary-dark"
         >
-          Add Category
+          Add Brand
         </button>
       </div>
       {error && <p className="text-red-500 mb-4">{error}</p>}
       {loading ? (
-        <p className="text-gray-500 mb-4">Loading categories...</p>
+        <p className="text-gray-500 mb-4">Loading brands...</p>
       ) : (
         <div className="overflow-x-auto">
           <table className="min-w-full bg-white border">
@@ -182,23 +173,23 @@ const CategoriesManagement = () => {
               </tr>
             </thead>
             <tbody>
-              {Array.isArray(categories) && categories.length > 0 ? (
-                categories.map((category) => (
-                  <tr key={category.category_id}>
-                    <td className="px-4 py-2 border">{category.category_id}</td>
-                    <td className="px-4 py-2 border">{category.name}</td>
+              {Array.isArray(brands) && brands.length > 0 ? (
+                brands.map((brand) => (
+                  <tr key={brand.brand_id}>
+                    <td className="px-4 py-2 border">{brand.brand_id}</td>
+                    <td className="px-4 py-2 border">{brand.name}</td>
                     <td className="px-4 py-2 border">
-                      {category.description || "-"}
+                      {brand.description || "-"}
                     </td>
                     <td className="px-4 py-2 border flex gap-2">
                       <button
-                        onClick={() => openEditModal(category)}
+                        onClick={() => openEditModal(brand)}
                         className="text-blue-500 hover:underline"
                       >
                         Edit
                       </button>
                       <button
-                        onClick={() => handleDelete(category.category_id)}
+                        onClick={() => handleDelete(brand.brand_id)}
                         className="text-red-500 hover:underline"
                       >
                         Delete
@@ -209,7 +200,7 @@ const CategoriesManagement = () => {
               ) : (
                 <tr>
                   <td colSpan="4" className="px-4 py-2 border text-center">
-                    No categories found
+                    No brands found
                   </td>
                 </tr>
               )}
@@ -222,7 +213,7 @@ const CategoriesManagement = () => {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 max-w-lg w-full">
             <h2 className="text-xl font-bold mb-4">
-              {modalMode === "add" ? "Add New Category" : "Edit Category"}
+              {modalMode === "add" ? "Add New Brand" : "Edit Brand"}
             </h2>
             {error && <p className="text-red-500 mb-4">{error}</p>}
             <form onSubmit={handleSubmit}>
@@ -252,7 +243,7 @@ const CategoriesManagement = () => {
                   type="submit"
                   className="bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary-dark"
                 >
-                  {modalMode === "add" ? "Add Category" : "Update Category"}
+                  {modalMode === "add" ? "Add Brand" : "Update Brand"}
                 </button>
                 <button
                   type="button"
@@ -270,4 +261,4 @@ const CategoriesManagement = () => {
   );
 };
 
-export default CategoriesManagement;
+export default BrandsManagement;

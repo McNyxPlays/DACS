@@ -16,7 +16,7 @@ const EditUser = () => {
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        const response = await api.get(`/Users.php?id=${id}`);
+        const response = await api.get(`/Usersmana.php?id=${id}`);
         if (
           response.data.status === "success" &&
           response.data.data.length > 0
@@ -50,7 +50,7 @@ const EditUser = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await api.put(`/Users.php?id=${id}`, formData);
+      await api.put(`/Usersmana.php?id=${id}`, formData);
       navigate("/admin/users");
     } catch (err) {
       if (err.response && err.response.data.message) {

@@ -1,39 +1,14 @@
-import React, { useState, useEffect } from "react";
-import { useNavigate, useParams, Link } from "react-router-dom";
+import React, { useState } from "react";
+import { useNavigate, Link } from "react-router-dom";
 import api from "../../../api/index";
 
-const EditCategories = () => {
-  const { id } = useParams();
+const AddBrand = () => {
   const [formData, setFormData] = useState({
     name: "",
     description: "",
   });
   const [error, setError] = useState("");
   const navigate = useNavigate();
-
-  useEffect(() => {
-    const fetchCategory = async () => {
-      try {
-        const response = await api.get(`/categoriesmana.php?id=${id}`);
-        if (
-          response.data.status === "success" &&
-          response.data.data.length > 0
-        ) {
-          const category = response.data.data[0];
-          setFormData({
-            name: category.name,
-            description: category.description || "",
-          });
-        } else {
-          setError("Category not found");
-        }
-      } catch (err) {
-        setError("Failed to fetch category");
-        console.error(err);
-      }
-    };
-    fetchCategory();
-  }, [id]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -46,17 +21,17 @@ const EditCategories = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await api.put(`/categoriesmana.php?id=${id}`, formData);
+      const response = await api.post("/brandsmana.php", formData);
       if (response.data.status === "success") {
-        navigate("/admin/categories");
+        navigate("/admin/brands");
       } else {
-        setError(response.data.message || "Failed to update category");
+        setError(response.data.message || "Failed to add brand");
       }
     } catch (err) {
       if (err.response && err.response.data.message) {
         setError(err.response.data.message);
       } else {
-        setError("Failed to update category");
+        setError("Failed to add brand");
       }
       console.error(err);
     }
@@ -64,7 +39,7 @@ const EditCategories = () => {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <h1 className="text-2xl font-bold mb-6">Edit Category</h1>
+      <h1 className="text-2xl font-bold mb-6">Add New Brand</h1>
       {error && <p className="text-red-500 mb-4">{error}</p>}
       <form onSubmit={handleSubmit} className="max-w-lg">
         <div className="mb-4">
@@ -93,10 +68,10 @@ const EditCategories = () => {
             type="submit"
             className="bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary-dark"
           >
-            Update Category
+            Add Brand
           </button>
           <Link
-            to="/admin/categories"
+            to="/admin/brands"
             className="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600"
           >
             Back
@@ -107,4 +82,4 @@ const EditCategories = () => {
   );
 };
 
-export default EditCategories;
+export default AddBrand;

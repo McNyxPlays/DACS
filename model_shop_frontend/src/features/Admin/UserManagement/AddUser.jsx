@@ -24,7 +24,7 @@ const AddUser = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await api.post("/users.php", formData);
+      await api.post("/Usersmana.php", formData);
       navigate("/admin/users");
     } catch (err) {
       if (err.response && err.response.data.error) {

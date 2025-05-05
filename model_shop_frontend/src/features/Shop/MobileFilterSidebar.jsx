@@ -1,11 +1,133 @@
-import { useState } from "react";
+import React, { useState, useEffect } from "react";
+import api from "../../api/index";
 
-function MobileFilterSidebar() {
+function MobileFilterSidebar({ onFilterChange }) {
   const [isOpen, setIsOpen] = useState(false);
+  const [categories, setCategories] = useState([]);
+  const [brands, setBrands] = useState([]);
+  const [selectedCategories, setSelectedCategories] = useState([]);
+  const [selectedBrands, setSelectedBrands] = useState([]);
+  const [minRating, setMinRating] = useState(0);
+  const [statusNew, setStatusNew] = useState(false);
+  const [statusUsed, setStatusUsed] = useState(false);
+  const [statusCustom, setStatusCustom] = useState(false);
+  const [statusHot, setStatusHot] = useState(false);
+  const [statusAvailable, setStatusAvailable] = useState(false);
+  const [statusSale, setStatusSale] = useState(false);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const response = await api.get("/products.php?action=categories");
+        if (response.data.status === "success") {
+          setCategories(response.data.data);
+        } else {
+          setError("Failed to fetch categories");
+        }
+      } catch (err) {
+        setError(
+          "Failed to fetch categories: " + (err.message || "Unknown error")
+        );
+        console.error(err);
+      }
+    };
+
+    const fetchBrands = async () => {
+      try {
+        const response = await api.get("/products.php?action=brands");
+        if (response.data.status === "success") {
+          setBrands(response.data.data);
+        } else {
+          setError("Failed to fetch brands");
+        }
+      } catch (err) {
+        setError("Failed to fetch brands: " + (err.message || "Unknown error"));
+        console.error(err);
+      }
+    };
+
+    fetchCategories();
+    fetchBrands();
+  }, []);
+
+  useEffect(() => {
+    if (isOpen) {
+      onFilterChange({
+        category_ids: selectedCategories,
+        brand_ids: selectedBrands,
+        min_rating: minRating,
+        status_new: statusNew,
+        status_used: statusUsed,
+        status_custom: statusCustom,
+        status_hot: statusHot,
+        status_available: statusAvailable,
+        status_sale: statusSale,
+      });
+    }
+  }, [
+    isOpen,
+    selectedCategories,
+    selectedBrands,
+    minRating,
+    statusNew,
+    statusUsed,
+    statusCustom,
+    statusHot,
+    statusAvailable,
+    statusSale,
+  ]);
 
   const toggleSidebar = () => {
     setIsOpen(!isOpen);
     document.body.style.overflow = isOpen ? "auto" : "hidden";
+  };
+
+  const handleCategoryChange = (categoryId) => {
+    setSelectedCategories((prev) =>
+      prev.includes(categoryId)
+        ? prev.filter((id) => id !== categoryId)
+        : [...prev, categoryId]
+    );
+  };
+
+  const handleBrandChange = (brandId) => {
+    setSelectedBrands((prev) =>
+      prev.includes(brandId)
+        ? prev.filter((id) => id !== brandId)
+        : [...prev, brandId]
+    );
+  };
+
+  const handleRatingChange = (rating) => {
+    setMinRating(minRating === rating ? 0 : rating);
+  };
+
+  const clearFilters = () => {
+    setSelectedCategories([]);
+    setSelectedBrands([]);
+    setMinRating(0);
+    setStatusNew(false);
+    setStatusUsed(false);
+    setStatusCustom(false);
+    setStatusHot(false);
+    setStatusAvailable(false);
+    setStatusSale(false);
+  };
+
+  const applyFilters = () => {
+    onFilterChange({
+      category_ids: selectedCategories,
+      brand_ids: selectedBrands,
+      min_rating: minRating,
+      status_new: statusNew,
+      status_used: statusUsed,
+      status_custom: statusCustom,
+      status_hot: statusHot,
+      status_available: statusAvailable,
+      status_sale: statusSale,
+    });
+    toggleSidebar();
   };
 
   return (
@@ -39,202 +161,163 @@ function MobileFilterSidebar() {
               <i className="ri-close-line ri-lg"></i>
             </button>
           </div>
+          {error && <p className="text-red-500 mb-4">{error}</p>}
           <div className="space-y-6">
             <div>
               <h3 className="font-semibold text-gray-900 mb-4">Categories</h3>
               <ul className="space-y-2">
-                <li className="flex items-center">
-                  <label className="custom-checkbox">
-                    <input type="checkbox" defaultChecked />
-                    <span className="checkmark"></span>
-                  </label>
-                  <span className="ml-2 text-gray-700">All Categories</span>
-                  <span className="ml-auto text-gray-500 text-sm">(248)</span>
-                </li>
-                <li className="flex items-center">
-                  <label className="custom-checkbox">
-                    <input type="checkbox" />
-                    <span className="checkmark"></span>
-                  </label>
-                  <span className="ml-2 text-gray-700">Gundam Kits</span>
-                  <span className="ml-auto text-gray-500 text-sm">(86)</span>
-                </li>
-                <li className="flex items-center">
-                  <label className="custom-checkbox">
-                    <input type="checkbox" />
-                    <span className="checkmark"></span>
-                  </label>
-                  <span className="ml-2 text-gray-700">Anime Figures</span>
-                  <span className="ml-auto text-gray-500 text-sm">(52)</span>
-                </li>
-                <li className="flex items-center">
-                  <label className="custom-checkbox">
-                    <input type="checkbox" />
-                    <span className="checkmark"></span>
-                  </label>
-                  <span className="ml-2 text-gray-700">DIY Models</span>
-                  <span className="ml-auto text-gray-500 text-sm">(38)</span>
-                </li>
-                <li className="flex items-center">
-                  <label className="custom-checkbox">
-                    <input type="checkbox" />
-                    <span className="checkmark"></span>
-                  </label>
-                  <span className="ml-2 text-gray-700">Tools & Paints</span>
-                  <span className="ml-auto text-gray-500 text-sm">(45)</span>
-                </li>
-                <li className="flex items-center">
-                  <label className="custom-checkbox">
-                    <input type="checkbox" />
-                    <span className="checkmark"></span>
-                  </label>
-                  <span className="ml-2 text-gray-700">Game Figures</span>
-                  <span className="ml-auto text-gray-500 text-sm">(27)</span>
-                </li>
+                {categories.map((category) => (
+                  <li key={category.category_id} className="flex items-center">
+                    <label className="custom-checkbox">
+                      <input
+                        type="checkbox"
+                        checked={selectedCategories.includes(
+                          category.category_id
+                        )}
+                        onChange={() =>
+                          handleCategoryChange(category.category_id)
+                        }
+                      />
+                      <span className="checkmark"></span>
+                    </label>
+                    <span className="ml-2 text-gray-700">{category.name}</span>
+                    <span className="ml-auto text-gray-500 text-sm">
+                      ({category.product_count})
+                    </span>
+                  </li>
+                ))}
               </ul>
-            </div>
-            <div className="border-t border-gray-200 pt-6">
-              <h3 className="font-semibold text-gray-900 mb-4">Price Range</h3>
-              <div className="px-1">
-                <input
-                  type="range"
-                  min="0"
-                  max="500"
-                  defaultValue="200"
-                  className="price-slider"
-                  id="mobilePriceRange"
-                />
-                <div className="flex justify-between mt-2 text-sm text-gray-600">
-                  <span>$0</span>
-                  <span id="mobilePriceValue">$200</span>
-                  <span>$500+</span>
-                </div>
-              </div>
             </div>
             <div className="border-t border-gray-200 pt-6">
               <h3 className="font-semibold text-gray-900 mb-4">Brands</h3>
               <ul className="space-y-2">
-                <li className="flex items-center">
-                  <label className="custom-checkbox">
-                    <input type="checkbox" />
-                    <span className="checkmark"></span>
-                  </label>
-                  <span className="ml-2 text-gray-700">Bandai</span>
-                </li>
-                <li className="flex items-center">
-                  <label className="custom-checkbox">
-                    <input type="checkbox" />
-                    <span className="checkmark"></span>
-                  </label>
-                  <span className="ml-2 text-gray-700">Kotobukiya</span>
-                </li>
-                <li className="flex items-center">
-                  <label className="custom-checkbox">
-                    <input type="checkbox" />
-                    <span className="checkmark"></span>
-                  </label>
-                  <span className="ml-2 text-gray-700">Good Smile Company</span>
-                </li>
-                <li className="flex items-center">
-                  <label className="custom-checkbox">
-                    <input type="checkbox" />
-                    <span className="checkmark"></span>
-                  </label>
-                  <span className="ml-2 text-gray-700">Tamiya</span>
-                </li>
-                <li className="flex items-center">
-                  <label className="custom-checkbox">
-                    <input type="checkbox" />
-                    <span className="checkmark"></span>
-                  </label>
-                  <span className="ml-2 text-gray-700">Max Factory</span>
-                </li>
+                {brands.map((brand) => (
+                  <li key={brand.brand_id} className="flex items-center">
+                    <label className="custom-checkbox">
+                      <input
+                        type="checkbox"
+                        checked={selectedBrands.includes(brand.brand_id)}
+                        onChange={() => handleBrandChange(brand.brand_id)}
+                      />
+                      <span className="checkmark"></span>
+                    </label>
+                    <span className="ml-2 text-gray-700">{brand.name}</span>
+                  </li>
+                ))}
               </ul>
             </div>
             <div className="border-t border-gray-200 pt-6">
               <h3 className="font-semibold text-gray-900 mb-4">Ratings</h3>
               <ul className="space-y-2">
-                <li className="flex items-center">
-                  <label className="custom-checkbox">
-                    <input type="checkbox" />
-                    <span className="checkmark"></span>
-                  </label>
-                  <div className="ml-2 flex items-center">
-                    <div className="flex text-amber-400">
-                      <i className="ri-star-fill"></i>
-                      <i className="ri-star-fill"></i>
-                      <i className="ri-star-fill"></i>
-                      <i className="ri-star-fill"></i>
-                      <i className="ri-star-fill"></i>
+                {[5, 4, 3].map((rating) => (
+                  <li key={rating} className="flex items-center">
+                    <label className="custom-checkbox">
+                      <input
+                        type="checkbox"
+                        checked={minRating === rating}
+                        onChange={() => handleRatingChange(rating)}
+                      />
+                      <span className="checkmark"></span>
+                    </label>
+                    <div className="ml-2 flex items-center">
+                      <div className="flex text-amber-400">
+                        {Array.from({ length: 5 }, (_, i) => (
+                          <i
+                            key={i}
+                            className={
+                              i < rating ? "ri-star-fill" : "ri-star-line"
+                            }
+                          ></i>
+                        ))}
+                      </div>
+                      <span className="ml-1 text-gray-700">({rating}.0)</span>
                     </div>
-                    <span className="ml-1 text-gray-700">(5.0)</span>
-                  </div>
-                </li>
-                <li className="flex items-center">
-                  <label className="custom-checkbox">
-                    <input type="checkbox" />
-                    <span className="checkmark"></span>
-                  </label>
-                  <div className="ml-2 flex items-center">
-                    <div className="flex text-amber-400">
-                      <i className="ri-star-fill"></i>
-                      <i className="ri-star-fill"></i>
-                      <i className="ri-star-fill"></i>
-                      <i className="ri-star-fill"></i>
-                      <i className="ri-star-line"></i>
-                    </div>
-                    <span className="ml-1 text-gray-700">(4.0 & up)</span>
-                  </div>
-                </li>
-                <li className="flex items-center">
-                  <label className="custom-checkbox">
-                    <input type="checkbox" />
-                    <span className="checkmark"></span>
-                  </label>
-                  <div className="ml-2 flex items-center">
-                    <div className="flex text-amber-400">
-                      <i className="ri-star-fill"></i>
-                      <i className="ri-star-fill"></i>
-                      <i className="ri-star-fill"></i>
-                      <i className="ri-star-line"></i>
-                      <i className="ri-star-line"></i>
-                    </div>
-                    <span className="ml-1 text-gray-700">(3.0 & up)</span>
-                  </div>
-                </li>
+                  </li>
+                ))}
               </ul>
             </div>
             <div className="border-t border-gray-200 pt-6">
-              <h3 className="font-semibold text-gray-900 mb-4">Availability</h3>
+              <h3 className="font-semibold text-gray-900 mb-4">Status</h3>
               <ul className="space-y-2">
                 <li className="flex items-center justify-between">
-                  <span className="text-gray-700">In Stock</span>
+                  <span className="text-gray-700">New</span>
                   <label className="custom-switch">
-                    <input type="checkbox" defaultChecked />
+                    <input
+                      type="checkbox"
+                      checked={statusNew}
+                      onChange={() => setStatusNew(!statusNew)}
+                    />
+                    <span className="switch-slider"></span>
+                  </label>
+                </li>
+                <li className="flex items-center justify-between">
+                  <span className="text-gray-700">Used</span>
+                  <label className="custom-switch">
+                    <input
+                      type="checkbox"
+                      checked={statusUsed}
+                      onChange={() => setStatusUsed(!statusUsed)}
+                    />
+                    <span className="switch-slider"></span>
+                  </label>
+                </li>
+                <li className="flex items-center justify-between">
+                  <span className="text-gray-700">Custom</span>
+                  <label className="custom-switch">
+                    <input
+                      type="checkbox"
+                      checked={statusCustom}
+                      onChange={() => setStatusCustom(!statusCustom)}
+                    />
+                    <span className="switch-slider"></span>
+                  </label>
+                </li>
+                <li className="flex items-center justify-between">
+                  <span className="text-gray-700">Hot</span>
+                  <label className="custom-switch">
+                    <input
+                      type="checkbox"
+                      checked={statusHot}
+                      onChange={() => setStatusHot(!statusHot)}
+                    />
+                    <span className="switch-slider"></span>
+                  </label>
+                </li>
+                <li className="flex items-center justify-between">
+                  <span className="text-gray-700">Available</span>
+                  <label className="custom-switch">
+                    <input
+                      type="checkbox"
+                      checked={statusAvailable}
+                      onChange={() => setStatusAvailable(!statusAvailable)}
+                    />
                     <span className="switch-slider"></span>
                   </label>
                 </li>
                 <li className="flex items-center justify-between">
                   <span className="text-gray-700">On Sale</span>
                   <label className="custom-switch">
-                    <input type="checkbox" />
-                    <span className="switch-slider"></span>
-                  </label>
-                </li>
-                <li className="flex items-center justify-between">
-                  <span className="text-gray-700">New Arrivals</span>
-                  <label className="custom-switch">
-                    <input type="checkbox" />
+                    <input
+                      type="checkbox"
+                      checked={statusSale}
+                      onChange={() => setStatusSale(!statusSale)}
+                    />
                     <span className="switch-slider"></span>
                   </label>
                 </li>
               </ul>
             </div>
             <div className="pt-6 flex flex-col gap-3">
-              <button className="w-full bg-primary text-white py-2 font-medium rounded-button hover:bg-primary/90 transition">
+              <button
+                onClick={applyFilters}
+                className="w-full bg-primary text-white py-2 font-medium rounded-button hover:bg-primary/90 transition"
+              >
                 Apply Filters
               </button>
-              <button className="w-full bg-gray-100 text-gray-700 py-2 font-medium rounded-button hover:bg-gray-200 transition">
+              <button
+                onClick={clearFilters}
+                className="w-full bg-gray-100 text-gray-700 py-2 font-medium rounded-button hover:bg-gray-200 transition"
+              >
                 Clear All
               </button>
             </div>
