@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import api from "../../api/index";
+import { Toastify } from "../../components/Toastify";
 
 function QuickViewModal({ productId, isOpen, toggleModal }) {
   const [product, setProduct] = useState(null);
@@ -7,6 +8,16 @@ function QuickViewModal({ productId, isOpen, toggleModal }) {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const exchangeRate = 25000; // 1 USD = 25,000 VND
+  const sessionKey =
+    sessionStorage.getItem("guest_session_key") ||
+    (() => {
+      const newSessionKey = `guest_${Date.now()}_${Math.random()
+        .toString(36)
+        .substr(2, 9)}`;
+      sessionStorage.setItem("guest_session_key", newSessionKey);
+      return newSessionKey;
+    })();
+  const user = JSON.parse(sessionStorage.getItem("user"));
 
   useEffect(() => {
     if (isOpen && productId) {
@@ -20,15 +31,25 @@ function QuickViewModal({ productId, isOpen, toggleModal }) {
             setProduct(response.data.data);
             setError("");
           } else {
-            setError("Product not found");
+            const errorMsg = response.data.message || "Product not found";
+            setError(errorMsg);
+            Toastify.error(errorMsg);
             setProduct(null);
           }
         } catch (err) {
-          setError(
-            "Failed to fetch product: " + (err.message || "Unknown error")
-          );
+          const errorMsg =
+            err.response?.data?.message ||
+            err.message ||
+            "Network or server error";
+          setError(`Failed to fetch product: ${errorMsg}`);
+          Toastify.error(`Failed to fetch product: ${errorMsg}`);
+          console.error("Fetch product error:", {
+            error: err,
+            response: err.response,
+            status: err.response?.status,
+            data: err.response?.data,
+          });
           setProduct(null);
-          console.error(err);
         } finally {
           setLoading(false);
         }
@@ -38,15 +59,91 @@ function QuickViewModal({ productId, isOpen, toggleModal }) {
   }, [isOpen, productId]);
 
   const handleQuantityChange = (delta) => {
-    setQuantity((prev) => Math.max(1, prev + delta));
+    setQuantity((prev) =>
+      Math.max(
+        1,
+        Math.min(prev + delta, product ? product.stock_quantity : prev)
+      )
+    );
   };
 
-  const handleAddToCart = () => {
-    console.log(`Adding ${quantity} of product ${productId} to cart`);
+  const handleAddToCart = async () => {
+    if (!product) {
+      Toastify.error("No product selected");
+      return;
+    }
+    if (product.stock_quantity < quantity) {
+      setError("Insufficient stock");
+      Toastify.error("Insufficient stock");
+      return;
+    }
+    try {
+      const payload = user
+        ? { user_id: user.user_id, product_id: productId, quantity }
+        : { session_key: sessionKey, product_id: productId, quantity };
+      const endpoint = user ? "/carts.php" : "/guest_carts.php";
+      const response = await api.post(endpoint, payload);
+      if (response.data.status === "success") {
+        const event = new CustomEvent("cartUpdated");
+        window.dispatchEvent(event);
+        Toastify.success(`Added ${quantity} ${product.name} to cart!`);
+        setError("");
+      } else {
+        const errorMsg = response.data.message || "Unknown error";
+        setError(`Failed to add to cart: ${errorMsg}`);
+        Toastify.error(`Failed to add to cart: ${errorMsg}`);
+      }
+    } catch (err) {
+      const errorMsg =
+        err.response?.data?.message || err.message || "Network or server error";
+      setError(`Failed to add to cart: ${errorMsg}`);
+      Toastify.error(`Failed to add to cart: ${errorMsg}`);
+      console.error("Add to cart error:", {
+        error: err,
+        response: err.response,
+        status: err.response?.status,
+        data: err.response?.data,
+        payload,
+        endpoint,
+      });
+    }
   };
 
-  const handleAddToWishlist = () => {
-    console.log(`Adding product ${productId} to wishlist`);
+  const handleAddToWishlist = async () => {
+    if (!product) {
+      Toastify.error("No product selected");
+      return;
+    }
+    try {
+      const payload = user
+        ? { user_id: user.user_id, product_id: productId }
+        : { session_key: sessionKey, product_id: productId };
+      const endpoint = user ? "/favorites.php" : "/guest_favorites.php";
+      const response = await api.post(endpoint, payload);
+      if (response.data.status === "success") {
+        const event = new CustomEvent("favoritesUpdated");
+        window.dispatchEvent(event);
+        Toastify.success(`Added ${product.name} to wishlist!`);
+        setError("");
+      } else {
+        const errorMsg = response.data.message || "Unknown error";
+        setError(`Failed to add to wishlist: ${errorMsg}`);
+        Toastify.error(`Failed to add to wishlist: ${errorMsg}`);
+      }
+    } catch (err) {
+      const errorMsg =
+        err.response?.data?.message || err.message || "Network or server error";
+      setError(`Failed to add to wishlist: ${errorMsg}`);
+      Toastify.error(`Failed to add to wishlist: ${errorMsg}`);
+      console.error("Add to wishlist error:", {
+        error: err,
+        response: err.response,
+        status: err.response?.status,
+        data: err.response?.data,
+        payload,
+        endpoint,
+      });
+    }
   };
 
   return (
@@ -105,23 +202,6 @@ function QuickViewModal({ productId, isOpen, toggleModal }) {
                   </div>
                 </div>
                 <div>
-                  <div className="flex items-center gap-1 text-amber-400 mb-2">
-                    {Array.from({ length: 5 }, (_, i) => (
-                      <i
-                        key={i}
-                        className={
-                          i < Math.floor(product.rating)
-                            ? "ri-star-fill"
-                            : i < product.rating
-                            ? "ri-star-half-fill"
-                            : "ri-star-line"
-                        }
-                      ></i>
-                    ))}
-                    <span className="text-gray-600 text-sm ml-1">
-                      ({product.review_count} reviews)
-                    </span>
-                  </div>
                   <div className="mb-4">
                     {product.badge && (
                       <span

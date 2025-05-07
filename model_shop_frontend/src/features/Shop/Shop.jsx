@@ -10,7 +10,6 @@ function Shop() {
   const [filters, setFilters] = useState({
     category_ids: [],
     brand_ids: [],
-    min_rating: 0,
     status_new: false,
     status_available: false,
     status_sale: false,
@@ -62,18 +61,22 @@ function Shop() {
     fetchBrands();
   }, []);
 
-  const handleFilterChange = (newFilters) => {
-    setFilters((prev) => ({
-      ...prev,
-      ...newFilters,
-    }));
-  };
-
   const handleSearch = (searchTerm) => {
     setFilters((prev) => ({
       ...prev,
       search: searchTerm,
     }));
+  };
+
+  const clearAllFilters = () => {
+    setFilters({
+      category_ids: [],
+      brand_ids: [],
+      status_new: false,
+      status_available: false,
+      status_sale: false,
+      search: "",
+    });
   };
 
   return (
@@ -87,10 +90,20 @@ function Shop() {
                 <p className="text-red-500 mb-4">{categoryError}</p>
               )}
               {brandError && <p className="text-red-500 mb-4">{brandError}</p>}
-              <FiltersSidebar onFilterChange={handleFilterChange} />
+              <FiltersSidebar
+                filters={filters}
+                setFilters={setFilters}
+                categories={categories}
+                brands={brands}
+              />
             </div>
             <div className="flex-1">
-              <MobileFilterSidebar onFilterChange={handleFilterChange} />
+              <MobileFilterSidebar
+                filters={filters}
+                setFilters={setFilters}
+                categories={categories}
+                brands={brands}
+              />
               <ProductsGrid
                 viewMode={viewMode}
                 filters={filters}
@@ -100,6 +113,12 @@ function Shop() {
               />
             </div>
           </div>
+          <button
+            onClick={clearAllFilters}
+            className="mt-4 bg-gray-100 text-gray-700 py-2 px-4 rounded-button hover:bg-gray-200 transition"
+          >
+            Clear All Filters
+          </button>
         </div>
       </section>
     </div>

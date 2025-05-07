@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import api from "../../api/index";
 import QuickViewModal from "./QuickViewModal";
+import { Toastify } from "../../components/Toastify";
 
 function ProductsGrid({ viewMode, filters, setFilters, categories, brands }) {
   const [sortOption, setSortOption] = useState("Popularity");
@@ -16,8 +17,17 @@ function ProductsGrid({ viewMode, filters, setFilters, categories, brands }) {
   const [loading, setLoading] = useState(false);
   const [quickViewProductId, setQuickViewProductId] = useState(null);
   const [isQuickViewOpen, setIsQuickViewOpen] = useState(false);
-
   const exchangeRate = 25000; // 1 USD = 25,000 VND
+  const sessionKey =
+    sessionStorage.getItem("guest_session_key") ||
+    (() => {
+      const newSessionKey = `guest_${Date.now()}_${Math.random()
+        .toString(36)
+        .substr(2, 9)}`;
+      sessionStorage.setItem("guest_session_key", newSessionKey);
+      return newSessionKey;
+    })();
+  const user = JSON.parse(sessionStorage.getItem("user"));
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -30,7 +40,6 @@ function ProductsGrid({ viewMode, filters, setFilters, categories, brands }) {
   }, []);
 
   useEffect(() => {
-    // Reset currentPage to 1 whenever filters change
     setCurrentPage(1);
   }, [filters]);
 
@@ -50,27 +59,34 @@ function ProductsGrid({ viewMode, filters, setFilters, categories, brands }) {
             ? "price_low"
             : sortOption === "Price: High to Low"
             ? "price_high"
-            : sortOption === "Rating"
-            ? "rating"
             : sortOption === "Newest First"
             ? "newest"
             : "popularity",
         page: currentPage,
       };
-      console.log("Fetching products with params:", params); // Debug log
       const response = await api.get("/products.php", { params });
       if (response.data.status === "success") {
         setProducts(response.data.data);
         setPagination(response.data.pagination);
         setError("");
       } else {
+        const errorMsg = response.data.message || "Unknown error";
         setProducts([]);
-        setError("Failed to fetch products: " + response.data.message);
+        setError(`Failed to fetch products: ${errorMsg}`);
+        Toastify.error(`Failed to fetch products: ${errorMsg}`);
       }
     } catch (err) {
+      const errorMsg =
+        err.response?.data?.message || err.message || "Network or server error";
       setProducts([]);
-      setError("Failed to fetch products: " + (err.message || "Unknown error"));
-      console.error("Fetch error details:", err);
+      setError(`Failed to fetch products: ${errorMsg}`);
+      Toastify.error(`Failed to fetch products: ${errorMsg}`);
+      console.error("Fetch products error:", {
+        error: err,
+        response: err.response,
+        status: err.response?.status,
+        data: err.response?.data,
+      });
     } finally {
       setLoading(false);
     }
@@ -92,25 +108,69 @@ function ProductsGrid({ viewMode, filters, setFilters, categories, brands }) {
   };
 
   const handleRemoveCategory = (id) => {
-    setFilters((prev) => {
-      const updatedFilters = {
-        ...prev,
-        category_ids: prev.category_ids.filter((cid) => cid !== id),
-      };
-      fetchProducts();
-      return updatedFilters;
-    });
+    setFilters((prev) => ({
+      ...prev,
+      category_ids: prev.category_ids.filter((cid) => cid !== id),
+    }));
   };
 
   const handleRemoveBrand = (id) => {
-    setFilters((prev) => {
-      const updatedFilters = {
-        ...prev,
-        brand_ids: prev.brand_ids.filter((bid) => bid !== id),
-      };
-      fetchProducts();
-      return updatedFilters;
-    });
+    setFilters((prev) => ({
+      ...prev,
+      brand_ids: prev.brand_ids.filter((bid) => bid !== id),
+    }));
+  };
+
+  const handleAddToCart = async (productId) => {
+    const product = products.find((p) => p.product_id === productId);
+    if (!product) {
+      Toastify.error("Product not found");
+      console.log("Product not found for ID:", productId);
+      return;
+    }
+    if (product.stock_quantity <= 0) {
+      setError("Product is out of stock");
+      Toastify.error("Product is out of stock");
+      return;
+    }
+    try {
+      const payload = user
+        ? { user_id: user.user_id, product_id: productId, quantity: 1 }
+        : { session_key: sessionKey, product_id: productId, quantity: 1 };
+      const endpoint = user ? "/carts.php" : "/guest_carts.php";
+      const response = await api.post(endpoint, payload);
+      console.log("Add to cart response:", response.data);
+      if (response.data.status === "success") {
+        setProducts((prevProducts) =>
+          prevProducts.map((p) =>
+            p.product_id === productId
+              ? { ...p, stock_quantity: p.stock_quantity - 1 }
+              : p
+          )
+        );
+        const event = new CustomEvent("cartUpdated");
+        window.dispatchEvent(event);
+        Toastify.success(`Added ${product.name} to cart!`);
+        setError("");
+      } else {
+        const errorMsg = response.data.message || "Unknown error";
+        setError(`Failed to add to cart: ${errorMsg}`);
+        Toastify.error(`Failed to add to cart: ${errorMsg}`);
+      }
+    } catch (err) {
+      const errorMsg =
+        err.response?.data?.message || err.message || "Network or server error";
+      setError(`Failed to add to cart: ${errorMsg}`);
+      Toastify.error(`Failed to add to cart: ${errorMsg}`);
+      console.error("Add to cart error:", {
+        error: err,
+        response: err.response,
+        status: err.response?.status,
+        data: err.response?.data,
+        payload,
+        endpoint,
+      });
+    }
   };
 
   return (
@@ -144,7 +204,6 @@ function ProductsGrid({ viewMode, filters, setFilters, categories, brands }) {
                     "Newest First",
                     "Price: Low to High",
                     "Price: High to Low",
-                    "Rating",
                   ].map((option) => (
                     <button
                       key={option}
@@ -243,43 +302,20 @@ function ProductsGrid({ viewMode, filters, setFilters, categories, brands }) {
                 </button>
               </div>
             </div>
-            <div
-              className={
-                viewMode === "grid"
-                  ? "p-4"
-                  : "flex-1 p-6 flex flex-col justify-between"
-              }
-            >
-              <div>
-                <div className="flex items-center gap-1 text-amber-400 mb-2">
-                  {Array.from({ length: 5 }, (_, i) => (
-                    <i
-                      key={i}
-                      className={
-                        i < Math.floor(product.rating)
-                          ? "ri-star-fill"
-                          : i < product.rating
-                          ? "ri-star-half-fill"
-                          : "ri-star-line"
-                      }
-                    ></i>
-                  ))}
-                  <span className="text-gray-600 text-sm ml-1">
-                    ({product.review_count})
-                  </span>
-                </div>
-                <h3 className="font-medium text-gray-900 mb-1">
-                  {product.name}
-                </h3>
-                <p className="text-gray-500 text-sm mb-3">
-                  {product.description}
-                </p>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="font-bold text-gray-900">
+            <div className="p-4">
+              <h3 className="font-medium text-gray-900 mb-1">{product.name}</h3>
+              <p className="text-gray-500 text-sm mb-3">
+                {product.description}
+              </p>
+              <div className="flex items-center justify-between">
+                <span className="font-bold text-gray-900 text-lg">
                   {(product.price * exchangeRate).toLocaleString("vi-VN")} VND
                 </span>
-                <button className="w-10 h-10 flex items-center justify-center bg-gray-100 text-gray-700 rounded-full hover:bg-primary hover:text-white transition rounded-button">
+                <button
+                  onClick={() => handleAddToCart(product.product_id)}
+                  className="w-10 h-10 flex items-center justify-center bg-gray-100 text-gray-700 rounded-full hover:bg-primary hover:text-white transition rounded-button"
+                  disabled={product.stock_quantity <= 0}
+                >
                   <i className="ri-shopping-cart-line"></i>
                 </button>
               </div>

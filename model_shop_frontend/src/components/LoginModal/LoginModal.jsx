@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import api from "../../api/index";
 import "./LoginModal.css";
 
@@ -9,6 +9,7 @@ function LoginModal({ isOpen, setIsOpen, onLoginSuccess }) {
 
   const handleClose = () => {
     setIsOpen(false);
+    setIsLogin(true); // Reset to Sign In view when closing
     setError("");
     setSuccess("");
     document.body.style.overflow = "auto";
@@ -36,7 +37,7 @@ function LoginModal({ isOpen, setIsOpen, onLoginSuccess }) {
       const response = await api.post("/login.php", { email, password });
       setSuccess(response.data.message);
       setError("");
-      localStorage.setItem("user", JSON.stringify(response.data.user));
+      sessionStorage.setItem("user", JSON.stringify(response.data.user));
       if (onLoginSuccess) {
         onLoginSuccess(response.data.user);
       }
@@ -100,7 +101,7 @@ function LoginModal({ isOpen, setIsOpen, onLoginSuccess }) {
 
       try {
         const loginResponse = await api.post("/login.php", { email, password });
-        localStorage.setItem("user", JSON.stringify(loginResponse.data.user));
+        sessionStorage.setItem("user", JSON.stringify(loginResponse.data.user));
         if (onLoginSuccess) {
           onLoginSuccess(loginResponse.data.user);
         }
@@ -124,6 +125,15 @@ function LoginModal({ isOpen, setIsOpen, onLoginSuccess }) {
       setSuccess("");
     }
   };
+
+  // Reset to Sign In view whenever the modal is opened
+  useEffect(() => {
+    if (isOpen) {
+      setIsLogin(true);
+      setError("");
+      setSuccess("");
+    }
+  }, [isOpen]);
 
   if (!isOpen) return null;
 

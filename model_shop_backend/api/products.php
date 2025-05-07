@@ -59,7 +59,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
                     $stmt = $conn->prepare("
                         SELECT b.brand_id, b.name, COUNT(p.product_id) as product_count
                         FROM brands b
-                        LEFT JOIN products p ON b.brand_id = b.brand_id
+                        LEFT JOIN products p ON b.brand_id = p.brand_id
                         GROUP BY b.brand_id, b.name
                     ");
                     $stmt->execute();
@@ -83,15 +83,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
                     $stmt = $conn->prepare("
                         SELECT p.product_id, p.name, p.description, p.price, p.status, p.stock_quantity, p.discount,
                                c.name as category_name, b.name as brand_name,
-                               COALESCE(AVG(r.rating), 0) as rating, COUNT(r.rating_id) as review_count,
                                p.created_at
                         FROM products p
                         LEFT JOIN categories c ON p.category_id = c.category_id
                         LEFT JOIN brands b ON p.brand_id = b.brand_id
-                        LEFT JOIN ratings r ON p.product_id = r.product_id
                         WHERE p.product_id = ?
-                        GROUP BY p.product_id, p.name, p.description, p.price, p.status, p.stock_quantity, p.discount,
-                                 c.name, b.name, p.created_at
                     ");
                     $stmt->execute([$id]);
                     $product = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -156,37 +152,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         $search = isset($_GET['search']) ? '%' . $_GET['search'] . '%' : '%';
         $category_ids = isset($_GET['category_ids']) ? explode(',', $_GET['category_ids']) : [];
         $brand_ids = isset($_GET['brand_ids']) ? explode(',', $_GET['brand_ids']) : [];
-        $min_rating = isset($_GET['min_rating']) ? floatval($_GET['min_rating']) : 0;
         $status_new = isset($_GET['status_new']) ? filter_var($_GET['status_new'], FILTER_VALIDATE_BOOLEAN) : false;
         $status_available = isset($_GET['status_available']) ? filter_var($_GET['status_available'], FILTER_VALIDATE_BOOLEAN) : false;
         $status_sale = isset($_GET['status_sale']) ? filter_var($_GET['status_sale'], FILTER_VALIDATE_BOOLEAN) : false;
         $sort = isset($_GET['sort']) ? $_GET['sort'] : 'popularity';
-        $page = isset
-($_GET['page']) ? max(1, intval($_GET['page'])) : 1;
+        $page = isset($_GET['page']) ? max(1, intval($_GET['page'])) : 1;
         $limit = 12;
         $offset = ($page - 1) * $limit;
 
-        $validSorts = ['price_low', 'price_high', 'rating', 'newest', 'popularity'];
+        $validSorts = ['price_low', 'price_high', 'newest', 'popularity'];
         $sort = in_array($sort, $validSorts) ? $sort : 'popularity';
 
         try {
-            // Precompute ratings
-            $ratingsQuery = "
-                SELECT product_id, COALESCE(AVG(rating), 0) as avg_rating, COUNT(rating_id) as review_count
-                FROM ratings
-                GROUP BY product_id
-            ";
-            $ratingsStmt = $conn->prepare($ratingsQuery);
-            $ratingsStmt->execute();
-            $ratingsData = $ratingsStmt->fetchAll(PDO::FETCH_ASSOC);
-            $ratingsMap = [];
-            foreach ($ratingsData as $row) {
-                $ratingsMap[$row['product_id']] = [
-                    'rating' => $row['avg_rating'],
-                    'review_count' => $row['review_count']
-                ];
-            }
-
             // Precompute popularity scores
             $popularityQuery = "
                 SELECT product_id, COUNT(*) as popularity_score
@@ -249,13 +226,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
                     break;
                 case 'price_high':
                     $query .= " ORDER BY p.price DESC";
-                    break;
-                case 'rating':
-                    $query .= " ORDER BY (
-                        SELECT COALESCE(AVG(rating), 0)
-                        FROM ratings r
-                        WHERE r.product_id = p.product_id
-                    ) DESC";
                     break;
                 case 'newest':
                     $query .= " ORDER BY p.created_at DESC";
@@ -329,12 +299,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
                 }
                 $product['image'] = $product['images'][0];
                 unset($product['image_url']);
-                $product['rating'] = isset($ratingsMap[$product['product_id']])
-                    ? $ratingsMap[$product['product_id']]['rating']
-                    : 0;
-                $product['review_count'] = isset($ratingsMap[$product['product_id']])
-                    ? $ratingsMap[$product['product_id']]['review_count']
-                    : 0;
                 $product['popularity_score'] = isset($popularityMap[$product['product_id']])
                     ? $popularityMap[$product['product_id']]
                     : 0;

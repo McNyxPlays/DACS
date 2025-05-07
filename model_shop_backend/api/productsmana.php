@@ -301,7 +301,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'DELETE') {
     }
 
     try {
-        // Delete product images
         $stmt = $conn->prepare("SELECT image_url FROM product_images WHERE product_id = ?");
         $stmt->execute([$id]);
         $images = $stmt->fetchAll(PDO::FETCH_ASSOC);

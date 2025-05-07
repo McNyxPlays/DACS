@@ -8,6 +8,14 @@ const api = axios.create({
   withCredentials: true,
 });
 
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    console.error("API error:", error);
+    return Promise.reject(error);
+  }
+);
+
 // Lấy thông tin người dùng hiện tại
 export const getUser = () => api.get("/user.php");
 

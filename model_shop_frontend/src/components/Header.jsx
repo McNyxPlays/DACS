@@ -7,6 +7,16 @@ const Header = ({ setIsLoginModalOpen, user, setUser }) => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const navigate = useNavigate();
   const dropdownRef = useRef(null);
+  const [cartCount, setCartCount] = useState(0);
+  const sessionKey =
+    sessionStorage.getItem("guest_session_key") ||
+    (() => {
+      const newSessionKey = `guest_${Date.now()}_${Math.random()
+        .toString(36)
+        .substr(2, 9)}`;
+      sessionStorage.setItem("guest_session_key", newSessionKey);
+      return newSessionKey;
+    })();
 
   const toggleNav = () => {
     setIsNavOpen((prev) => {
@@ -24,6 +34,7 @@ const Header = ({ setIsLoginModalOpen, user, setUser }) => {
       await api.post("/user.php");
       setUser(null);
       localStorage.removeItem("user");
+      sessionStorage.removeItem("guest_session_key");
       setIsNavOpen(false);
       setIsDropdownOpen(false);
       document.body.style.overflow = "auto";
@@ -32,12 +43,48 @@ const Header = ({ setIsLoginModalOpen, user, setUser }) => {
       console.error("Logout error:", err);
       setUser(null);
       localStorage.removeItem("user");
+      sessionStorage.removeItem("guest_session_key");
       setIsNavOpen(false);
       setIsDropdownOpen(false);
       document.body.style.overflow = "auto";
       navigate("/");
     }
   };
+
+  const fetchCounts = async () => {
+    try {
+      if (user) {
+        const cartResponse = await api.get("/carts.php", {
+          params: { user_id: user.user_id },
+        });
+        setCartCount(cartResponse.data.data?.length || 0);
+      } else {
+        const cartResponse = await api.get("/guest_carts.php", {
+          params: { session_key: sessionKey },
+        });
+        setCartCount(cartResponse.data.data?.length || 0);
+      }
+    } catch (err) {
+      console.error("Fetch counts error:", err);
+      setCartCount(0);
+    }
+  };
+
+  useEffect(() => {
+    fetchCounts();
+
+    const handleCartUpdate = () => {
+      setTimeout(() => {
+        fetchCounts();
+      }, 500);
+    };
+
+    window.addEventListener("cartUpdated", handleCartUpdate);
+
+    return () => {
+      window.removeEventListener("cartUpdated", handleCartUpdate);
+    };
+  }, [user, sessionKey]);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -111,18 +158,25 @@ const Header = ({ setIsLoginModalOpen, user, setUser }) => {
             </div>
           </div>
           <div className="flex items-center gap-3">
-            <button className="w-10 h-10 flex items-center justify-center text-gray-700 hover:bg-gray-100 rounded-full relative">
-              <i className="ri-heart-line ri-xl"></i>
-              <span className="absolute -top-1 -right-1 bg-primary text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                3
-              </span>
-            </button>
-            <button className="w-10 h-10 flex items-center justify-center text-gray-700 hover:bg-gray-100 rounded-full relative">
+            {user && (
+              <NavLink
+                to="/favorites"
+                className="w-10 h-10 flex items-center justify-center text-gray-700 hover:bg-gray-100 rounded-full"
+              >
+                <i className="ri-heart-line ri-xl"></i>
+              </NavLink>
+            )}
+            <NavLink
+              to="/cart"
+              className="w-10 h-10 flex items-center justify-center text-gray-700 hover:bg-gray-100 rounded-full relative"
+            >
               <i className="ri-shopping-cart-line ri-xl"></i>
-              <span className="absolute -top-1 -right-1 bg-primary text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                2
-              </span>
-            </button>
+              {cartCount > 0 && (
+                <span className="absolute -top-1 -right-1 bg-primary text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                  {cartCount}
+                </span>
+              )}
+            </NavLink>
 
             {user && user.role === "admin" && (
               <NavLink
@@ -281,11 +335,35 @@ const Header = ({ setIsLoginModalOpen, user, setUser }) => {
           >
             Community
           </NavLink>
+          {user && (
+            <NavLink
+              to="/favorites"
+              className={({ isActive }) =>
+                `font-medium py-2 ${
+                  isActive ? "text-primary" : "text-gray-600 hover:text-primary"
+                }`
+              }
+              onClick={toggleNav}
+            >
+              Favorites
+            </NavLink>
+          )}
+          <NavLink
+            to="/cart"
+            className={({ isActive }) =>
+              `font-medium py-2 ${
+                isActive ? "text-primary" : "text-gray-600 hover:text-primary"
+              }`
+            }
+            onClick={toggleNav}
+          >
+            Cart
+          </NavLink>
 
           <div className="relative mt-4">
             <input
               type="text"
-              placeholder="Search models..."
+              placeholder="Search..."
               className="w-full pl-10 pr-4 py-2 rounded-full bg-gray-100 focus:outline-none focus:ring-2 focus:ring-primary focus:bg-white text-sm"
             />
             <div className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 flex items-center justify-center text-gray-500">

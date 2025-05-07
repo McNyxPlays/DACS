@@ -1,20 +1,30 @@
+sessionStorage
+frontend vite+tailwindcss+axios
+backend  mysql+xampp
+
+
 model_shop_backend
 │   .htaccess
 │
 ├───api
-│       categories.php
+│       brandsmana.php
+│       categoriesmana.php
+│       count.php
 │       index.php
 │       login.php
 │       products.php
+│       productsmana.php
 │       register.php
 │       user.php
-│       Users.php
+│       Usersmana.php
 │
 ├───config
 │       database.php
 │       functions.php
 │
-└───includes
+├───includes
+└───logs
+        error.log
 
 model_shop_frontend
 |
@@ -48,6 +58,11 @@ model_shop_frontend
     │   ├───Admin
     │   │   │   Admin.jsx
     │   │   │   ErrorBoundary.jsx
+    │   │   │
+    │   │   ├───BrandsManagement
+    │   │   │       AddBrand.jsx
+    │   │   │       BrandsManagement.jsx
+    │   │   │       EditBrand.jsx
     │   │   │
     │   │   ├───CategoriesManagement
     │   │   │       AddCategories.jsx
