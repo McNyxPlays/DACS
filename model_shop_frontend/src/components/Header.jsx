@@ -197,7 +197,7 @@ const Header = ({ setIsLoginModalOpen, user, setUser }) => {
                     <img
                       src={user.profile_image}
                       alt="Profile"
-                      className="w-8 h-8 rounded-full object-cover"
+                      className="w-8 h-8 rounded-full object-cover border-2 border-white shadow-sm"
                     />
                   ) : (
                     <i className="ri-user-line ri-lg text-gray-700"></i>
@@ -388,7 +388,7 @@ const Header = ({ setIsLoginModalOpen, user, setUser }) => {
                   <img
                     src={user.profile_image}
                     alt="Profile"
-                    className="w-8 h-8 rounded-full object-cover"
+                    className="w-8 h-8 rounded-full object-cover border-2 border-white shadow-sm"
                   />
                 ) : (
                   <i className="ri-user-line ri-lg text-gray-700"></i>

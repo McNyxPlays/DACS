@@ -3,19 +3,14 @@ import api from "../../../api/index";
 
 const ProfileSettings = ({ activeSection, user, onUserUpdate }) => {
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
-  const [profilePicture, setProfilePicture] = useState(
-    user?.profile_image || ""
-  );
+  const [profilePicture, setProfilePicture] = useState("");
   const [formData, setFormData] = useState({
-    full_name: user?.full_name || "",
-    email: user?.email || "",
-    phone_number: user?.phone_number || "",
-    address: user?.address || "",
-    gender: user?.gender || "",
-    custom_gender:
-      user?.gender && !["male", "female"].includes(user?.gender)
-        ? user.gender
-        : "",
+    full_name: "",
+    email: "",
+    phone_number: "",
+    address: "",
+    gender: "",
+    custom_gender: "",
     currentPassword: "",
     newPassword: "",
     confirmPassword: "",
@@ -42,9 +37,51 @@ const ProfileSettings = ({ activeSection, user, onUserUpdate }) => {
   }, []);
 
   useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const response = await api.get("/user.php");
+        if (response.data.status === "success") {
+          const fetchedUser = response.data.user;
+          console.log("Fetched user data:", fetchedUser);
+          setFormData({
+            full_name: fetchedUser.full_name || "",
+            email: fetchedUser.email || "",
+            phone_number: fetchedUser.phone_number || "",
+            address: fetchedUser.address || "",
+            gender: fetchedUser.gender || "",
+            custom_gender:
+              fetchedUser.gender &&
+              !["male", "female"].includes(fetchedUser.gender)
+                ? fetchedUser.gender
+                : "",
+            currentPassword: "",
+            newPassword: "",
+            confirmPassword: "",
+          });
+          setProfilePicture(fetchedUser.profile_image || "");
+          sessionStorage.setItem("user", JSON.stringify(fetchedUser));
+          if (onUserUpdate) {
+            onUserUpdate(fetchedUser);
+          }
+        } else {
+          setErrors({ general: "Failed to fetch user data." });
+        }
+      } catch (err) {
+        console.error("Error fetching user data:", err);
+        setErrors({
+          general: err.response?.data?.message || "Error fetching user data.",
+        });
+      }
+    };
+
+    fetchUserData();
+  }, []);
+
+  useEffect(() => {
     if (user) {
-      console.log("User data received in ProfileSettings:", user); // Debug dữ liệu user
-      setFormData({
+      console.log("User prop updated:", user);
+      setFormData((prev) => ({
+        ...prev,
         full_name: user.full_name || "",
         email: user.email || "",
         phone_number: user.phone_number || "",
@@ -54,10 +91,7 @@ const ProfileSettings = ({ activeSection, user, onUserUpdate }) => {
           user.gender && !["male", "female"].includes(user.gender)
             ? user.gender
             : "",
-        currentPassword: "",
-        newPassword: "",
-        confirmPassword: "",
-      });
+      }));
       setProfilePicture(user.profile_image || "");
     }
   }, [user]);
@@ -71,10 +105,14 @@ const ProfileSettings = ({ activeSection, user, onUserUpdate }) => {
     setErrors((prev) => ({ ...prev, [name]: "" }));
   };
 
-  const handleProfilePictureChange = () => {
-    const newProfilePicture = prompt("Enter new profile picture URL:");
-    if (newProfilePicture) {
-      setProfilePicture(newProfilePicture);
+  const handleProfilePictureChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setProfilePicture(reader.result);
+      };
+      reader.readAsDataURL(file);
     }
   };
 
@@ -136,7 +174,7 @@ const ProfileSettings = ({ activeSection, user, onUserUpdate }) => {
       const response = await api.put("/user.php", updateData);
       if (response.data.status === "success") {
         setSuccess("Profile settings saved successfully!");
-        localStorage.setItem("user", JSON.stringify(response.data.user));
+        sessionStorage.setItem("user", JSON.stringify(response.data.user));
         if (onUserUpdate) {
           onUserUpdate(response.data.user);
         }
@@ -186,13 +224,16 @@ const ProfileSettings = ({ activeSection, user, onUserUpdate }) => {
                   profile and in community posts.
                 </p>
                 <div className="flex space-x-3">
-                  <button
-                    type="button"
-                    className="bg-gray-100 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-200 !rounded-button whitespace-nowrap cursor-pointer"
-                    disabled={isLoading}
-                  >
+                  <label className="bg-gray-100 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-200 !rounded-button whitespace-nowrap cursor-pointer">
                     Upload New Picture
-                  </button>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleProfilePictureChange}
+                      className="hidden"
+                      disabled={isLoading}
+                    />
+                  </label>
                   <button
                     type="button"
                     className="bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-50 !rounded-button whitespace-nowrap cursor-pointer"
@@ -304,7 +345,7 @@ const ProfileSettings = ({ activeSection, user, onUserUpdate }) => {
                   name="gender"
                   value={formData.gender}
                   onChange={handleInputChange}
-                  className="w-full vertex border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   disabled={isLoading}
                 >
                   <option value="">Select Gender</option>

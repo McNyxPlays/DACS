@@ -27,7 +27,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
         if ($user) {
-            // Chuyển null thành chuỗi rỗng cho các trường
             $user['phone_number'] = $user['phone_number'] ?? "";
             $user['address'] = $user['address'] ?? "";
             $user['gender'] = $user['gender'] ?? "";
@@ -61,15 +60,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     }
 
     $user_id = $_SESSION['user_id'];
-    $data = json_decode(file_get_contents('php://input'), true);
+    $data = $_POST; // For text fields
     $full_name = sanitize_input($data['full_name'] ?? '');
     $email = sanitize_input($data['email'] ?? '');
     $phone_number = sanitize_input($data['phone_number'] ?? null);
     $gender = sanitize_input($data['gender'] ?? null);
     $address = sanitize_input($data['address'] ?? null);
-    $profile_image = $data['profile_image'] ?? null;
     $current_password = $data['current_password'] ?? '';
     $new_password = $data['new_password'] ?? '';
+    $profile_image = $_FILES['profile_image'] ?? null;
 
     if (empty($email) || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
         http_response_code(400);
@@ -77,7 +76,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         exit;
     }
 
-    // Kiểm tra email trùng lặp
     $stmt = $pdo->prepare("SELECT user_id FROM users WHERE email = ? AND user_id != ?");
     $stmt->execute([$email, $user_id]);
     if ($stmt->fetch()) {
@@ -87,7 +85,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     }
 
     try {
-        // Kiểm tra mật khẩu hiện tại nếu thay đổi mật khẩu
+        $profile_image_path = null;
+        if ($profile_image && $profile_image['error'] === UPLOAD_ERR_OK) {
+            $upload_dir = '../uploads/profiles/';
+            if (!file_exists($upload_dir)) {
+                mkdir($upload_dir, 0777, true);
+            }
+            $file_name = uniqid() . '_' . basename($profile_image['name']);
+            $target_file = $upload_dir . $file_name;
+            if (move_uploaded_file($profile_image['tmp_name'], $target_file)) {
+                $profile_image_path = 'uploads/profiles/' . $file_name;
+            } else {
+                http_response_code(500);
+                echo json_encode(['status' => 'error', 'message' => 'Failed to upload image']);
+                exit;
+            }
+        }
+
         $password_sql = '';
         $password_params = [];
         if ($current_password && $new_password) {
@@ -103,19 +117,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
             $password_params = [password_hash($new_password, PASSWORD_DEFAULT)];
         }
 
-        // Cập nhật thông tin người dùng
         $sql = "UPDATE users SET full_name = ?, email = ?, phone_number = ?, gender = ?, address = ?, profile_image = ? $password_sql WHERE user_id = ?";
-        $params = array_merge([$full_name, $email, $phone_number, $gender, $address, $profile_image], $password_params, [$user_id]);
+        $params = array_merge([$full_name, $email, $phone_number, $gender, $address, $profile_image_path ?? null], $password_params, [$user_id]);
         $stmt = $pdo->prepare($sql);
         $stmt->execute($params);
 
-        // Lấy thông tin người dùng sau khi cập nhật
         $stmt = $pdo->prepare("SELECT user_id, email, full_name, phone_number, gender, address, profile_image, role FROM users WHERE user_id = ? AND is_active = TRUE");
         $stmt->execute([$user_id]);
         $updated_user = $stmt->fetch(PDO::FETCH_ASSOC);
 
         if ($updated_user) {
-            // Chuyển null thành chuỗi rỗng cho các trường
             $updated_user['phone_number'] = $updated_user['phone_number'] ?? "";
             $updated_user['address'] = $updated_user['address'] ?? "";
             $updated_user['gender'] = $updated_user['gender'] ?? "";

@@ -17,7 +17,31 @@ function QuickViewModal({ productId, isOpen, toggleModal }) {
       sessionStorage.setItem("guest_session_key", newSessionKey);
       return newSessionKey;
     })();
-  const user = JSON.parse(sessionStorage.getItem("user"));
+  const [user, setUser] = useState(
+    JSON.parse(sessionStorage.getItem("user") || "null")
+  );
+
+  useEffect(() => {
+    const validateUser = async () => {
+      if (user && user.user_id) {
+        try {
+          const response = await api.get("/user.php");
+          if (response.data.status === "success" && response.data.user) {
+            setUser(response.data.user);
+            sessionStorage.setItem("user", JSON.stringify(response.data.user));
+          } else {
+            setUser(null);
+            sessionStorage.removeItem("user");
+          }
+        } catch (err) {
+          console.error("User validation error:", err);
+          setUser(null);
+          sessionStorage.removeItem("user");
+        }
+      }
+    };
+    validateUser();
+  }, [isOpen]);
 
   useEffect(() => {
     if (isOpen && productId) {
@@ -114,12 +138,13 @@ function QuickViewModal({ productId, isOpen, toggleModal }) {
       Toastify.error("No product selected");
       return;
     }
+    if (!user || !user.user_id) {
+      Toastify.error("Please log in to add to wishlist");
+      return;
+    }
     try {
-      const payload = user
-        ? { user_id: user.user_id, product_id: productId }
-        : { session_key: sessionKey, product_id: productId };
-      const endpoint = user ? "/favorites.php" : "/guest_favorites.php";
-      const response = await api.post(endpoint, payload);
+      const payload = { user_id: user.user_id, product_id: productId };
+      const response = await api.post("/favorites.php", payload);
       if (response.data.status === "success") {
         const event = new CustomEvent("favoritesUpdated");
         window.dispatchEvent(event);
@@ -141,7 +166,7 @@ function QuickViewModal({ productId, isOpen, toggleModal }) {
         status: err.response?.status,
         data: err.response?.data,
         payload,
-        endpoint,
+        user: user,
       });
     }
   };
@@ -305,7 +330,17 @@ function QuickViewModal({ productId, isOpen, toggleModal }) {
                   <div className="flex items-center gap-4">
                     <button
                       onClick={handleAddToWishlist}
-                      className="flex items-center gap-2 text-gray-700 hover:text-primary transition"
+                      className={`flex items-center gap-2 transition ${
+                        user && user.user_id
+                          ? "text-gray-700 hover:text-primary"
+                          : "text-gray-400 cursor-not-allowed"
+                      }`}
+                      disabled={!user || !user.user_id}
+                      title={
+                        user && user.user_id
+                          ? "Add to Wishlist"
+                          : "Log in to add to wishlist"
+                      }
                     >
                       <i className="ri-heart-line"></i>
                       Add to Wishlist

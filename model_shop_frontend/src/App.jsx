@@ -42,30 +42,39 @@ const App = () => {
   const [user, setUser] = useState(null);
 
   useEffect(() => {
-    const storedUser = JSON.parse(sessionStorage.getItem("user"));
-    if (storedUser) {
-      api
-        .get("/user.php")
-        .then((response) => {
+    const validateUser = async () => {
+      const storedUser = JSON.parse(sessionStorage.getItem("user"));
+      if (storedUser && storedUser.user_id) {
+        try {
+          const response = await api.get("/user.php");
           if (response.data.status === "success" && response.data.user) {
-            setUser(response.data.user);
-            sessionStorage.setItem("user", JSON.stringify(response.data.user));
+            const validatedUser = response.data.user;
+            setUser(validatedUser);
+            sessionStorage.setItem("user", JSON.stringify(validatedUser));
           } else {
             sessionStorage.removeItem("user");
             setUser(null);
           }
-        })
-        .catch((err) => {
-          console.error("User fetch error:", err);
+        } catch (err) {
+          console.error("User validation error:", err);
           sessionStorage.removeItem("user");
           setUser(null);
-        });
-    }
+        }
+      }
+    };
+    validateUser();
   }, []);
 
   const handleUserUpdate = (updatedUser) => {
     setUser(updatedUser);
     sessionStorage.setItem("user", JSON.stringify(updatedUser));
+  };
+
+  const handleLogout = () => {
+    api.post("/user.php").then(() => {
+      sessionStorage.removeItem("user");
+      setUser(null);
+    });
   };
 
   return (
