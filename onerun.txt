@@ -1,11 +1,14 @@
-npm install
+git config --global user.name "Tên của bạn"
+git config --global user.email "email@example.com"
+=============================================================
+npm install(main)
 npm i -D tailwindcss@3 postcss autoprefixer
 npm i axios
 npm i react-toastify
 npm run dev
 =============================================================
-git config --global user.name "Tên của bạn"
-git config --global user.email "email@example.com"
+Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned
+Y
 =============================================================
 Up code của bạn lên GitHub:
 # Khởi tạo Git nếu chưa có

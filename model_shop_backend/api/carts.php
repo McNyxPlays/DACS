@@ -216,7 +216,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'PUT') {
     exit;
 }
 
-// Handle DELETE request (remove item)
+// Handle DELETE request (remove item or all)
 if ($_SERVER['REQUEST_METHOD'] === 'DELETE') {
     $input = json_decode(file_get_contents('php://input'), true);
     if (!$input) {
@@ -228,20 +228,32 @@ if ($_SERVER['REQUEST_METHOD'] === 'DELETE') {
     $user_id = isset($input['user_id']) ? (int)$input['user_id'] : null;
     $cart_id = isset($input['cart_id']) ? (int)$input['cart_id'] : null;
 
-    if (!$user_id || !$cart_id) {
+    if (!$user_id) {
         http_response_code(400);
-        echo json_encode(['status' => 'error', 'message' => 'Missing or invalid parameters']);
+        echo json_encode(['status' => 'error', 'message' => 'Missing user_id']);
         exit;
     }
 
     try {
-        $stmt = $conn->prepare("DELETE FROM carts WHERE cart_id = ? AND user_id = ?");
-        $stmt->execute([$cart_id, $user_id]);
-        if ($stmt->rowCount() > 0) {
-            echo json_encode(['status' => 'success', 'message' => 'Item removed from cart']);
+        if ($cart_id) {
+            // Xóa một mục cụ thể
+            $stmt = $conn->prepare("DELETE FROM carts WHERE cart_id = ? AND user_id = ?");
+            $stmt->execute([$cart_id, $user_id]);
+            if ($stmt->rowCount() > 0) {
+                echo json_encode(['status' => 'success', 'message' => 'Item removed from cart']);
+            } else {
+                http_response_code(400);
+                echo json_encode(['status' => 'error', 'message' => 'Invalid cart_id or user_id']);
+            }
         } else {
-            http_response_code(400);
-            echo json_encode(['status' => 'error', 'message' => 'Invalid cart_id or user_id']);
+            // Xóa tất cả các mục của user
+            $stmt = $conn->prepare("DELETE FROM carts WHERE user_id = ?");
+            $stmt->execute([$user_id]);
+            if ($stmt->rowCount() > 0) {
+                echo json_encode(['status' => 'success', 'message' => 'All items removed from cart']);
+            } else {
+                echo json_encode(['status' => 'success', 'message' => 'Cart is already empty']);
+            }
         }
     } catch (PDOException $e) {
         log_error("Database error in carts.php: " . $e->getMessage());

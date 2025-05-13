@@ -136,6 +136,13 @@ model_shop_frontend
     │       │       Messages.jsx
     │       │       MessagesSidebar.jsx
     │       │
+    │       ├───Notifications
+    │       │       NotificationItem.jsx
+    │       │       Notifications.jsx
+    │       │       NotificationsHeader.jsx
+    │       │       NotificationsPagination.jsx
+    │       │       NotificationsSidebar.jsx
+    │       │
     │       └───UserProfileOverview
     │               MainContent.jsx
     │               ProfileBanner.jsx

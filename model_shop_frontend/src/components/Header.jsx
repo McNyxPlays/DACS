@@ -2,7 +2,13 @@ import React, { useState, useEffect, useRef } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import api from "../api/index";
 
-const Header = ({ setIsLoginModalOpen, user, setUser }) => {
+const Header = ({
+  setIsLoginModalOpen,
+  user,
+  setUser,
+  isCartOpen,
+  setIsCartOpen,
+}) => {
   const [isNavOpen, setIsNavOpen] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const navigate = useNavigate();
@@ -167,7 +173,8 @@ const Header = ({ setIsLoginModalOpen, user, setUser }) => {
               </NavLink>
             )}
             <NavLink
-              to="/cart"
+              to="#"
+              onClick={() => setIsCartOpen(!isCartOpen)}
               className="w-10 h-10 flex items-center justify-center text-gray-700 hover:bg-gray-100 rounded-full relative"
             >
               <i className="ri-shopping-cart-line ri-xl"></i>
@@ -349,13 +356,16 @@ const Header = ({ setIsLoginModalOpen, user, setUser }) => {
             </NavLink>
           )}
           <NavLink
-            to="/cart"
+            to="#"
+            onClick={() => {
+              setIsCartOpen(!isCartOpen);
+              toggleNav();
+            }}
             className={({ isActive }) =>
               `font-medium py-2 ${
                 isActive ? "text-primary" : "text-gray-600 hover:text-primary"
               }`
             }
-            onClick={toggleNav}
           >
             Cart
           </NavLink>

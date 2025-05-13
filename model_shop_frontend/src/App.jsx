@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Routes, Route, Outlet, Navigate } from "react-router-dom"; // Add Navigate
+import { Routes, Route, Outlet, Navigate } from "react-router-dom";
 import { ToastifyContainer } from "./components/Toastify";
 import Header from "./components/Header";
 import LoginModal from "./components/LoginModal/LoginModal";
@@ -14,14 +14,23 @@ import Admin from "./features/Admin/Admin";
 import Favorites from "./features/Favorites/Favorites";
 import Cart from "./features/Cart/Cart";
 import Messages from "./features/UserProfile/Messages/Messages";
-import api from "./api/index";
+import Checkout from "./features/Checkout/Checkout"; // Đảm bảo đường dẫn đúng
 
-const Layout = ({ isLoginModalOpen, setIsLoginModalOpen, user, setUser }) => (
+const Layout = ({
+  isLoginModalOpen,
+  setIsLoginModalOpen,
+  user,
+  setUser,
+  isCartOpen,
+  setIsCartOpen,
+}) => (
   <div>
     <Header
       user={user}
       setIsLoginModalOpen={setIsLoginModalOpen}
       setUser={setUser}
+      isCartOpen={isCartOpen}
+      setIsCartOpen={setIsCartOpen}
     />
     <LoginModal
       isOpen={isLoginModalOpen}
@@ -35,6 +44,7 @@ const Layout = ({ isLoginModalOpen, setIsLoginModalOpen, user, setUser }) => (
     <Footer />
     <BackToTop />
     <ToastifyContainer />
+    {isCartOpen && <Cart isOpen={isCartOpen} setIsOpen={setIsCartOpen} />}
   </div>
 );
 
@@ -48,6 +58,7 @@ const ProtectedRoute = ({ user, children }) => {
 const App = () => {
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const [user, setUser] = useState(null);
+  const [isCartOpen, setIsCartOpen] = useState(false);
 
   useEffect(() => {
     const validateUser = async () => {
@@ -81,13 +92,6 @@ const App = () => {
     sessionStorage.setItem("user", JSON.stringify(updatedUser));
   };
 
-  const handleLogout = () => {
-    api.post("/user.php").then(() => {
-      sessionStorage.removeItem("user");
-      setUser(null);
-    });
-  };
-
   return (
     <Routes>
       <Route
@@ -97,6 +101,8 @@ const App = () => {
             setIsLoginModalOpen={setIsLoginModalOpen}
             user={user}
             setUser={setUser}
+            isCartOpen={isCartOpen}
+            setIsCartOpen={setIsCartOpen}
           />
         }
       >
@@ -127,7 +133,11 @@ const App = () => {
             </ProtectedRoute>
           }
         />
-        <Route path="/cart" element={<Cart />} />
+        <Route
+          path="/cart"
+          element={<Cart isOpen={true} setIsOpen={setIsCartOpen} />}
+        />
+        <Route path="/checkout" element={<Checkout />} /> {/* Cập nhật route */}
         <Route
           path="/admin/*"
           element={
