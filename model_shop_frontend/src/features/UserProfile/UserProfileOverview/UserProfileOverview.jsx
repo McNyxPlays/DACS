@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import axios from "axios";
 import ProfileBanner from "./ProfileBanner";
 import ProfileStats from "./ProfileStats";
 import SidebarLeft from "./SidebarLeft";
@@ -8,17 +9,45 @@ import SidebarRight from "./SidebarRight";
 const UserProfileOverview = ({ user }) => {
   const [activeTab, setActiveTab] = useState("builds");
   const [isEditing, setIsEditing] = useState(false);
-  const [isPrivacyOpen, setIsPrivacyOpen] = useState(false);
+  const [skills, setSkills] = useState([]);
   const [skillsInput, setSkillsInput] = useState("");
-  const [skills, setSkills] = useState([
-    "Gunpla Building",
-    "Weathering",
-    "Airbrush",
-    "Panel Lining",
-    "Diorama Creation",
-  ]);
+  const [followers, setFollowers] = useState(0);
+  const [following, setFollowing] = useState(0);
+  const [posts, setPosts] = useState(0);
 
-  // User profile data from props
+  // Fetch skills from API
+  useEffect(() => {
+    axios
+      .get("http://localhost/model_shop_backend/api/skills.php", {
+        withCredentials: true,
+      })
+      .then((response) => {
+        if (response.data.status === "success") {
+          setSkills(response.data.skills);
+        }
+      })
+      .catch((error) => {
+        console.error("Error fetching skills:", error);
+      });
+
+    // Fetch followers, following, and posts
+    axios
+      .get("http://localhost/model_shop_backend/api/user_stats.php", {
+        withCredentials: true,
+      })
+      .then((response) => {
+        if (response.data.status === "success") {
+          setFollowers(response.data.followers);
+          setFollowing(response.data.following);
+          setPosts(response.data.posts);
+        }
+      })
+      .catch((error) => {
+        console.error("Error fetching user stats:", error);
+      });
+  }, []);
+
+  // User profile data from props and API
   const userData = {
     name: user?.full_name || "Unknown User",
     handle: user?.email ? `@${user.email.split("@")[0]}` : "@user",
@@ -29,26 +58,49 @@ const UserProfileOverview = ({ user }) => {
           year: "numeric",
         })
       : "Unknown",
-    bio: "Passionate model builder with 5+ years of experience. Specializing in Gundam models and military vehicles. Always looking to learn new techniques and connect with fellow enthusiasts.",
-    followers: 245,
-    following: 127,
-    posts: 86,
+    bio:
+      user?.bio ||
+      "Passionate model builder with 5+ years of experience. Specializing in Gundam models and military vehicles. Always looking to learn new techniques and connect with fellow enthusiasts.",
+    followers: followers,
+    following: following,
+    posts: posts,
     profileCompletion: user ? 85 : 50,
   };
 
   const handleAddSkill = (e) => {
     if (e.key === "Enter" && skillsInput.trim() !== "") {
-      setSkills([...skills, skillsInput.trim()]);
-      setSkillsInput("");
+      axios
+        .post(
+          "http://localhost/model_shop_backend/api/skills.php",
+          { skill_name: skillsInput.trim() },
+          { withCredentials: true }
+        )
+        .then((response) => {
+          if (response.data.status === "success") {
+            setSkills([...skills, response.data.skill]);
+            setSkillsInput("");
+          }
+        })
+        .catch((error) => {
+          console.error("Error adding skill:", error);
+        });
     }
   };
 
-  const handleRemoveSkill = (skillToRemove) => {
-    setSkills(skills.filter((skill) => skill !== skillToRemove));
-  };
-
-  const togglePrivacySettings = () => {
-    setIsPrivacyOpen(!isPrivacyOpen);
+  const handleRemoveSkill = (skill_id) => {
+    axios
+      .delete("http://localhost/model_shop_backend/api/skills.php", {
+        data: { skill_id },
+        withCredentials: true,
+      })
+      .then((response) => {
+        if (response.data.status === "success") {
+          setSkills(skills.filter((skill) => skill.skill_id !== skill_id));
+        }
+      })
+      .catch((error) => {
+        console.error("Error removing skill:", error);
+      });
   };
 
   return (
@@ -64,12 +116,11 @@ const UserProfileOverview = ({ user }) => {
           userData={userData}
           isEditing={isEditing}
           skills={skills}
+          setSkills={setSkills}
           skillsInput={skillsInput}
           setSkillsInput={setSkillsInput}
           handleAddSkill={handleAddSkill}
           handleRemoveSkill={handleRemoveSkill}
-          isPrivacyOpen={isPrivacyOpen}
-          togglePrivacySettings={togglePrivacySettings}
         />
         <MainContent activeTab={activeTab} setActiveTab={setActiveTab} />
         <SidebarRight userData={userData} />

@@ -374,7 +374,7 @@ const Header = ({ setIsLoginModalOpen, user, setUser }) => {
           {user && user.role === "admin" && (
             <NavLink
               to="/admin"
-              className="flex items-center gap-2 py-2 text-gray-700 hover:text-primary"
+              className="flex items-center gap-2 py-2 text-gray-600 hover:text-primary"
               onClick={toggleNav}
             >
               <i className="ri-shield-user-line"></i>
@@ -391,15 +391,15 @@ const Header = ({ setIsLoginModalOpen, user, setUser }) => {
                     className="w-8 h-8 rounded-full object-cover border-2 border-white shadow-sm"
                   />
                 ) : (
-                  <i className="ri-user-line ri-lg text-gray-700"></i>
+                  <i className="ri-user-line ri-lg text-gray-600"></i>
                 )}
-                <span className="text-gray-700 font-medium">
+                <span className="text-gray-600 font-medium">
                   {user.full_name || user.email || "User"}
                 </span>
               </div>
               <NavLink
                 to="/profile"
-                className="flex items-center gap-2 py-2 text-gray-700 hover:text-primary"
+                className="flex items-center gap-2 py-2 text-gray-600 hover:text-primary"
                 onClick={toggleNav}
               >
                 <i className="ri-user-line"></i>
@@ -407,7 +407,7 @@ const Header = ({ setIsLoginModalOpen, user, setUser }) => {
               </NavLink>
               <NavLink
                 to="/builds"
-                className="flex items-center gap-2 py-2 text-gray-700 hover:text-primary"
+                className="flex items-center gap-2 py-2 text-gray-600 hover:text-primary"
                 onClick={toggleNav}
               >
                 <i className="ri-hammer-line"></i>
@@ -415,7 +415,7 @@ const Header = ({ setIsLoginModalOpen, user, setUser }) => {
               </NavLink>
               <NavLink
                 to="/settings"
-                className="flex items-center gap-2 py-2 text-gray-700 hover:text-primary"
+                className="flex items-center gap-2 py-2 text-gray-600 hover:text-primary"
                 onClick={toggleNav}
               >
                 <i className="ri-settings-3-line"></i>
@@ -423,7 +423,7 @@ const Header = ({ setIsLoginModalOpen, user, setUser }) => {
               </NavLink>
               <NavLink
                 to="/notifications"
-                className="flex items-center gap-2 py-2 text-gray-700 hover:text-primary"
+                className="flex items-center gap-2 py-2 text-gray-600 hover:text-primary"
                 onClick={toggleNav}
               >
                 <i className="ri-notification-3-line"></i>
@@ -434,7 +434,7 @@ const Header = ({ setIsLoginModalOpen, user, setUser }) => {
               </NavLink>
               <NavLink
                 to="/messages"
-                className="flex items-center gap-2 py-2 text-gray-700 hover:text-primary"
+                className="flex items-center gap-2 py-2 text-gray-600 hover:text-primary"
                 onClick={toggleNav}
               >
                 <i className="ri-message-3-line"></i>
@@ -454,7 +454,7 @@ const Header = ({ setIsLoginModalOpen, user, setUser }) => {
                 setIsLoginModalOpen(true);
                 toggleNav();
               }}
-              className="flex items-center gap-2 text-gray-700 hover:text-primary transition py-2"
+              className="flex items-center gap-2 text-gray-600 hover:text-primary transition py-2"
             >
               <i className="ri-user-line ri-lg"></i>
               <span>Sign In</span>

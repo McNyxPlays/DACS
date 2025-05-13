@@ -5,7 +5,7 @@ import ShowcaseSection from "./ShowcaseSection";
 import TutorialsEvents from "./TutorialsEvents";
 import RightSidebar from "./RightSidebar";
 
-function Community() {
+function Community({ user }) {
   return (
     <div className="bg-gray-50 font-inter">
       <section className="py-10">
@@ -13,12 +13,12 @@ function Community() {
           <div className="flex flex-col lg:flex-row gap-8">
             <LeftSidebar />
             <div className="flex-1">
-              <FeaturedContent />
+              <FeaturedContent user={user} />
               <ForumsSection />
               <ShowcaseSection />
               <TutorialsEvents />
             </div>
-            <RightSidebar />
+            <RightSidebar user={user} />
           </div>
         </div>
       </section>

@@ -1,16 +1,34 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
+import axios from "axios";
 
 const SidebarLeft = ({
   userData,
   isEditing,
   skills,
+  setSkills,
   skillsInput,
   setSkillsInput,
   handleAddSkill,
   handleRemoveSkill,
-  isPrivacyOpen,
-  togglePrivacySettings,
 }) => {
+  const [socialLinks, setSocialLinks] = useState([]);
+
+  // Fetch social links from API
+  useEffect(() => {
+    axios
+      .get("http://localhost/model_shop_backend/api/social_links.php", {
+        withCredentials: true,
+      })
+      .then((response) => {
+        if (response.data.status === "success") {
+          setSocialLinks(response.data.social_links);
+        }
+      })
+      .catch((error) => {
+        console.error("Error fetching social links:", error);
+      });
+  }, []);
+
   return (
     <div className="w-full md:w-1/5 mb-6 md:mb-0 md:mr-6">
       <div className="bg-white rounded-lg shadow-sm p-4 mb-6">
@@ -58,15 +76,15 @@ const SidebarLeft = ({
           </div>
         ) : null}
         <div className="flex flex-wrap gap-2 mb-3">
-          {skills.map((skill, index) => (
+          {skills.map((skill) => (
             <div
-              key={index}
+              key={skill.skill_id}
               className="bg-gray-100 text-gray-700 text-xs px-2 py-1 rounded-full flex items-center"
             >
-              <span>{skill}</span>
+              <span>{skill.skill_name}</span>
               {isEditing && (
                 <button
-                  onClick={() => handleRemoveSkill(skill)}
+                  onClick={() => handleRemoveSkill(skill.skill_id)}
                   className="ml-1 text-gray-500 hover:text-red-500 cursor-pointer"
                 >
                   <i className="fas fa-times"></i>
@@ -87,109 +105,28 @@ const SidebarLeft = ({
           )}
         </div>
         <div className="space-y-3">
-          <div className="flex items-center">
-            <i className="fab fa-instagram text-pink-600 w-8 text-lg"></i>
-            <a
-              href="https://instagram.com/mchen_models"
-              className="text-sm text-blue-600 hover:underline"
-            >
-              @mchen_models
-            </a>
-          </div>
-          <div className="flex items-center">
-            <i className="fab fa-youtube text-red-600 w-8 text-lg"></i>
-            <a
-              href="https://youtube.com/@MichaelsModelWorkshop"
-              className="text-sm text-blue-600 hover:underline"
-            >
-              Michael's Model Workshop
-            </a>
-          </div>
-          <div className="flex items-center">
-            <i className="fab fa-twitter text-blue-400 w-8 text-lg"></i>
-            <a
-              href="https://twitter.com/mchen_builds"
-              className="text-sm text-blue-600 hover:underline"
-            >
-              @mchen_builds
-            </a>
-          </div>
+          {socialLinks.map((link) => (
+            <div key={link.link_id} className="flex items-center">
+              <i
+                className={`fab fa-${link.platform} text-${
+                  link.platform === "instagram"
+                    ? "pink"
+                    : link.platform === "youtube"
+                    ? "red"
+                    : link.platform === "twitter"
+                    ? "blue"
+                    : "blue"
+                }-600 w-8 text-lg`}
+              ></i>
+              <a
+                href={link.link_url}
+                className="text-sm text-blue-600 hover:underline"
+              >
+                {link.display_name}
+              </a>
+            </div>
+          ))}
         </div>
-      </div>
-
-      <div className="bg-white rounded-lg shadow-sm p-4">
-        <div className="flex justify-between items-center mb-3">
-          <h2 className="font-medium">Privacy Settings</h2>
-          <button
-            onClick={togglePrivacySettings}
-            className="text-blue-600 text-sm hover:text-blue-800 cursor-pointer"
-          >
-            <i
-              className={`fas fa-chevron-${isPrivacyOpen ? "up" : "down"}`}
-            ></i>
-          </button>
-        </div>
-        {isPrivacyOpen && (
-          <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <label className="text-sm text-gray-700">
-                Show my online status
-              </label>
-              <div className="relative inline-block w-10 mr-2 align-middle select-none">
-                <input
-                  type="checkbox"
-                  id="toggle1"
-                  defaultChecked
-                  className="sr-only"
-                />
-                <label
-                  htmlFor="toggle1"
-                  className="block overflow-hidden h-6 rounded-full bg-gray-300 cursor-pointer"
-                >
-                  <span className="block h-6 w-6 rounded-full bg-white shadow transform transition-transform duration-200 ease-in-out translate-x-4"></span>
-                </label>
-              </div>
-            </div>
-            <div className="flex items-center justify-between">
-              <label className="text-sm text-gray-700">
-                Allow message requests
-              </label>
-              <div className="relative inline-block w-10 mr-2 align-middle select-none">
-                <input
-                  type="checkbox"
-                  id="toggle2"
-                  defaultChecked
-                  className="sr-only"
-                />
-                <label
-                  htmlFor="toggle2"
-                  className="block overflow-hidden h-6 rounded-full bg-gray-300 cursor-pointer"
-                >
-                  <span className="block h-6 w-6 rounded-full bg-white shadow transform transition-transform duration-200 ease-in-out translate-x-4"></span>
-                </label>
-              </div>
-            </div>
-            <div className="flex items-center justify-between">
-              <label className="text-sm text-gray-700">
-                Show my activity feed
-              </label>
-              <div className="relative inline-block w-10 mr-2 align-middle select-none">
-                <input
-                  type="checkbox"
-                  id="toggle3"
-                  defaultChecked
-                  className="sr-only"
-                />
-                <label
-                  htmlFor="toggle3"
-                  className="block overflow-hidden h-6 rounded-full bg-gray-300 cursor-pointer"
-                >
-                  <span className="block h-6 w-6 rounded-full bg-white shadow transform transition-transform duration-200 ease-in-out translate-x-4"></span>
-                </label>
-              </div>
-            </div>
-          </div>
-        )}
       </div>
     </div>
   );

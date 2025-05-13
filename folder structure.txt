@@ -4,12 +4,16 @@ backend  mysql+xampp
 
 
 model_shop_backend
+│
 │   .htaccess
 │
 ├───api
 │       brandsmana.php
+│       carts.php
 │       categoriesmana.php
 │       count.php
+│       favorites.php
+│       guest_carts.php
 │       index.php
 │       login.php
 │       products.php
@@ -25,9 +29,9 @@ model_shop_backend
 ├───includes
 └───logs
         error.log
-
+        error_log.txt
 model_shop_frontend
-|
+│
 ├───public
 │       favicon.ico
 │       vite.svg
@@ -49,6 +53,7 @@ model_shop_frontend
     │   │   BackToTop.jsx
     │   │   Footer.jsx
     │   │   Header.jsx
+    │   │   Toastify.jsx
     │   │
     │   └───LoginModal
     │           LoginModal.css
@@ -79,6 +84,10 @@ model_shop_frontend
     │   │           EditUser.jsx
     │   │           UserManagement.jsx
     │   │
+    │   ├───Cart
+    │   │       Cart.jsx
+    │   │       Cartitem.jsx
+    │   │
     │   ├───Community
     │   │       Community.jsx
     │   │       FeaturedContent.jsx
@@ -89,6 +98,10 @@ model_shop_frontend
     │   │       Showcase.jsx
     │   │       ShowcaseSection.jsx
     │   │       TutorialsEvents.jsx
+    │   │
+    │   ├───Favorites
+    │   │       FavoriteItem.jsx
+    │   │       Favorites.jsx
     │   │
     │   ├───Home
     │   │   │   Categories.jsx
@@ -117,6 +130,11 @@ model_shop_frontend
     │       │       NotificationSettings.jsx
     │       │       PrivacySettings.jsx
     │       │       ProfileSettings.jsx
+    │       │
+    │       ├───Messages
+    │       │       ConversationView.jsx
+    │       │       Messages.jsx
+    │       │       MessagesSidebar.jsx
     │       │
     │       └───UserProfileOverview
     │               MainContent.jsx
