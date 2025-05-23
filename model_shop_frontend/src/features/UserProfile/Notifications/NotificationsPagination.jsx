@@ -13,3 +13,5 @@ const NotificationsPagination = ({ currentPage, totalPages, onPageChange }) => (
     ))}
   </div>
 );
+
+export default NotificationsPagination;

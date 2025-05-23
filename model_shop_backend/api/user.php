@@ -9,20 +9,31 @@ header('Access-Control-Allow-Credentials: true');
 require '../config/database.php';
 require '../config/functions.php';
 
-$database = new Database();
-$pdo = $database->getConnection();
+// Use db_connect() to ensure consistency with notifications.php
+$conn = db_connect();
+if ($conn === null) {
+    http_response_code(500);
+    $errorMsg = 'Database connection failed';
+    log_error($errorMsg);
+    echo json_encode(['status' => 'error', 'message' => $errorMsg]);
+    exit;
+}
 
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+    log_error("GET request to user.php, Session: " . json_encode($_SESSION) . " at " . date('Y-m-d H:i:s'));
     if (!isset($_SESSION['user_id'])) {
         http_response_code(401);
-        echo json_encode(['status' => 'error', 'message' => 'Unauthorized: Please log in']);
+        $errorMsg = 'Unauthorized: Please log in';
+        log_error($errorMsg);
+        echo json_encode(['status' => 'error', 'message' => $errorMsg]);
+        $conn = null;
         exit;
     }
 
     $user_id = $_SESSION['user_id'];
 
     try {
-        $stmt = $pdo->prepare("SELECT user_id, email, full_name, phone_number, gender, address, profile_image, role FROM users WHERE user_id = ? AND is_active = TRUE");
+        $stmt = $conn->prepare("SELECT user_id, email, full_name, phone_number, gender, address, profile_image, role FROM users WHERE user_id = ? AND is_active = TRUE");
         $stmt->execute([$user_id]);
         $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
@@ -39,12 +50,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         }
     } catch (Exception $e) {
         http_response_code(500);
-        echo json_encode(['status' => 'error', 'message' => 'Error fetching user: ' . $e->getMessage()]);
+        $errorMsg = 'Error fetching user: ' . $e->getMessage();
+        log_error($errorMsg);
+        echo json_encode(['status' => 'error', 'message' => $errorMsg]);
     }
 } elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (!isset($_SESSION['user_id'])) {
         http_response_code(401);
         echo json_encode(['status' => 'error', 'message' => 'Not logged in']);
+        $conn = null;
         exit;
     }
 
@@ -52,10 +66,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     session_destroy();
     http_response_code(200);
     echo json_encode(['status' => 'success', 'message' => 'Logout successful']);
+    $conn = null;
 } elseif ($_SERVER['REQUEST_METHOD'] === 'PUT') {
     if (!isset($_SESSION['user_id'])) {
         http_response_code(401);
         echo json_encode(['status' => 'error', 'message' => 'Unauthorized: Please log in']);
+        $conn = null;
         exit;
     }
 
@@ -73,14 +89,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     if (empty($email) || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
         http_response_code(400);
         echo json_encode(['status' => 'error', 'message' => 'Valid email is required']);
+        $conn = null;
         exit;
     }
 
-    $stmt = $pdo->prepare("SELECT user_id FROM users WHERE email = ? AND user_id != ?");
+    $stmt = $conn->prepare("SELECT user_id FROM users WHERE email = ? AND user_id != ?");
     $stmt->execute([$email, $user_id]);
     if ($stmt->fetch()) {
         http_response_code(400);
         echo json_encode(['status' => 'error', 'message' => 'Email already exists']);
+        $conn = null;
         exit;
     }
 
@@ -98,6 +116,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
             } else {
                 http_response_code(500);
                 echo json_encode(['status' => 'error', 'message' => 'Failed to upload image']);
+                $conn = null;
                 exit;
             }
         }
@@ -105,12 +124,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         $password_sql = '';
         $password_params = [];
         if ($current_password && $new_password) {
-            $stmt = $pdo->prepare("SELECT password FROM users WHERE user_id = ?");
+            $stmt = $conn->prepare("SELECT password FROM users WHERE user_id = ?");
             $stmt->execute([$user_id]);
             $user = $stmt->fetch(PDO::FETCH_ASSOC);
             if (!password_verify($current_password, $user['password'])) {
                 http_response_code(400);
                 echo json_encode(['status' => 'error', 'message' => 'Current password is incorrect']);
+                $conn = null;
                 exit;
             }
             $password_sql = ', password = ?';
@@ -119,10 +139,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
 
         $sql = "UPDATE users SET full_name = ?, email = ?, phone_number = ?, gender = ?, address = ?, profile_image = ? $password_sql WHERE user_id = ?";
         $params = array_merge([$full_name, $email, $phone_number, $gender, $address, $profile_image_path ?? null], $password_params, [$user_id]);
-        $stmt = $pdo->prepare($sql);
+        $stmt = $conn->prepare($sql);
         $stmt->execute($params);
 
-        $stmt = $pdo->prepare("SELECT user_id, email, full_name, phone_number, gender, address, profile_image, role FROM users WHERE user_id = ? AND is_active = TRUE");
+        $stmt = $conn->prepare("SELECT user_id, email, full_name, phone_number, gender, address, profile_image, role FROM users WHERE user_id = ? AND is_active = TRUE");
         $stmt->execute([$user_id]);
         $updated_user = $stmt->fetch(PDO::FETCH_ASSOC);
 
@@ -149,13 +169,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     if (!isset($_SESSION['user_id'])) {
         http_response_code(401);
         echo json_encode(['status' => 'error', 'message' => 'Unauthorized: Please log in']);
+        $conn = null;
         exit;
     }
 
     $user_id = $_SESSION['user_id'];
 
     try {
-        $stmt = $pdo->prepare("UPDATE users SET is_active = FALSE WHERE user_id = ?");
+        $stmt = $conn->prepare("UPDATE users SET is_active = FALSE WHERE user_id = ?");
         $stmt->execute([$user_id]);
 
         if ($stmt->rowCount() > 0) {
@@ -172,4 +193,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         echo json_encode(['status' => 'error', 'message' => 'Deletion failed: ' . $e->getMessage()]);
     }
 }
+
+$conn = null;
 ?>

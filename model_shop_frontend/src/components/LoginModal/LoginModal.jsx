@@ -6,12 +6,18 @@ function LoginModal({ isOpen, setIsOpen, onLoginSuccess }) {
   const [isLogin, setIsLogin] = useState(true);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const [showLoginPassword, setShowLoginPassword] = useState(false);
+  const [showRegisterPassword, setShowRegisterPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const handleClose = () => {
     setIsOpen(false);
-    setIsLogin(true); // Reset to Sign In view when closing
+    setIsLogin(true);
     setError("");
     setSuccess("");
+    setShowLoginPassword(false);
+    setShowRegisterPassword(false);
+    setShowConfirmPassword(false);
     document.body.style.overflow = "auto";
   };
 
@@ -126,16 +132,54 @@ function LoginModal({ isOpen, setIsOpen, onLoginSuccess }) {
     }
   };
 
-  // Reset to Sign In view whenever the modal is opened
   useEffect(() => {
     if (isOpen) {
       setIsLogin(true);
       setError("");
       setSuccess("");
+      setShowLoginPassword(false);
+      setShowRegisterPassword(false);
+      setShowConfirmPassword(false);
     }
   }, [isOpen]);
 
   if (!isOpen) return null;
+
+  // SVG icons from UXWing (black-and-white)
+  const openEyeIcon = (
+    <svg
+      width="20"
+      height="20"
+      viewBox="0 0 24 24"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      className="text-gray-600 hover:text-gray-800"
+    >
+      <path
+        d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"
+        fill="currentColor"
+      />
+    </svg>
+  );
+
+  const closedEyeIcon = (
+    <svg
+      width="20"
+      height="20"
+      viewBox="0 0 24 24"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      className="text-gray-600 hover:text-gray-800"
+    >
+      <path
+        d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24M1 1l22 22"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
 
   return (
     <div
@@ -148,9 +192,7 @@ function LoginModal({ isOpen, setIsOpen, onLoginSuccess }) {
       >
         <div className="p-6">
           {error && <p className="text-red-500 text-center mb-4">{error}</p>}
-          {success && (
-            <p className="text-green-500 text-center mb-4">{success}</p>
-          )}
+          {success && <p className="text-green-500 text-center mb-4">{success}</p>}
           {isLogin ? (
             <div id="loginForm">
               <div className="flex justify-between items-center mb-6">
@@ -163,11 +205,11 @@ function LoginModal({ isOpen, setIsOpen, onLoginSuccess }) {
                 </button>
               </div>
               <div className="space-y-4 mb-6">
-                <button className="w-full flex items-center justify-center gap-3 border border-gray-300 rounded-lg py-3 px-4 text-gray-700 font-medium hover:bg-gray-50 transition rounded-button whitespace-nowrap">
+                <button className="w-full flex items-center justify-center gap-3 border border-gray-300 rounded-lg py-3 px-4 text-gray-700 font-medium hover:bg-gray-50 transition whitespace-nowrap">
                   <i className="ri-google-fill text-red-500"></i>
                   Continue with Google
                 </button>
-                <button className="w-full flex items-center justify-center gap-3 border border-gray-300 rounded-lg py-3 px-4 text-gray-700 font-medium hover:bg-gray-50 transition rounded-button whitespace-nowrap">
+                <button className="w-full flex items-center justify-center gap-3 border border-gray-300 rounded-lg py-3 px-4 text-gray-700 font-medium hover:bg-gray-50 transition whitespace-nowrap">
                   <i className="ri-facebook-fill text-blue-600"></i>
                   Continue with Facebook
                 </button>
@@ -201,14 +243,23 @@ function LoginModal({ isOpen, setIsOpen, onLoginSuccess }) {
                   >
                     Password
                   </label>
-                  <input
-                    type="password"
-                    id="loginPassword"
-                    name="loginPassword"
-                    className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                    placeholder="password"
-                    required
-                  />
+                  <div className="relative">
+                    <input
+                      type={showLoginPassword ? "text" : "password"}
+                      id="loginPassword"
+                      name="loginPassword"
+                      className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                      placeholder="password"
+                      required
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowLoginPassword(!showLoginPassword)}
+                      className="absolute inset-y-0 right-0 flex items-center pr-3"
+                    >
+                      {showLoginPassword ? closedEyeIcon : openEyeIcon}
+                    </button>
+                  </div>
                 </div>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center">
@@ -226,7 +277,7 @@ function LoginModal({ isOpen, setIsOpen, onLoginSuccess }) {
                 </div>
                 <button
                   type="submit"
-                  className="w-full bg-primary text-white py-3 font-medium rounded-button whitespace-nowrap hover:bg-primary/90 transition"
+                  className="w-full bg-primary text-white py-3 font-medium rounded-lg hover:bg-primary/90 transition"
                 >
                   Sign In
                 </button>
@@ -255,11 +306,11 @@ function LoginModal({ isOpen, setIsOpen, onLoginSuccess }) {
                 </button>
               </div>
               <div className="space-y-4 mb-6">
-                <button className="w-full flex items-center justify-center gap-3 border border-gray-300 rounded-lg py-3 px-4 text-gray-700 font-medium hover:bg-gray-50 transition rounded-button whitespace-nowrap">
+                <button className="w-full flex items-center justify-center gap-3 border border-gray-300 rounded-lg py-3 px-4 text-gray-700 font-medium hover:bg-gray-50 transition whitespace-nowrap">
                   <i className="ri-google-fill text-red-500"></i>
                   Continue with Google
                 </button>
-                <button className="w-full flex items-center justify-center gap-3 border border-gray-300 rounded-lg py-3 px-4 text-gray-700 font-medium hover:bg-gray-50 transition rounded-button whitespace-nowrap">
+                <button className="w-full flex items-center justify-center gap-3 border border-gray-300 rounded-lg py-3 px-4 text-gray-700 font-medium hover:bg-gray-50 transition whitespace-nowrap">
                   <i className="ri-facebook-fill text-blue-600"></i>
                   Continue with Facebook
                 </button>
@@ -309,14 +360,23 @@ function LoginModal({ isOpen, setIsOpen, onLoginSuccess }) {
                   >
                     Password
                   </label>
-                  <input
-                    type="password"
-                    id="registerPassword"
-                    name="registerPassword"
-                    className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                    placeholder="Password"
-                    required
-                  />
+                  <div className="relative">
+                    <input
+                      type={showRegisterPassword ? "text" : "password"}
+                      id="registerPassword"
+                      name="registerPassword"
+                      className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                      placeholder="Password"
+                      required
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowRegisterPassword(!showRegisterPassword)}
+                      className="absolute inset-y-0 right-0 flex items-center pr-3"
+                    >
+                      {showRegisterPassword ? closedEyeIcon : openEyeIcon}
+                    </button>
+                  </div>
                 </div>
                 <div>
                   <label
@@ -325,14 +385,23 @@ function LoginModal({ isOpen, setIsOpen, onLoginSuccess }) {
                   >
                     Confirm Password
                   </label>
-                  <input
-                    type="password"
-                    id="confirmPassword"
-                    name="confirmPassword"
-                    className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                    placeholder="Password"
-                    required
-                  />
+                  <div className="relative">
+                    <input
+                      type={showConfirmPassword ? "text" : "password"}
+                      id="confirmPassword"
+                      name="confirmPassword"
+                      className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                      placeholder="Password"
+                      required
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                      className="absolute inset-y-0 right-0 flex items-center pr-3"
+                    >
+                      {showConfirmPassword ? closedEyeIcon : openEyeIcon}
+                    </button>
+                  </div>
                 </div>
                 <div className="flex items-center">
                   <label className="custom-checkbox">
@@ -356,7 +425,7 @@ function LoginModal({ isOpen, setIsOpen, onLoginSuccess }) {
                 </div>
                 <button
                   type="submit"
-                  className="w-full bg-primary text-white py-3 font-medium rounded-button whitespace-nowrap hover:bg-primary/90 transition"
+                  className="w-full bg-primary text-white py-3 font-medium rounded-lg hover:bg-primary/90 transition"
                 >
                   Create Account
                 </button>

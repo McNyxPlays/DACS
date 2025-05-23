@@ -1,4 +1,3 @@
-// components/FeaturedPosts/FeaturedPosts.jsx
 import React from "react";
 
 const FeaturedPosts = () => {

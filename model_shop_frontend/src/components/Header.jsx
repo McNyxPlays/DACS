@@ -14,6 +14,7 @@ const Header = ({
   const navigate = useNavigate();
   const dropdownRef = useRef(null);
   const [cartCount, setCartCount] = useState(0);
+  const [notificationCount, setNotificationCount] = useState(0);
   const sessionKey =
     sessionStorage.getItem("guest_session_key") ||
     (() => {
@@ -64,15 +65,22 @@ const Header = ({
           params: { user_id: user.user_id },
         });
         setCartCount(cartResponse.data.data?.length || 0);
+
+        const notificationResponse = await api.get("/notifications.php", {
+          params: { action: "count" },
+        });
+        setNotificationCount(notificationResponse.data.unread_count || 0);
       } else {
         const cartResponse = await api.get("/guest_carts.php", {
           params: { session_key: sessionKey },
         });
         setCartCount(cartResponse.data.data?.length || 0);
+        setNotificationCount(0);
       }
     } catch (err) {
       console.error("Fetch counts error:", err);
       setCartCount(0);
+      setNotificationCount(0);
     }
   };
 
@@ -86,6 +94,26 @@ const Header = ({
     };
 
     window.addEventListener("cartUpdated", handleCartUpdate);
+
+    // Set up SSE for real-time notification updates
+    if (user) {
+      const eventSource = new EventSource("http://localhost:80/notifications_sse.php", {
+        withCredentials: true,
+      });
+
+      eventSource.addEventListener("notification_count", (event) => {
+        setNotificationCount(parseInt(event.data));
+      });
+
+      eventSource.addEventListener("error", (event) => {
+        console.error("SSE error:", event);
+        eventSource.close();
+      });
+
+      return () => {
+        eventSource.close();
+      };
+    }
 
     return () => {
       window.removeEventListener("cartUpdated", handleCartUpdate);
@@ -231,12 +259,12 @@ const Header = ({
                         <span>My Profile</span>
                       </NavLink>
                       <NavLink
-                        to="/builds"
+                        to="/store"
                         className="flex items-center gap-2 px-4 py-2 text-gray-700 hover:bg-gray-100"
                         onClick={() => setIsDropdownOpen(false)}
                       >
-                        <i className="ri-hammer-line"></i>
-                        <span>My Builds</span>
+                        <i className="ri-store-line"></i>
+                        <span>My Store</span>
                       </NavLink>
                       <NavLink
                         to="/settings"
@@ -253,9 +281,11 @@ const Header = ({
                       >
                         <i className="ri-notification-3-line"></i>
                         <span>Notifications</span>
-                        <span className="ml-auto bg-red-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center">
-                          2
-                        </span>
+                        {notificationCount > 0 && (
+                          <span className="ml-auto bg-red-500 text-white text-xs rounded-full h-4 w-auto min-w-[1rem] flex items-center justify-center px-1">
+                            {notificationCount > 99 ? "99+" : notificationCount}
+                          </span>
+                        )}
                       </NavLink>
                       <NavLink
                         to="/messages"
@@ -416,12 +446,12 @@ const Header = ({
                 <span>My Profile</span>
               </NavLink>
               <NavLink
-                to="/builds"
+                to="/store"
                 className="flex items-center gap-2 py-2 text-gray-600 hover:text-primary"
                 onClick={toggleNav}
               >
-                <i className="ri-hammer-line"></i>
-                <span>My Builds</span>
+                <i className="ri-store-line"></i>
+                <span>My Store</span>
               </NavLink>
               <NavLink
                 to="/settings"
@@ -438,9 +468,11 @@ const Header = ({
               >
                 <i className="ri-notification-3-line"></i>
                 <span>Notifications</span>
-                <span className="ml-auto bg-red-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center">
-                  2
-                </span>
+                {notificationCount > 0 && (
+                  <span className="ml-auto bg-red-500 text-white text-xs rounded-full h-4 w-auto min-w-[1rem] flex items-center justify-center px-1">
+                    {notificationCount > 99 ? "99+" : notificationCount}
+                  </span>
+                )}
               </NavLink>
               <NavLink
                 to="/messages"

@@ -14,7 +14,8 @@ import Admin from "./features/Admin/Admin";
 import Favorites from "./features/Favorites/Favorites";
 import Cart from "./features/Cart/Cart";
 import Messages from "./features/UserProfile/Messages/Messages";
-import Checkout from "./features/Checkout/Checkout"; // Đảm bảo đường dẫn đúng
+import Checkout from "./features/Checkout/Checkout";
+import Notifications from "./features/UserProfile/Notifications/Notifications";
 
 const Layout = ({
   isLoginModalOpen,
@@ -49,7 +50,7 @@ const Layout = ({
 );
 
 const ProtectedRoute = ({ user, children }) => {
-  if (!user) {
+  if (!user?.user_id) {
     return <Navigate to="/" replace />;
   }
   return children;
@@ -63,25 +64,38 @@ const App = () => {
   useEffect(() => {
     const validateUser = async () => {
       const storedUser = JSON.parse(sessionStorage.getItem("user"));
+      console.log("Stored user from sessionStorage:", storedUser);
       if (storedUser && storedUser.user_id) {
         try {
           const response = await api.get("/user.php");
+          console.log("User.php response:", response.data);
           if (response.data.status === "success" && response.data.user) {
             const validatedUser = {
-              ...storedUser,
-              ...response.data.user,
+              user_id: response.data.user.user_id || storedUser.user_id,
+              email: response.data.user.email || storedUser.email,
+              full_name: response.data.user.full_name || storedUser.full_name,
+              profile_image:
+                response.data.user.profile_image ||
+                storedUser.profile_image ||
+                null,
+              role: response.data.user.role || storedUser.role,
             };
             setUser(validatedUser);
             sessionStorage.setItem("user", JSON.stringify(validatedUser));
           } else {
             sessionStorage.removeItem("user");
             setUser(null);
+            // Removed setIsLoginModalOpen(true)
           }
         } catch (err) {
           console.error("User validation error:", err);
           sessionStorage.removeItem("user");
           setUser(null);
+          // Removed setIsLoginModalOpen(true)
         }
+      } else {
+        setUser(null);
+        // Removed setIsLoginModalOpen(true)
       }
     };
     validateUser();
@@ -137,7 +151,7 @@ const App = () => {
           path="/cart"
           element={<Cart isOpen={true} setIsOpen={setIsCartOpen} />}
         />
-        <Route path="/checkout" element={<Checkout />} /> {/* Cập nhật route */}
+        <Route path="/checkout" element={<Checkout />} />
         <Route
           path="/admin/*"
           element={
@@ -151,6 +165,14 @@ const App = () => {
           element={
             <ProtectedRoute user={user}>
               <Messages />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/notifications"
+          element={
+            <ProtectedRoute user={user}>
+              <Notifications user={user} />
             </ProtectedRoute>
           }
         />

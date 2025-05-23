@@ -15,7 +15,6 @@ INSERT INTO brands (name, description) VALUES
 ('Square Enix', 'Produces game figures from their franchises like Final Fantasy.');
 
 -- Chèn 22 sản phẩm (Products)
--- Các sản phẩm sẽ được phân bổ vào các danh mục và thương hiệu đã tạo, với các trạng thái khác nhau
 INSERT INTO products (category_id, brand_id, name, price, stock_quantity, discount, description, status, created_at) VALUES
 -- Gundam Kits (category_id = 1)
 (1, 1, 'HG Gundam RX-78-2', 25.00, 50, 0.00, 'High Grade Gundam RX-78-2 model kit, 1/144 scale.', 'new', '2025-04-01 10:00:00'),
@@ -23,28 +22,30 @@ INSERT INTO products (category_id, brand_id, name, price, stock_quantity, discou
 (1, 1, 'RG Gundam Unicorn', 35.00, 20, 0.00, 'Real Grade Gundam Unicorn model kit, 1/144 scale.', 'hot', '2025-04-03 14:00:00'),
 (1, 1, 'PG Gundam Exia', 120.00, 10, 10.00, 'Perfect Grade Gundam Exia model kit, 1/60 scale.', 'available', '2025-04-04 16:00:00'),
 (1, 1, 'SD Gundam Barbatos', 15.00, 100, 0.00, 'Super Deformed Gundam Barbatos model kit.', 'new', '2025-04-05 18:00:00'),
-
 -- DIY Models (category_id = 2)
 (2, 3, 'Tamiya Mini 4WD Car Kit', 18.00, 40, 0.00, 'Mini 4WD car kit for racing and customization.', 'new', '2025-04-06 09:00:00'),
 (2, 1, 'Bandai Star Wars X-Wing', 30.00, 25, 0.00, 'Star Wars X-Wing model kit for DIY enthusiasts.', 'custom', '2025-04-07 11:00:00'),
 (2, 3, 'Tamiya Tank Model Kit', 28.00, 15, 0.00, 'WWII tank model kit, 1/35 scale.', 'used', '2025-04-08 13:00:00'),
 (2, 3, 'Tamiya Aircraft Carrier', 50.00, 10, 5.00, 'Aircraft carrier model kit, 1/700 scale.', 'sale', '2025-04-09 15:00:00'),
-
 -- Game Figures (category_id = 3)
 (3, 5, 'Cloud Strife Figure - Final Fantasy VII', 60.00, 20, 0.00, 'Cloud Strife figure from Final Fantasy VII, 7 inches tall.', 'hot', '2025-04-10 10:00:00'),
 (3, 5, 'Tifa Lockhart Figure - Final Fantasy VII', 55.00, 15, 0.00, 'Tifa Lockhart figure from Final Fantasy VII, 6 inches tall.', 'available', '2025-04-11 12:00:00'),
 (3, 2, 'Kotobukiya ArtFX J Noctis', 70.00, 10, 10.00, 'Noctis figure from Final Fantasy XV, 8 inches tall.', 'sale', '2025-04-12 14:00:00'),
 (3, 5, 'Sephiroth Figure - Final Fantasy VII', 65.00, 12, 0.00, 'Sephiroth figure from Final Fantasy VII, 9 inches tall.', 'new', '2025-04-13 16:00:00'),
-
 -- Anime Figures (category_id = 4)
 (4, 4, 'Nendoroid Hatsune Miku', 40.00, 30, 0.00, 'Hatsune Miku Nendoroid figure, 4 inches tall.', 'new', '2025-04-14 09:00:00'),
 (4, 2, 'Kotobukiya Asuka Langley', 80.00, 10, 0.00, 'Asuka Langley figure from Evangelion, 1/7 scale.', 'hot', '2025-04-15 11:00:00'),
 (4, 4, 'Nendoroid Levi Ackerman', 45.00, 25, 5.00, 'Levi Ackerman Nendoroid from Attack on Titan.', 'sale', '2025-04-16 13:00:00'),
 (4, 2, 'Kotobukiya Saber - Fate/Stay Night', 90.00, 8, 0.00, 'Saber figure from Fate/Stay Night, 1/7 scale.', 'available', '2025-04-17 15:00:00'),
 (4, 4, 'Nendoroid Tanjiro Kamado', 42.00, 20, 0.00, 'Tanjiro Kamado Nendoroid from Demon Slayer.', 'new', '2025-04-18 17:00:00'),
-
 -- Tools & Paints (category_id = 5)
 (5, 3, 'Tamiya Acrylic Paint Set', 12.00, 50, 0.00, 'Set of 6 acrylic paints for model kits.', 'new', '2025-04-19 10:00:00'),
 (5, 3, 'Tamiya Modeler’s Knife', 8.00, 60, 0.00, 'Precision knife for cutting model parts.', 'available', '2025-04-20 12:00:00'),
 (5, 3, 'Tamiya Sanding Sticks', 5.00, 80, 0.00, 'Set of sanding sticks for model kit finishing.', 'hot', '2025-04-21 14:00:00'),
 (5, 3, 'Tamiya Airbrush Kit', 120.00, 5, 10.00, 'Airbrush kit for painting model kits.', 'sale', '2025-04-22 16:00:00');
+
+-- Chèn 3 thông báo (Notifications) cho user_id = 1
+INSERT INTO notifications (user_id, message, type, created_at) VALUES
+(1, 'Welcome to Model Shop! Start exploring our collections.', 'system', '2025-05-19 11:10:00'),
+(1, 'Your account has been successfully created.', 'system', '2025-05-19 11:11:00'),
+(1, 'Check out our new Gundam Kits collection!', 'custom', '2025-05-19 11:12:00');

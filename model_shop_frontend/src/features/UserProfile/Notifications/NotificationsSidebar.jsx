@@ -26,17 +26,20 @@ const NotificationsSidebar = ({
     >
       {[
         "All Categories",
-        "System",
-        "Social",
-        "Challenge",
-        "Shopping",
-        "Events",
-        "Account",
+        "order",
+        "system",
+        "message",
+        "social",
+        "shopping",
+        "events",
+        "account",
       ].map((c) => (
         <option key={c} value={c}>
-          {c}
+          {c.charAt(0).toUpperCase() + c.slice(1)} {/* Hiển thị đẹp hơn */}
         </option>
       ))}
     </select>
   </div>
 );
+
+export default NotificationsSidebar;

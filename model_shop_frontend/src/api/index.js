@@ -16,6 +16,14 @@ api.interceptors.response.use(
   }
 );
 
+// Endpoints cho notifications
+export const getNotifications = (params) =>
+  api.get("/notifications.php", { params });
+export const markNotificationsAsRead = () =>
+  api.post("/notifications.php?action=markAsRead");
+export const deleteNotifications = () =>
+  api.post("/notifications.php?action=delete");
+
 // Lấy thông tin người dùng hiện tại
 export const getUser = () => api.get("/user.php");
 

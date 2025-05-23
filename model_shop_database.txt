@@ -163,7 +163,7 @@ CREATE TABLE IF NOT EXISTS comments (
     INDEX idx_product_id (product_id)
 );
 
--- Bảng 12: favorites (san pham)
+-- Bảng 12: favorites
 CREATE TABLE IF NOT EXISTS favorites (
     favorite_id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT NOT NULL,
@@ -204,15 +204,16 @@ CREATE TABLE IF NOT EXISTS order_status_history (
 CREATE TABLE IF NOT EXISTS notifications (
     notification_id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT NOT NULL,
-    message TEXT NOT NULL,
-    type ENUM('order', 'system', 'custom', 'message') DEFAULT 'system',
-    is_read BOOLEAN DEFAULT FALSE,
+    message VARCHAR(1000) NOT NULL,
+    type ENUM('order', 'system', 'custom', 'message', 'social', 'shopping', 'events', 'account') DEFAULT 'system',
+    is_read TINYINT(1) DEFAULT 0,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE,
     INDEX idx_user_id (user_id),
-    INDEX idx_type (type)
+    INDEX idx_type (type),
+    INDEX idx_created_at (created_at),
+    INDEX idx_user_id_is_read_type_created_at (user_id, is_read, type, created_at)
 );
-
 -- Bảng 16: messages
 CREATE TABLE IF NOT EXISTS messages (
     message_id INT AUTO_INCREMENT PRIMARY KEY,
@@ -337,7 +338,7 @@ CREATE TABLE IF NOT EXISTS transactions (
     INDEX idx_transaction_status (transaction_status)
 );
 
--- Bảng 24: wishlists (bai dang)
+-- Bảng 24: wishlists
 CREATE TABLE IF NOT EXISTS wishlists (
     wishlist_id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT NOT NULL,
@@ -353,7 +354,6 @@ CREATE TABLE IF NOT EXISTS wishlists (
     INDEX idx_post_id (post_id)
 );
 
-
 -- Bảng 25: likes
 CREATE TABLE IF NOT EXISTS likes (
     like_id INT AUTO_INCREMENT PRIMARY KEY,
@@ -367,7 +367,7 @@ CREATE TABLE IF NOT EXISTS likes (
     INDEX idx_post_id (post_id)
 );
 
--- Bảng 25: user_social_links
+-- Bảng 26: user_social_links
 CREATE TABLE IF NOT EXISTS user_social_links (
     link_id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT NOT NULL,
@@ -380,7 +380,7 @@ CREATE TABLE IF NOT EXISTS user_social_links (
     INDEX idx_platform (platform)
 );
 
--- Bảng 26: user_skills
+-- Bảng 27: user_skills
 CREATE TABLE IF NOT EXISTS user_skills (
     skill_id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT NOT NULL,

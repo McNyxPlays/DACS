@@ -1,0 +1,682 @@
+[2025-05-23 19:09:41] Session data: {"user_id":1,"login_attempts":0} at 2025-05-23 19:09:41
+[2025-05-23 19:09:41] User ID: 1 at 2025-05-23 19:09:41
+[2025-05-23 19:09:41] Columns in notifications table: ["notification_id","user_id","message","type","is_read","created_at"] at 2025-05-23 19:09:41
+[2025-05-23 19:09:41] Query params: {"filter":"All","category":"All Categories","sort":"Newest First","page":"1"} at 2025-05-23 19:09:41
+[2025-05-23 19:09:41] Executing SQL Query: SELECT * FROM notifications WHERE user_id = ? ORDER BY created_at DESC LIMIT ?, ? with params: [1,0,10] at 2025-05-23 19:09:41
+[2025-05-23 19:09:41] Server error: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near ''0', '10'' at line 1 at 2025-05-23 19:09:41
+[2025-05-23 19:09:41] Session data: {"user_id":1,"login_attempts":0} at 2025-05-23 19:09:41
+[2025-05-23 19:09:41] User ID: 1 at 2025-05-23 19:09:41
+[2025-05-23 19:09:41] Columns in notifications table: ["notification_id","user_id","message","type","is_read","created_at"] at 2025-05-23 19:09:41
+[2025-05-23 19:09:41] Query params: {"filter":"All","category":"All Categories","sort":"Newest First","page":"1"} at 2025-05-23 19:09:41
+[2025-05-23 19:09:41] Executing SQL Query: SELECT * FROM notifications WHERE user_id = ? ORDER BY created_at DESC LIMIT ?, ? with params: [1,0,10] at 2025-05-23 19:09:41
+[2025-05-23 19:09:41] Server error: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near ''0', '10'' at line 1 at 2025-05-23 19:09:41
+[2025-05-23 19:11:27] Session data: {"user_id":1,"login_attempts":0} at 2025-05-23 19:11:27
+[2025-05-23 19:11:27] User ID: 1 at 2025-05-23 19:11:27
+[2025-05-23 19:11:27] Columns in notifications table: ["notification_id","user_id","message","type","is_read","created_at"] at 2025-05-23 19:11:27
+[2025-05-23 19:11:27] Query params: {"filter":"All","category":"All Categories","sort":"Newest First","page":"1"} at 2025-05-23 19:11:27
+[2025-05-23 19:11:27] Executing SQL Query: SELECT * FROM notifications WHERE user_id = ? ORDER BY created_at DESC LIMIT 0, 10 with params: [1] at 2025-05-23 19:11:27
+[2025-05-23 19:11:27] Query executed successfully at 2025-05-23 19:11:27
+[2025-05-23 19:11:27] Fetched notifications: [{"notification_id":1,"user_id":1,"message":"Test notification","type":"system","is_read":0,"created_at":"2025-05-24 00:11:04"}] at 2025-05-23 19:11:27
+[2025-05-23 19:11:27] Total notifications: 1, Total pages: 1 at 2025-05-23 19:11:27
+[2025-05-23 19:11:27] Session data: {"user_id":1,"login_attempts":0} at 2025-05-23 19:11:27
+[2025-05-23 19:11:27] User ID: 1 at 2025-05-23 19:11:27
+[2025-05-23 19:11:27] Columns in notifications table: ["notification_id","user_id","message","type","is_read","created_at"] at 2025-05-23 19:11:27
+[2025-05-23 19:11:27] Query params: {"filter":"All","category":"All Categories","sort":"Newest First","page":"1"} at 2025-05-23 19:11:27
+[2025-05-23 19:11:27] Executing SQL Query: SELECT * FROM notifications WHERE user_id = ? ORDER BY created_at DESC LIMIT 0, 10 with params: [1] at 2025-05-23 19:11:27
+[2025-05-23 19:11:27] Query executed successfully at 2025-05-23 19:11:27
+[2025-05-23 19:11:27] Fetched notifications: [{"notification_id":1,"user_id":1,"message":"Test notification","type":"system","is_read":0,"created_at":"2025-05-24 00:11:04"}] at 2025-05-23 19:11:27
+[2025-05-23 19:11:27] Total notifications: 1, Total pages: 1 at 2025-05-23 19:11:27
+[2025-05-23 19:11:35] Session data: {"user_id":1,"login_attempts":0} at 2025-05-23 19:11:35
+[2025-05-23 19:11:35] User ID: 1 at 2025-05-23 19:11:35
+[2025-05-23 19:11:35] Columns in notifications table: ["notification_id","user_id","message","type","is_read","created_at"] at 2025-05-23 19:11:35
+[2025-05-23 19:11:35] Query params: {"filter":"Unread","category":"All Categories","sort":"Newest First","page":"1"} at 2025-05-23 19:11:35
+[2025-05-23 19:11:35] Executing SQL Query: SELECT * FROM notifications WHERE user_id = ? AND is_read = 0 ORDER BY created_at DESC LIMIT 0, 10 with params: [1] at 2025-05-23 19:11:35
+[2025-05-23 19:11:35] Query executed successfully at 2025-05-23 19:11:35
+[2025-05-23 19:11:35] Fetched notifications: [{"notification_id":1,"user_id":1,"message":"Test notification","type":"system","is_read":0,"created_at":"2025-05-24 00:11:04"}] at 2025-05-23 19:11:35
+[2025-05-23 19:11:35] Total notifications: 1, Total pages: 1 at 2025-05-23 19:11:35
+[2025-05-23 19:11:35] Session data: {"user_id":1,"login_attempts":0} at 2025-05-23 19:11:35
+[2025-05-23 19:11:35] User ID: 1 at 2025-05-23 19:11:35
+[2025-05-23 19:11:35] Columns in notifications table: ["notification_id","user_id","message","type","is_read","created_at"] at 2025-05-23 19:11:35
+[2025-05-23 19:11:35] Query params: {"filter":"All","category":"All Categories","sort":"Newest First","page":"1"} at 2025-05-23 19:11:35
+[2025-05-23 19:11:35] Executing SQL Query: SELECT * FROM notifications WHERE user_id = ? ORDER BY created_at DESC LIMIT 0, 10 with params: [1] at 2025-05-23 19:11:35
+[2025-05-23 19:11:35] Query executed successfully at 2025-05-23 19:11:35
+[2025-05-23 19:11:35] Fetched notifications: [{"notification_id":1,"user_id":1,"message":"Test notification","type":"system","is_read":0,"created_at":"2025-05-24 00:11:04"}] at 2025-05-23 19:11:35
+[2025-05-23 19:11:35] Total notifications: 1, Total pages: 1 at 2025-05-23 19:11:35
+[2025-05-23 19:11:37] Session data: {"user_id":1,"login_attempts":0} at 2025-05-23 19:11:37
+[2025-05-23 19:11:37] User ID: 1 at 2025-05-23 19:11:37
+[2025-05-23 19:11:37] Columns in notifications table: ["notification_id","user_id","message","type","is_read","created_at"] at 2025-05-23 19:11:37
+[2025-05-23 19:11:37] Query params: {"filter":"Unread","category":"All Categories","sort":"Newest First","page":"1"} at 2025-05-23 19:11:37
+[2025-05-23 19:11:37] Executing SQL Query: SELECT * FROM notifications WHERE user_id = ? AND is_read = 0 ORDER BY created_at DESC LIMIT 0, 10 with params: [1] at 2025-05-23 19:11:37
+[2025-05-23 19:11:37] Query executed successfully at 2025-05-23 19:11:37
+[2025-05-23 19:11:37] Fetched notifications: [{"notification_id":1,"user_id":1,"message":"Test notification","type":"system","is_read":0,"created_at":"2025-05-24 00:11:04"}] at 2025-05-23 19:11:37
+[2025-05-23 19:11:37] Total notifications: 1, Total pages: 1 at 2025-05-23 19:11:37
+[2025-05-23 19:11:38] Session data: {"user_id":1,"login_attempts":0} at 2025-05-23 19:11:38
+[2025-05-23 19:11:38] User ID: 1 at 2025-05-23 19:11:38
+[2025-05-23 19:11:38] Columns in notifications table: ["notification_id","user_id","message","type","is_read","created_at"] at 2025-05-23 19:11:38
+[2025-05-23 19:11:38] Query params: {"filter":"Read","category":"All Categories","sort":"Newest First","page":"1"} at 2025-05-23 19:11:38
+[2025-05-23 19:11:38] Executing SQL Query: SELECT * FROM notifications WHERE user_id = ? AND is_read = 1 ORDER BY created_at DESC LIMIT 0, 10 with params: [1] at 2025-05-23 19:11:38
+[2025-05-23 19:11:38] Query executed successfully at 2025-05-23 19:11:38
+[2025-05-23 19:11:38] Fetched notifications: [] at 2025-05-23 19:11:38
+[2025-05-23 19:11:38] Total notifications: 1, Total pages: 1 at 2025-05-23 19:11:38
+[2025-05-23 19:11:38] Session data: {"user_id":1,"login_attempts":0} at 2025-05-23 19:11:38
+[2025-05-23 19:11:38] User ID: 1 at 2025-05-23 19:11:38
+[2025-05-23 19:11:38] Columns in notifications table: ["notification_id","user_id","message","type","is_read","created_at"] at 2025-05-23 19:11:38
+[2025-05-23 19:11:38] Query params: {"filter":"Unread","category":"All Categories","sort":"Newest First","page":"1"} at 2025-05-23 19:11:38
+[2025-05-23 19:11:38] Executing SQL Query: SELECT * FROM notifications WHERE user_id = ? AND is_read = 0 ORDER BY created_at DESC LIMIT 0, 10 with params: [1] at 2025-05-23 19:11:38
+[2025-05-23 19:11:38] Query executed successfully at 2025-05-23 19:11:38
+[2025-05-23 19:11:38] Fetched notifications: [{"notification_id":1,"user_id":1,"message":"Test notification","type":"system","is_read":0,"created_at":"2025-05-24 00:11:04"}] at 2025-05-23 19:11:38
+[2025-05-23 19:11:38] Total notifications: 1, Total pages: 1 at 2025-05-23 19:11:38
+[2025-05-23 19:11:39] Session data: {"user_id":1,"login_attempts":0} at 2025-05-23 19:11:39
+[2025-05-23 19:11:39] User ID: 1 at 2025-05-23 19:11:39
+[2025-05-23 19:11:39] Columns in notifications table: ["notification_id","user_id","message","type","is_read","created_at"] at 2025-05-23 19:11:39
+[2025-05-23 19:11:39] Query params: {"filter":"All","category":"All Categories","sort":"Newest First","page":"1"} at 2025-05-23 19:11:39
+[2025-05-23 19:11:39] Executing SQL Query: SELECT * FROM notifications WHERE user_id = ? ORDER BY created_at DESC LIMIT 0, 10 with params: [1] at 2025-05-23 19:11:39
+[2025-05-23 19:11:39] Query executed successfully at 2025-05-23 19:11:39
+[2025-05-23 19:11:39] Fetched notifications: [{"notification_id":1,"user_id":1,"message":"Test notification","type":"system","is_read":0,"created_at":"2025-05-24 00:11:04"}] at 2025-05-23 19:11:39
+[2025-05-23 19:11:39] Total notifications: 1, Total pages: 1 at 2025-05-23 19:11:39
+[2025-05-23 19:17:56] Session data: {"user_id":1,"login_attempts":0} at 2025-05-23 19:17:56
+[2025-05-23 19:17:56] User ID: 1 at 2025-05-23 19:17:56
+[2025-05-23 19:17:56] Columns in notifications table: ["notification_id","user_id","message","type","is_read","created_at"] at 2025-05-23 19:17:56
+[2025-05-23 19:17:56] Query params: {"filter":"All","category":"All Categories","sort":"Newest First","page":"1"} at 2025-05-23 19:17:56
+[2025-05-23 19:17:56] Executing SQL Query: SELECT * FROM notifications WHERE user_id = ? ORDER BY created_at DESC LIMIT 0, 10 with params: [1] at 2025-05-23 19:17:56
+[2025-05-23 19:17:56] Query executed successfully at 2025-05-23 19:17:56
+[2025-05-23 19:17:56] Fetched notifications: [{"notification_id":2,"user_id":1,"message":"Test notification1","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":3,"user_id":1,"message":"Test notification2","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":4,"user_id":1,"message":"Test notification3","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":5,"user_id":1,"message":"Test notification4","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":6,"user_id":1,"message":"Test notification5","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":7,"user_id":1,"message":"Test notification6","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":8,"user_id":1,"message":"Test notification7","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":1,"user_id":1,"message":"Test notification","type":"system","is_read":0,"created_at":"2025-05-24 00:11:04"}] at 2025-05-23 19:17:56
+[2025-05-23 19:17:56] Total notifications: 8, Total pages: 1 at 2025-05-23 19:17:56
+[2025-05-23 19:17:56] Session data: {"user_id":1,"login_attempts":0} at 2025-05-23 19:17:56
+[2025-05-23 19:17:56] User ID: 1 at 2025-05-23 19:17:56
+[2025-05-23 19:17:56] Columns in notifications table: ["notification_id","user_id","message","type","is_read","created_at"] at 2025-05-23 19:17:56
+[2025-05-23 19:17:56] Query params: {"filter":"All","category":"All Categories","sort":"Newest First","page":"1"} at 2025-05-23 19:17:56
+[2025-05-23 19:17:56] Executing SQL Query: SELECT * FROM notifications WHERE user_id = ? ORDER BY created_at DESC LIMIT 0, 10 with params: [1] at 2025-05-23 19:17:56
+[2025-05-23 19:17:56] Query executed successfully at 2025-05-23 19:17:56
+[2025-05-23 19:17:56] Fetched notifications: [{"notification_id":2,"user_id":1,"message":"Test notification1","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":3,"user_id":1,"message":"Test notification2","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":4,"user_id":1,"message":"Test notification3","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":5,"user_id":1,"message":"Test notification4","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":6,"user_id":1,"message":"Test notification5","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":7,"user_id":1,"message":"Test notification6","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":8,"user_id":1,"message":"Test notification7","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":1,"user_id":1,"message":"Test notification","type":"system","is_read":0,"created_at":"2025-05-24 00:11:04"}] at 2025-05-23 19:17:56
+[2025-05-23 19:17:56] Total notifications: 8, Total pages: 1 at 2025-05-23 19:17:56
+[2025-05-23 19:22:18] Session data: {"user_id":1,"login_attempts":0} at 2025-05-23 19:22:18
+[2025-05-23 19:22:18] User ID: 1 at 2025-05-23 19:22:18
+[2025-05-23 19:22:18] Columns in notifications table: ["notification_id","user_id","message","type","is_read","created_at"] at 2025-05-23 19:22:18
+[2025-05-23 19:22:18] Query params: {"filter":"All","category":"order","sort":"Newest First","page":"1"} at 2025-05-23 19:22:18
+[2025-05-23 19:22:18] Executing SQL Query: SELECT * FROM notifications WHERE user_id = ? AND type = ? ORDER BY created_at DESC LIMIT 0, 10 with params: [1,"order"] at 2025-05-23 19:22:18
+[2025-05-23 19:22:18] Query executed successfully at 2025-05-23 19:22:18
+[2025-05-23 19:22:18] Fetched notifications: [] at 2025-05-23 19:22:18
+[2025-05-23 19:22:18] Total notifications: 8, Total pages: 1 at 2025-05-23 19:22:18
+[2025-05-23 19:22:20] Session data: {"user_id":1,"login_attempts":0} at 2025-05-23 19:22:20
+[2025-05-23 19:22:20] User ID: 1 at 2025-05-23 19:22:20
+[2025-05-23 19:22:20] Columns in notifications table: ["notification_id","user_id","message","type","is_read","created_at"] at 2025-05-23 19:22:20
+[2025-05-23 19:22:20] Query params: {"filter":"All","category":"system","sort":"Newest First","page":"1"} at 2025-05-23 19:22:20
+[2025-05-23 19:22:20] Executing SQL Query: SELECT * FROM notifications WHERE user_id = ? AND type = ? ORDER BY created_at DESC LIMIT 0, 10 with params: [1,"system"] at 2025-05-23 19:22:20
+[2025-05-23 19:22:20] Query executed successfully at 2025-05-23 19:22:20
+[2025-05-23 19:22:20] Fetched notifications: [{"notification_id":2,"user_id":1,"message":"Test notification1","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":3,"user_id":1,"message":"Test notification2","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":4,"user_id":1,"message":"Test notification3","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":5,"user_id":1,"message":"Test notification4","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":6,"user_id":1,"message":"Test notification5","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":7,"user_id":1,"message":"Test notification6","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":8,"user_id":1,"message":"Test notification7","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":1,"user_id":1,"message":"Test notification","type":"system","is_read":0,"created_at":"2025-05-24 00:11:04"}] at 2025-05-23 19:22:20
+[2025-05-23 19:22:20] Total notifications: 8, Total pages: 1 at 2025-05-23 19:22:20
+[2025-05-23 19:22:22] Session data: {"user_id":1,"login_attempts":0} at 2025-05-23 19:22:22
+[2025-05-23 19:22:22] User ID: 1 at 2025-05-23 19:22:22
+[2025-05-23 19:22:22] Columns in notifications table: ["notification_id","user_id","message","type","is_read","created_at"] at 2025-05-23 19:22:22
+[2025-05-23 19:22:22] Query params: {"filter":"All","category":"message","sort":"Newest First","page":"1"} at 2025-05-23 19:22:22
+[2025-05-23 19:22:22] Executing SQL Query: SELECT * FROM notifications WHERE user_id = ? AND type = ? ORDER BY created_at DESC LIMIT 0, 10 with params: [1,"message"] at 2025-05-23 19:22:22
+[2025-05-23 19:22:22] Query executed successfully at 2025-05-23 19:22:22
+[2025-05-23 19:22:22] Fetched notifications: [] at 2025-05-23 19:22:22
+[2025-05-23 19:22:22] Total notifications: 8, Total pages: 1 at 2025-05-23 19:22:22
+[2025-05-23 19:22:23] Session data: {"user_id":1,"login_attempts":0} at 2025-05-23 19:22:23
+[2025-05-23 19:22:23] User ID: 1 at 2025-05-23 19:22:23
+[2025-05-23 19:22:23] Columns in notifications table: ["notification_id","user_id","message","type","is_read","created_at"] at 2025-05-23 19:22:23
+[2025-05-23 19:22:23] Query params: {"filter":"All","category":"All Categories","sort":"Newest First","page":"1"} at 2025-05-23 19:22:23
+[2025-05-23 19:22:23] Executing SQL Query: SELECT * FROM notifications WHERE user_id = ? ORDER BY created_at DESC LIMIT 0, 10 with params: [1] at 2025-05-23 19:22:23
+[2025-05-23 19:22:23] Query executed successfully at 2025-05-23 19:22:23
+[2025-05-23 19:22:23] Fetched notifications: [{"notification_id":2,"user_id":1,"message":"Test notification1","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":3,"user_id":1,"message":"Test notification2","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":4,"user_id":1,"message":"Test notification3","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":5,"user_id":1,"message":"Test notification4","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":6,"user_id":1,"message":"Test notification5","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":7,"user_id":1,"message":"Test notification6","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":8,"user_id":1,"message":"Test notification7","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":1,"user_id":1,"message":"Test notification","type":"system","is_read":0,"created_at":"2025-05-24 00:11:04"}] at 2025-05-23 19:22:23
+[2025-05-23 19:22:23] Total notifications: 8, Total pages: 1 at 2025-05-23 19:22:23
+[2025-05-23 19:22:24] Session data: {"user_id":1,"login_attempts":0} at 2025-05-23 19:22:24
+[2025-05-23 19:22:24] User ID: 1 at 2025-05-23 19:22:24
+[2025-05-23 19:22:24] Columns in notifications table: ["notification_id","user_id","message","type","is_read","created_at"] at 2025-05-23 19:22:24
+[2025-05-23 19:22:24] Query params: {"filter":"Unread","category":"All Categories","sort":"Newest First","page":"1"} at 2025-05-23 19:22:24
+[2025-05-23 19:22:24] Executing SQL Query: SELECT * FROM notifications WHERE user_id = ? AND is_read = 0 ORDER BY created_at DESC LIMIT 0, 10 with params: [1] at 2025-05-23 19:22:24
+[2025-05-23 19:22:24] Query executed successfully at 2025-05-23 19:22:24
+[2025-05-23 19:22:24] Fetched notifications: [{"notification_id":2,"user_id":1,"message":"Test notification1","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":3,"user_id":1,"message":"Test notification2","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":4,"user_id":1,"message":"Test notification3","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":5,"user_id":1,"message":"Test notification4","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":6,"user_id":1,"message":"Test notification5","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":7,"user_id":1,"message":"Test notification6","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":8,"user_id":1,"message":"Test notification7","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":1,"user_id":1,"message":"Test notification","type":"system","is_read":0,"created_at":"2025-05-24 00:11:04"}] at 2025-05-23 19:22:24
+[2025-05-23 19:22:24] Total notifications: 8, Total pages: 1 at 2025-05-23 19:22:24
+[2025-05-23 19:22:25] Session data: {"user_id":1,"login_attempts":0} at 2025-05-23 19:22:25
+[2025-05-23 19:22:25] User ID: 1 at 2025-05-23 19:22:25
+[2025-05-23 19:22:25] Columns in notifications table: ["notification_id","user_id","message","type","is_read","created_at"] at 2025-05-23 19:22:25
+[2025-05-23 19:22:25] Query params: {"filter":"Read","category":"All Categories","sort":"Newest First","page":"1"} at 2025-05-23 19:22:25
+[2025-05-23 19:22:25] Executing SQL Query: SELECT * FROM notifications WHERE user_id = ? AND is_read = 1 ORDER BY created_at DESC LIMIT 0, 10 with params: [1] at 2025-05-23 19:22:25
+[2025-05-23 19:22:25] Query executed successfully at 2025-05-23 19:22:25
+[2025-05-23 19:22:25] Fetched notifications: [] at 2025-05-23 19:22:25
+[2025-05-23 19:22:25] Total notifications: 8, Total pages: 1 at 2025-05-23 19:22:25
+[2025-05-23 19:22:26] Session data: {"user_id":1,"login_attempts":0} at 2025-05-23 19:22:26
+[2025-05-23 19:22:26] User ID: 1 at 2025-05-23 19:22:26
+[2025-05-23 19:22:26] Columns in notifications table: ["notification_id","user_id","message","type","is_read","created_at"] at 2025-05-23 19:22:26
+[2025-05-23 19:22:26] Query params: {"filter":"Unread","category":"All Categories","sort":"Newest First","page":"1"} at 2025-05-23 19:22:26
+[2025-05-23 19:22:26] Executing SQL Query: SELECT * FROM notifications WHERE user_id = ? AND is_read = 0 ORDER BY created_at DESC LIMIT 0, 10 with params: [1] at 2025-05-23 19:22:26
+[2025-05-23 19:22:26] Query executed successfully at 2025-05-23 19:22:26
+[2025-05-23 19:22:26] Fetched notifications: [{"notification_id":2,"user_id":1,"message":"Test notification1","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":3,"user_id":1,"message":"Test notification2","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":4,"user_id":1,"message":"Test notification3","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":5,"user_id":1,"message":"Test notification4","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":6,"user_id":1,"message":"Test notification5","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":7,"user_id":1,"message":"Test notification6","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":8,"user_id":1,"message":"Test notification7","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":1,"user_id":1,"message":"Test notification","type":"system","is_read":0,"created_at":"2025-05-24 00:11:04"}] at 2025-05-23 19:22:26
+[2025-05-23 19:22:26] Total notifications: 8, Total pages: 1 at 2025-05-23 19:22:26
+[2025-05-23 19:22:26] Session data: {"user_id":1,"login_attempts":0} at 2025-05-23 19:22:26
+[2025-05-23 19:22:26] User ID: 1 at 2025-05-23 19:22:26
+[2025-05-23 19:22:26] Columns in notifications table: ["notification_id","user_id","message","type","is_read","created_at"] at 2025-05-23 19:22:26
+[2025-05-23 19:22:26] Query params: {"filter":"All","category":"All Categories","sort":"Newest First","page":"1"} at 2025-05-23 19:22:26
+[2025-05-23 19:22:26] Executing SQL Query: SELECT * FROM notifications WHERE user_id = ? ORDER BY created_at DESC LIMIT 0, 10 with params: [1] at 2025-05-23 19:22:26
+[2025-05-23 19:22:26] Query executed successfully at 2025-05-23 19:22:26
+[2025-05-23 19:22:26] Fetched notifications: [{"notification_id":2,"user_id":1,"message":"Test notification1","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":3,"user_id":1,"message":"Test notification2","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":4,"user_id":1,"message":"Test notification3","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":5,"user_id":1,"message":"Test notification4","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":6,"user_id":1,"message":"Test notification5","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":7,"user_id":1,"message":"Test notification6","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":8,"user_id":1,"message":"Test notification7","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":1,"user_id":1,"message":"Test notification","type":"system","is_read":0,"created_at":"2025-05-24 00:11:04"}] at 2025-05-23 19:22:26
+[2025-05-23 19:22:26] Total notifications: 8, Total pages: 1 at 2025-05-23 19:22:26
+[2025-05-23 19:22:27] Session data: {"user_id":1,"login_attempts":0} at 2025-05-23 19:22:27
+[2025-05-23 19:22:27] User ID: 1 at 2025-05-23 19:22:27
+[2025-05-23 19:22:27] Columns in notifications table: ["notification_id","user_id","message","type","is_read","created_at"] at 2025-05-23 19:22:27
+[2025-05-23 19:22:27] Query params: {"filter":"Unread","category":"All Categories","sort":"Newest First","page":"1"} at 2025-05-23 19:22:27
+[2025-05-23 19:22:27] Executing SQL Query: SELECT * FROM notifications WHERE user_id = ? AND is_read = 0 ORDER BY created_at DESC LIMIT 0, 10 with params: [1] at 2025-05-23 19:22:27
+[2025-05-23 19:22:27] Query executed successfully at 2025-05-23 19:22:27
+[2025-05-23 19:22:27] Fetched notifications: [{"notification_id":2,"user_id":1,"message":"Test notification1","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":3,"user_id":1,"message":"Test notification2","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":4,"user_id":1,"message":"Test notification3","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":5,"user_id":1,"message":"Test notification4","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":6,"user_id":1,"message":"Test notification5","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":7,"user_id":1,"message":"Test notification6","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":8,"user_id":1,"message":"Test notification7","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":1,"user_id":1,"message":"Test notification","type":"system","is_read":0,"created_at":"2025-05-24 00:11:04"}] at 2025-05-23 19:22:27
+[2025-05-23 19:22:27] Total notifications: 8, Total pages: 1 at 2025-05-23 19:22:27
+[2025-05-23 19:22:28] Session data: {"user_id":1,"login_attempts":0} at 2025-05-23 19:22:28
+[2025-05-23 19:22:28] User ID: 1 at 2025-05-23 19:22:28
+[2025-05-23 19:22:28] Columns in notifications table: ["notification_id","user_id","message","type","is_read","created_at"] at 2025-05-23 19:22:28
+[2025-05-23 19:22:28] Query params: {"filter":"Read","category":"All Categories","sort":"Newest First","page":"1"} at 2025-05-23 19:22:28
+[2025-05-23 19:22:28] Executing SQL Query: SELECT * FROM notifications WHERE user_id = ? AND is_read = 1 ORDER BY created_at DESC LIMIT 0, 10 with params: [1] at 2025-05-23 19:22:28
+[2025-05-23 19:22:28] Query executed successfully at 2025-05-23 19:22:28
+[2025-05-23 19:22:28] Fetched notifications: [] at 2025-05-23 19:22:28
+[2025-05-23 19:22:28] Total notifications: 8, Total pages: 1 at 2025-05-23 19:22:28
+[2025-05-23 19:22:28] Session data: {"user_id":1,"login_attempts":0} at 2025-05-23 19:22:28
+[2025-05-23 19:22:28] User ID: 1 at 2025-05-23 19:22:28
+[2025-05-23 19:22:28] Columns in notifications table: ["notification_id","user_id","message","type","is_read","created_at"] at 2025-05-23 19:22:28
+[2025-05-23 19:22:28] Query params: {"filter":"Unread","category":"All Categories","sort":"Newest First","page":"1"} at 2025-05-23 19:22:28
+[2025-05-23 19:22:28] Executing SQL Query: SELECT * FROM notifications WHERE user_id = ? AND is_read = 0 ORDER BY created_at DESC LIMIT 0, 10 with params: [1] at 2025-05-23 19:22:28
+[2025-05-23 19:22:28] Query executed successfully at 2025-05-23 19:22:28
+[2025-05-23 19:22:28] Fetched notifications: [{"notification_id":2,"user_id":1,"message":"Test notification1","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":3,"user_id":1,"message":"Test notification2","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":4,"user_id":1,"message":"Test notification3","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":5,"user_id":1,"message":"Test notification4","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":6,"user_id":1,"message":"Test notification5","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":7,"user_id":1,"message":"Test notification6","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":8,"user_id":1,"message":"Test notification7","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":1,"user_id":1,"message":"Test notification","type":"system","is_read":0,"created_at":"2025-05-24 00:11:04"}] at 2025-05-23 19:22:28
+[2025-05-23 19:22:28] Total notifications: 8, Total pages: 1 at 2025-05-23 19:22:28
+[2025-05-23 19:22:30] Session data: {"user_id":1,"login_attempts":0} at 2025-05-23 19:22:30
+[2025-05-23 19:22:30] User ID: 1 at 2025-05-23 19:22:30
+[2025-05-23 19:22:30] Columns in notifications table: ["notification_id","user_id","message","type","is_read","created_at"] at 2025-05-23 19:22:30
+[2025-05-23 19:22:30] Query params: {"filter":"Read","category":"All Categories","sort":"Newest First","page":"1"} at 2025-05-23 19:22:30
+[2025-05-23 19:22:30] Executing SQL Query: SELECT * FROM notifications WHERE user_id = ? AND is_read = 1 ORDER BY created_at DESC LIMIT 0, 10 with params: [1] at 2025-05-23 19:22:30
+[2025-05-23 19:22:30] Query executed successfully at 2025-05-23 19:22:30
+[2025-05-23 19:22:30] Fetched notifications: [] at 2025-05-23 19:22:30
+[2025-05-23 19:22:30] Total notifications: 8, Total pages: 1 at 2025-05-23 19:22:30
+[2025-05-23 19:22:31] Session data: {"user_id":1,"login_attempts":0} at 2025-05-23 19:22:31
+[2025-05-23 19:22:31] User ID: 1 at 2025-05-23 19:22:31
+[2025-05-23 19:22:31] Columns in notifications table: ["notification_id","user_id","message","type","is_read","created_at"] at 2025-05-23 19:22:31
+[2025-05-23 19:22:31] Query params: {"filter":"Unread","category":"All Categories","sort":"Newest First","page":"1"} at 2025-05-23 19:22:31
+[2025-05-23 19:22:31] Executing SQL Query: SELECT * FROM notifications WHERE user_id = ? AND is_read = 0 ORDER BY created_at DESC LIMIT 0, 10 with params: [1] at 2025-05-23 19:22:31
+[2025-05-23 19:22:31] Query executed successfully at 2025-05-23 19:22:31
+[2025-05-23 19:22:31] Fetched notifications: [{"notification_id":2,"user_id":1,"message":"Test notification1","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":3,"user_id":1,"message":"Test notification2","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":4,"user_id":1,"message":"Test notification3","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":5,"user_id":1,"message":"Test notification4","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":6,"user_id":1,"message":"Test notification5","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":7,"user_id":1,"message":"Test notification6","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":8,"user_id":1,"message":"Test notification7","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":1,"user_id":1,"message":"Test notification","type":"system","is_read":0,"created_at":"2025-05-24 00:11:04"}] at 2025-05-23 19:22:31
+[2025-05-23 19:22:31] Total notifications: 8, Total pages: 1 at 2025-05-23 19:22:31
+[2025-05-23 19:22:31] Session data: {"user_id":1,"login_attempts":0} at 2025-05-23 19:22:31
+[2025-05-23 19:22:31] User ID: 1 at 2025-05-23 19:22:31
+[2025-05-23 19:22:31] Columns in notifications table: ["notification_id","user_id","message","type","is_read","created_at"] at 2025-05-23 19:22:31
+[2025-05-23 19:22:31] Query params: {"filter":"All","category":"All Categories","sort":"Newest First","page":"1"} at 2025-05-23 19:22:31
+[2025-05-23 19:22:31] Executing SQL Query: SELECT * FROM notifications WHERE user_id = ? ORDER BY created_at DESC LIMIT 0, 10 with params: [1] at 2025-05-23 19:22:31
+[2025-05-23 19:22:31] Query executed successfully at 2025-05-23 19:22:31
+[2025-05-23 19:22:31] Fetched notifications: [{"notification_id":2,"user_id":1,"message":"Test notification1","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":3,"user_id":1,"message":"Test notification2","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":4,"user_id":1,"message":"Test notification3","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":5,"user_id":1,"message":"Test notification4","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":6,"user_id":1,"message":"Test notification5","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":7,"user_id":1,"message":"Test notification6","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":8,"user_id":1,"message":"Test notification7","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":1,"user_id":1,"message":"Test notification","type":"system","is_read":0,"created_at":"2025-05-24 00:11:04"}] at 2025-05-23 19:22:31
+[2025-05-23 19:22:31] Total notifications: 8, Total pages: 1 at 2025-05-23 19:22:31
+[2025-05-23 19:30:59] Session data: {"user_id":1,"login_attempts":0} at 2025-05-23 19:30:59
+[2025-05-23 19:30:59] User ID: 1 at 2025-05-23 19:30:59
+[2025-05-23 19:30:59] Columns in notifications table: ["notification_id","user_id","message","type","is_read","created_at"] at 2025-05-23 19:30:59
+[2025-05-23 19:32:54] Session data: {"user_id":1,"login_attempts":0} at 2025-05-23 19:32:54
+[2025-05-23 19:32:54] User ID: 1 at 2025-05-23 19:32:54
+[2025-05-23 19:32:54] Columns in notifications table: ["notification_id","user_id","message","type","is_read","created_at"] at 2025-05-23 19:32:54
+[2025-05-23 19:32:58] Session data: {"user_id":1,"login_attempts":0} at 2025-05-23 19:32:58
+[2025-05-23 19:32:58] User ID: 1 at 2025-05-23 19:32:58
+[2025-05-23 19:32:58] Columns in notifications table: ["notification_id","user_id","message","type","is_read","created_at"] at 2025-05-23 19:32:58
+[2025-05-23 19:32:58] Query params: {"filter":"All","category":"All Categories","sort":"Newest First","page":"1"} at 2025-05-23 19:32:58
+[2025-05-23 19:32:58] Executing SQL Query: SELECT * FROM notifications WHERE user_id = ? ORDER BY created_at DESC LIMIT 0, 10 with params: [1] at 2025-05-23 19:32:58
+[2025-05-23 19:32:58] Query executed successfully at 2025-05-23 19:32:58
+[2025-05-23 19:32:58] Fetched notifications: [{"notification_id":2,"user_id":1,"message":"Test notification1","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":3,"user_id":1,"message":"Test notification2","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":4,"user_id":1,"message":"Test notification3","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":5,"user_id":1,"message":"Test notification4","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":6,"user_id":1,"message":"Test notification5","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":7,"user_id":1,"message":"Test notification6","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":8,"user_id":1,"message":"Test notification7","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":1,"user_id":1,"message":"Test notification","type":"system","is_read":0,"created_at":"2025-05-24 00:11:04"}] at 2025-05-23 19:32:58
+[2025-05-23 19:32:58] Total notifications: 8, Total pages: 1 at 2025-05-23 19:32:58
+[2025-05-23 19:32:58] Session data: {"user_id":1,"login_attempts":0} at 2025-05-23 19:32:58
+[2025-05-23 19:32:58] User ID: 1 at 2025-05-23 19:32:58
+[2025-05-23 19:32:58] Columns in notifications table: ["notification_id","user_id","message","type","is_read","created_at"] at 2025-05-23 19:32:58
+[2025-05-23 19:32:58] Query params: {"filter":"All","category":"All Categories","sort":"Newest First","page":"1"} at 2025-05-23 19:32:58
+[2025-05-23 19:32:58] Executing SQL Query: SELECT * FROM notifications WHERE user_id = ? ORDER BY created_at DESC LIMIT 0, 10 with params: [1] at 2025-05-23 19:32:58
+[2025-05-23 19:32:58] Query executed successfully at 2025-05-23 19:32:58
+[2025-05-23 19:32:58] Fetched notifications: [{"notification_id":2,"user_id":1,"message":"Test notification1","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":3,"user_id":1,"message":"Test notification2","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":4,"user_id":1,"message":"Test notification3","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":5,"user_id":1,"message":"Test notification4","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":6,"user_id":1,"message":"Test notification5","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":7,"user_id":1,"message":"Test notification6","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":8,"user_id":1,"message":"Test notification7","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":1,"user_id":1,"message":"Test notification","type":"system","is_read":0,"created_at":"2025-05-24 00:11:04"}] at 2025-05-23 19:32:58
+[2025-05-23 19:32:58] Total notifications: 8, Total pages: 1 at 2025-05-23 19:32:58
+[2025-05-23 19:33:07] Session data: {"user_id":1,"login_attempts":0} at 2025-05-23 19:33:07
+[2025-05-23 19:33:07] User ID: 1 at 2025-05-23 19:33:07
+[2025-05-23 19:33:07] Columns in notifications table: ["notification_id","user_id","message","type","is_read","created_at"] at 2025-05-23 19:33:07
+[2025-05-23 19:33:07] Query params: [] at 2025-05-23 19:33:07
+[2025-05-23 19:33:07] Executing SQL Query: SELECT * FROM notifications WHERE user_id = ? AND type = ? ORDER BY created_at ASC LIMIT 0, 10 with params: [1,null] at 2025-05-23 19:33:07
+[2025-05-23 19:33:07] Query executed successfully at 2025-05-23 19:33:07
+[2025-05-23 19:33:07] Fetched notifications: [] at 2025-05-23 19:33:07
+[2025-05-23 19:33:07] Total notifications: 8, Total pages: 1 at 2025-05-23 19:33:07
+[2025-05-23 19:33:08] Session data: {"user_id":1,"login_attempts":0} at 2025-05-23 19:33:08
+[2025-05-23 19:33:08] User ID: 1 at 2025-05-23 19:33:08
+[2025-05-23 19:33:08] Columns in notifications table: ["notification_id","user_id","message","type","is_read","created_at"] at 2025-05-23 19:33:08
+[2025-05-23 19:33:08] Query params: {"filter":"Unread","category":"All Categories","sort":"Newest First","page":"1"} at 2025-05-23 19:33:08
+[2025-05-23 19:33:08] Executing SQL Query: SELECT * FROM notifications WHERE user_id = ? AND is_read = 0 ORDER BY created_at DESC LIMIT 0, 10 with params: [1] at 2025-05-23 19:33:08
+[2025-05-23 19:33:08] Query executed successfully at 2025-05-23 19:33:08
+[2025-05-23 19:33:08] Fetched notifications: [{"notification_id":2,"user_id":1,"message":"Test notification1","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":3,"user_id":1,"message":"Test notification2","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":4,"user_id":1,"message":"Test notification3","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":5,"user_id":1,"message":"Test notification4","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":6,"user_id":1,"message":"Test notification5","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":7,"user_id":1,"message":"Test notification6","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":8,"user_id":1,"message":"Test notification7","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":1,"user_id":1,"message":"Test notification","type":"system","is_read":0,"created_at":"2025-05-24 00:11:04"}] at 2025-05-23 19:33:08
+[2025-05-23 19:33:08] Total notifications: 8, Total pages: 1 at 2025-05-23 19:33:08
+[2025-05-23 19:33:09] Session data: {"user_id":1,"login_attempts":0} at 2025-05-23 19:33:09
+[2025-05-23 19:33:09] User ID: 1 at 2025-05-23 19:33:09
+[2025-05-23 19:33:09] Columns in notifications table: ["notification_id","user_id","message","type","is_read","created_at"] at 2025-05-23 19:33:09
+[2025-05-23 19:33:09] Query params: {"filter":"All","category":"All Categories","sort":"Newest First","page":"1"} at 2025-05-23 19:33:09
+[2025-05-23 19:33:09] Executing SQL Query: SELECT * FROM notifications WHERE user_id = ? ORDER BY created_at DESC LIMIT 0, 10 with params: [1] at 2025-05-23 19:33:09
+[2025-05-23 19:33:09] Query executed successfully at 2025-05-23 19:33:09
+[2025-05-23 19:33:09] Fetched notifications: [{"notification_id":2,"user_id":1,"message":"Test notification1","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":3,"user_id":1,"message":"Test notification2","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":4,"user_id":1,"message":"Test notification3","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":5,"user_id":1,"message":"Test notification4","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":6,"user_id":1,"message":"Test notification5","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":7,"user_id":1,"message":"Test notification6","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":8,"user_id":1,"message":"Test notification7","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":1,"user_id":1,"message":"Test notification","type":"system","is_read":0,"created_at":"2025-05-24 00:11:04"}] at 2025-05-23 19:33:09
+[2025-05-23 19:33:09] Total notifications: 8, Total pages: 1 at 2025-05-23 19:33:09
+[2025-05-23 19:33:10] Session data: {"user_id":1,"login_attempts":0} at 2025-05-23 19:33:10
+[2025-05-23 19:33:10] User ID: 1 at 2025-05-23 19:33:10
+[2025-05-23 19:33:10] Columns in notifications table: ["notification_id","user_id","message","type","is_read","created_at"] at 2025-05-23 19:33:10
+[2025-05-23 19:33:10] Query params: {"filter":"Unread","category":"All Categories","sort":"Newest First","page":"1"} at 2025-05-23 19:33:10
+[2025-05-23 19:33:10] Executing SQL Query: SELECT * FROM notifications WHERE user_id = ? AND is_read = 0 ORDER BY created_at DESC LIMIT 0, 10 with params: [1] at 2025-05-23 19:33:10
+[2025-05-23 19:33:10] Query executed successfully at 2025-05-23 19:33:10
+[2025-05-23 19:33:10] Fetched notifications: [{"notification_id":2,"user_id":1,"message":"Test notification1","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":3,"user_id":1,"message":"Test notification2","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":4,"user_id":1,"message":"Test notification3","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":5,"user_id":1,"message":"Test notification4","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":6,"user_id":1,"message":"Test notification5","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":7,"user_id":1,"message":"Test notification6","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":8,"user_id":1,"message":"Test notification7","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":1,"user_id":1,"message":"Test notification","type":"system","is_read":0,"created_at":"2025-05-24 00:11:04"}] at 2025-05-23 19:33:10
+[2025-05-23 19:33:10] Total notifications: 8, Total pages: 1 at 2025-05-23 19:33:10
+[2025-05-23 19:33:11] Session data: {"user_id":1,"login_attempts":0} at 2025-05-23 19:33:11
+[2025-05-23 19:33:11] User ID: 1 at 2025-05-23 19:33:11
+[2025-05-23 19:33:11] Columns in notifications table: ["notification_id","user_id","message","type","is_read","created_at"] at 2025-05-23 19:33:11
+[2025-05-23 19:33:11] Query params: {"filter":"Read","category":"All Categories","sort":"Newest First","page":"1"} at 2025-05-23 19:33:11
+[2025-05-23 19:33:11] Executing SQL Query: SELECT * FROM notifications WHERE user_id = ? AND is_read = 1 ORDER BY created_at DESC LIMIT 0, 10 with params: [1] at 2025-05-23 19:33:11
+[2025-05-23 19:33:11] Query executed successfully at 2025-05-23 19:33:11
+[2025-05-23 19:33:11] Fetched notifications: [] at 2025-05-23 19:33:11
+[2025-05-23 19:33:11] Total notifications: 8, Total pages: 1 at 2025-05-23 19:33:11
+[2025-05-23 19:33:11] Session data: {"user_id":1,"login_attempts":0} at 2025-05-23 19:33:11
+[2025-05-23 19:33:11] User ID: 1 at 2025-05-23 19:33:11
+[2025-05-23 19:33:11] Columns in notifications table: ["notification_id","user_id","message","type","is_read","created_at"] at 2025-05-23 19:33:11
+[2025-05-23 19:33:11] Query params: {"filter":"Unread","category":"All Categories","sort":"Newest First","page":"1"} at 2025-05-23 19:33:11
+[2025-05-23 19:33:11] Executing SQL Query: SELECT * FROM notifications WHERE user_id = ? AND is_read = 0 ORDER BY created_at DESC LIMIT 0, 10 with params: [1] at 2025-05-23 19:33:11
+[2025-05-23 19:33:11] Query executed successfully at 2025-05-23 19:33:11
+[2025-05-23 19:33:11] Fetched notifications: [{"notification_id":2,"user_id":1,"message":"Test notification1","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":3,"user_id":1,"message":"Test notification2","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":4,"user_id":1,"message":"Test notification3","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":5,"user_id":1,"message":"Test notification4","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":6,"user_id":1,"message":"Test notification5","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":7,"user_id":1,"message":"Test notification6","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":8,"user_id":1,"message":"Test notification7","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":1,"user_id":1,"message":"Test notification","type":"system","is_read":0,"created_at":"2025-05-24 00:11:04"}] at 2025-05-23 19:33:11
+[2025-05-23 19:33:11] Total notifications: 8, Total pages: 1 at 2025-05-23 19:33:11
+[2025-05-23 19:33:12] Session data: {"user_id":1,"login_attempts":0} at 2025-05-23 19:33:12
+[2025-05-23 19:33:12] User ID: 1 at 2025-05-23 19:33:12
+[2025-05-23 19:33:12] Columns in notifications table: ["notification_id","user_id","message","type","is_read","created_at"] at 2025-05-23 19:33:12
+[2025-05-23 19:33:12] Query params: [] at 2025-05-23 19:33:12
+[2025-05-23 19:33:12] Executing SQL Query: SELECT * FROM notifications WHERE user_id = ? AND type = ? ORDER BY created_at ASC LIMIT 0, 10 with params: [1,null] at 2025-05-23 19:33:12
+[2025-05-23 19:33:12] Query executed successfully at 2025-05-23 19:33:12
+[2025-05-23 19:33:12] Fetched notifications: [] at 2025-05-23 19:33:12
+[2025-05-23 19:33:12] Total notifications: 8, Total pages: 1 at 2025-05-23 19:33:12
+[2025-05-23 19:33:13] Session data: {"user_id":1,"login_attempts":0} at 2025-05-23 19:33:13
+[2025-05-23 19:33:13] User ID: 1 at 2025-05-23 19:33:13
+[2025-05-23 19:33:13] Columns in notifications table: ["notification_id","user_id","message","type","is_read","created_at"] at 2025-05-23 19:33:13
+[2025-05-23 19:33:13] Query params: [] at 2025-05-23 19:33:13
+[2025-05-23 19:33:13] Executing SQL Query: SELECT * FROM notifications WHERE user_id = ? AND type = ? ORDER BY created_at ASC LIMIT 0, 10 with params: [1,null] at 2025-05-23 19:33:13
+[2025-05-23 19:33:13] Query executed successfully at 2025-05-23 19:33:13
+[2025-05-23 19:33:13] Fetched notifications: [] at 2025-05-23 19:33:13
+[2025-05-23 19:33:13] Total notifications: 8, Total pages: 1 at 2025-05-23 19:33:13
+[2025-05-23 19:33:17] Session data: {"user_id":1,"login_attempts":0} at 2025-05-23 19:33:17
+[2025-05-23 19:33:17] User ID: 1 at 2025-05-23 19:33:17
+[2025-05-23 19:33:17] Columns in notifications table: ["notification_id","user_id","message","type","is_read","created_at"] at 2025-05-23 19:33:17
+[2025-05-23 19:33:17] Query params: {"filter":"Read","category":"All Categories","sort":"Newest First","page":"1"} at 2025-05-23 19:33:17
+[2025-05-23 19:33:17] Executing SQL Query: SELECT * FROM notifications WHERE user_id = ? AND is_read = 1 ORDER BY created_at DESC LIMIT 0, 10 with params: [1] at 2025-05-23 19:33:17
+[2025-05-23 19:33:17] Query executed successfully at 2025-05-23 19:33:17
+[2025-05-23 19:33:17] Fetched notifications: [] at 2025-05-23 19:33:17
+[2025-05-23 19:33:17] Total notifications: 8, Total pages: 1 at 2025-05-23 19:33:17
+[2025-05-23 19:33:18] Session data: {"user_id":1,"login_attempts":0} at 2025-05-23 19:33:18
+[2025-05-23 19:33:18] User ID: 1 at 2025-05-23 19:33:18
+[2025-05-23 19:33:18] Columns in notifications table: ["notification_id","user_id","message","type","is_read","created_at"] at 2025-05-23 19:33:18
+[2025-05-23 19:33:18] Query params: {"filter":"Unread","category":"All Categories","sort":"Newest First","page":"1"} at 2025-05-23 19:33:18
+[2025-05-23 19:33:18] Executing SQL Query: SELECT * FROM notifications WHERE user_id = ? AND is_read = 0 ORDER BY created_at DESC LIMIT 0, 10 with params: [1] at 2025-05-23 19:33:18
+[2025-05-23 19:33:18] Query executed successfully at 2025-05-23 19:33:18
+[2025-05-23 19:33:18] Fetched notifications: [{"notification_id":2,"user_id":1,"message":"Test notification1","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":3,"user_id":1,"message":"Test notification2","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":4,"user_id":1,"message":"Test notification3","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":5,"user_id":1,"message":"Test notification4","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":6,"user_id":1,"message":"Test notification5","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":7,"user_id":1,"message":"Test notification6","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":8,"user_id":1,"message":"Test notification7","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":1,"user_id":1,"message":"Test notification","type":"system","is_read":0,"created_at":"2025-05-24 00:11:04"}] at 2025-05-23 19:33:18
+[2025-05-23 19:33:18] Total notifications: 8, Total pages: 1 at 2025-05-23 19:33:18
+[2025-05-23 19:33:23] Session data: {"user_id":1,"login_attempts":0} at 2025-05-23 19:33:23
+[2025-05-23 19:33:23] User ID: 1 at 2025-05-23 19:33:23
+[2025-05-23 19:33:23] Columns in notifications table: ["notification_id","user_id","message","type","is_read","created_at"] at 2025-05-23 19:33:23
+[2025-05-23 19:33:23] Query params: [] at 2025-05-23 19:33:23
+[2025-05-23 19:33:23] Executing SQL Query: SELECT * FROM notifications WHERE user_id = ? AND type = ? ORDER BY created_at ASC LIMIT 0, 10 with params: [1,null] at 2025-05-23 19:33:23
+[2025-05-23 19:33:23] Query executed successfully at 2025-05-23 19:33:23
+[2025-05-23 19:33:23] Fetched notifications: [] at 2025-05-23 19:33:23
+[2025-05-23 19:33:23] Total notifications: 8, Total pages: 1 at 2025-05-23 19:33:23
+[2025-05-23 19:41:13] Session data: {"user_id":1,"login_attempts":0} at 2025-05-23 19:41:13
+[2025-05-23 19:41:13] User ID: 1 at 2025-05-23 19:41:13
+[2025-05-23 19:41:13] Columns in notifications table: ["notification_id","user_id","message","type","is_read","created_at"] at 2025-05-23 19:41:13
+[2025-05-23 19:41:13] Query params: {"filter":"All","category":"All Categories","sort":"Newest First","page":"1"} at 2025-05-23 19:41:13
+[2025-05-23 19:41:13] Executing SQL Query: SELECT * FROM notifications WHERE user_id = ? ORDER BY created_at DESC LIMIT 0, 10 with params: [1] at 2025-05-23 19:41:13
+[2025-05-23 19:41:13] Query executed successfully at 2025-05-23 19:41:13
+[2025-05-23 19:41:13] Fetched notifications: [{"notification_id":2,"user_id":1,"message":"Test notification1","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":3,"user_id":1,"message":"Test notification2","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":4,"user_id":1,"message":"Test notification3","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":5,"user_id":1,"message":"Test notification4","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":6,"user_id":1,"message":"Test notification5","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":7,"user_id":1,"message":"Test notification6","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":8,"user_id":1,"message":"Test notification7","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":1,"user_id":1,"message":"Test notification","type":"system","is_read":0,"created_at":"2025-05-24 00:11:04"}] at 2025-05-23 19:41:13
+[2025-05-23 19:41:13] Total notifications: 8, Total pages: 1 at 2025-05-23 19:41:13
+[2025-05-23 19:41:13] Session data: {"user_id":1,"login_attempts":0} at 2025-05-23 19:41:13
+[2025-05-23 19:41:13] User ID: 1 at 2025-05-23 19:41:13
+[2025-05-23 19:41:13] Columns in notifications table: ["notification_id","user_id","message","type","is_read","created_at"] at 2025-05-23 19:41:13
+[2025-05-23 19:41:13] Query params: {"filter":"All","category":"All Categories","sort":"Newest First","page":"1"} at 2025-05-23 19:41:13
+[2025-05-23 19:41:13] Executing SQL Query: SELECT * FROM notifications WHERE user_id = ? ORDER BY created_at DESC LIMIT 0, 10 with params: [1] at 2025-05-23 19:41:13
+[2025-05-23 19:41:13] Query executed successfully at 2025-05-23 19:41:13
+[2025-05-23 19:41:13] Fetched notifications: [{"notification_id":2,"user_id":1,"message":"Test notification1","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":3,"user_id":1,"message":"Test notification2","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":4,"user_id":1,"message":"Test notification3","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":5,"user_id":1,"message":"Test notification4","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":6,"user_id":1,"message":"Test notification5","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":7,"user_id":1,"message":"Test notification6","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":8,"user_id":1,"message":"Test notification7","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":1,"user_id":1,"message":"Test notification","type":"system","is_read":0,"created_at":"2025-05-24 00:11:04"}] at 2025-05-23 19:41:13
+[2025-05-23 19:41:13] Total notifications: 8, Total pages: 1 at 2025-05-23 19:41:13
+[2025-05-23 19:41:14] Session data: {"user_id":1,"login_attempts":0} at 2025-05-23 19:41:14
+[2025-05-23 19:41:14] User ID: 1 at 2025-05-23 19:41:14
+[2025-05-23 19:41:14] Columns in notifications table: ["notification_id","user_id","message","type","is_read","created_at"] at 2025-05-23 19:41:14
+[2025-05-23 19:41:14] Query params: [] at 2025-05-23 19:41:14
+[2025-05-23 19:41:14] Executing SQL Query: SELECT * FROM notifications WHERE user_id = ? AND type = ? ORDER BY created_at ASC LIMIT 0, 10 with params: [1,null] at 2025-05-23 19:41:14
+[2025-05-23 19:41:14] Query executed successfully at 2025-05-23 19:41:14
+[2025-05-23 19:41:14] Fetched notifications: [] at 2025-05-23 19:41:14
+[2025-05-23 19:41:14] Total notifications: 8, Total pages: 1 at 2025-05-23 19:41:14
+[2025-05-23 19:41:21] Session data: {"user_id":1,"login_attempts":0} at 2025-05-23 19:41:21
+[2025-05-23 19:41:21] User ID: 1 at 2025-05-23 19:41:21
+[2025-05-23 19:41:21] Columns in notifications table: ["notification_id","user_id","message","type","is_read","created_at"] at 2025-05-23 19:41:21
+[2025-05-23 19:41:21] Query params: [] at 2025-05-23 19:41:21
+[2025-05-23 19:41:21] Executing SQL Query: SELECT * FROM notifications WHERE user_id = ? AND type = ? ORDER BY created_at ASC LIMIT 0, 10 with params: [1,null] at 2025-05-23 19:41:21
+[2025-05-23 19:41:21] Query executed successfully at 2025-05-23 19:41:21
+[2025-05-23 19:41:21] Fetched notifications: [] at 2025-05-23 19:41:21
+[2025-05-23 19:41:21] Total notifications: 8, Total pages: 1 at 2025-05-23 19:41:21
+[2025-05-23 19:41:21] Session data: {"user_id":1,"login_attempts":0} at 2025-05-23 19:41:21
+[2025-05-23 19:41:21] User ID: 1 at 2025-05-23 19:41:21
+[2025-05-23 19:41:21] Columns in notifications table: ["notification_id","user_id","message","type","is_read","created_at"] at 2025-05-23 19:41:21
+[2025-05-23 19:41:21] Query params: [] at 2025-05-23 19:41:21
+[2025-05-23 19:41:21] Executing SQL Query: SELECT * FROM notifications WHERE user_id = ? AND type = ? ORDER BY created_at ASC LIMIT 0, 10 with params: [1,null] at 2025-05-23 19:41:21
+[2025-05-23 19:41:21] Query executed successfully at 2025-05-23 19:41:21
+[2025-05-23 19:41:21] Fetched notifications: [] at 2025-05-23 19:41:21
+[2025-05-23 19:41:21] Total notifications: 8, Total pages: 1 at 2025-05-23 19:41:21
+[2025-05-23 19:41:23] Session data: {"user_id":1,"login_attempts":0} at 2025-05-23 19:41:23
+[2025-05-23 19:41:23] User ID: 1 at 2025-05-23 19:41:23
+[2025-05-23 19:41:23] Columns in notifications table: ["notification_id","user_id","message","type","is_read","created_at"] at 2025-05-23 19:41:23
+[2025-05-23 19:41:23] Query params: [] at 2025-05-23 19:41:23
+[2025-05-23 19:41:23] Executing SQL Query: SELECT * FROM notifications WHERE user_id = ? AND type = ? ORDER BY created_at ASC LIMIT 0, 10 with params: [1,null] at 2025-05-23 19:41:23
+[2025-05-23 19:41:23] Query executed successfully at 2025-05-23 19:41:23
+[2025-05-23 19:41:23] Fetched notifications: [] at 2025-05-23 19:41:23
+[2025-05-23 19:41:23] Total notifications: 8, Total pages: 1 at 2025-05-23 19:41:23
+[2025-05-23 19:41:23] Session data: {"user_id":1,"login_attempts":0} at 2025-05-23 19:41:23
+[2025-05-23 19:41:23] User ID: 1 at 2025-05-23 19:41:23
+[2025-05-23 19:41:23] Columns in notifications table: ["notification_id","user_id","message","type","is_read","created_at"] at 2025-05-23 19:41:23
+[2025-05-23 19:41:23] Query params: [] at 2025-05-23 19:41:23
+[2025-05-23 19:41:23] Executing SQL Query: SELECT * FROM notifications WHERE user_id = ? AND type = ? ORDER BY created_at ASC LIMIT 0, 10 with params: [1,null] at 2025-05-23 19:41:23
+[2025-05-23 19:41:23] Query executed successfully at 2025-05-23 19:41:23
+[2025-05-23 19:41:23] Fetched notifications: [] at 2025-05-23 19:41:23
+[2025-05-23 19:41:23] Total notifications: 8, Total pages: 1 at 2025-05-23 19:41:23
+[2025-05-23 19:41:23] Session data: {"user_id":1,"login_attempts":0} at 2025-05-23 19:41:23
+[2025-05-23 19:41:23] User ID: 1 at 2025-05-23 19:41:23
+[2025-05-23 19:41:23] Columns in notifications table: ["notification_id","user_id","message","type","is_read","created_at"] at 2025-05-23 19:41:23
+[2025-05-23 19:41:23] Query params: [] at 2025-05-23 19:41:23
+[2025-05-23 19:41:23] Executing SQL Query: SELECT * FROM notifications WHERE user_id = ? AND type = ? ORDER BY created_at ASC LIMIT 0, 10 with params: [1,null] at 2025-05-23 19:41:23
+[2025-05-23 19:41:23] Query executed successfully at 2025-05-23 19:41:23
+[2025-05-23 19:41:23] Fetched notifications: [] at 2025-05-23 19:41:23
+[2025-05-23 19:41:23] Total notifications: 8, Total pages: 1 at 2025-05-23 19:41:23
+[2025-05-23 19:41:23] Session data: {"user_id":1,"login_attempts":0} at 2025-05-23 19:41:23
+[2025-05-23 19:41:23] User ID: 1 at 2025-05-23 19:41:23
+[2025-05-23 19:41:23] Columns in notifications table: ["notification_id","user_id","message","type","is_read","created_at"] at 2025-05-23 19:41:23
+[2025-05-23 19:41:23] Query params: [] at 2025-05-23 19:41:23
+[2025-05-23 19:41:23] Executing SQL Query: SELECT * FROM notifications WHERE user_id = ? AND type = ? ORDER BY created_at ASC LIMIT 0, 10 with params: [1,null] at 2025-05-23 19:41:23
+[2025-05-23 19:41:23] Query executed successfully at 2025-05-23 19:41:23
+[2025-05-23 19:41:23] Fetched notifications: [] at 2025-05-23 19:41:23
+[2025-05-23 19:41:23] Total notifications: 8, Total pages: 1 at 2025-05-23 19:41:23
+[2025-05-23 19:41:24] Session data: {"user_id":1,"login_attempts":0} at 2025-05-23 19:41:24
+[2025-05-23 19:41:24] User ID: 1 at 2025-05-23 19:41:24
+[2025-05-23 19:41:24] Columns in notifications table: ["notification_id","user_id","message","type","is_read","created_at"] at 2025-05-23 19:41:24
+[2025-05-23 19:41:24] Query params: [] at 2025-05-23 19:41:24
+[2025-05-23 19:41:24] Executing SQL Query: SELECT * FROM notifications WHERE user_id = ? AND type = ? ORDER BY created_at ASC LIMIT 0, 10 with params: [1,null] at 2025-05-23 19:41:24
+[2025-05-23 19:41:24] Query executed successfully at 2025-05-23 19:41:24
+[2025-05-23 19:41:24] Fetched notifications: [] at 2025-05-23 19:41:24
+[2025-05-23 19:41:24] Total notifications: 8, Total pages: 1 at 2025-05-23 19:41:24
+[2025-05-23 19:50:43] Session data: {"user_id":1,"login_attempts":0} at 2025-05-23 19:50:43
+[2025-05-23 19:50:43] User ID: 1 at 2025-05-23 19:50:43
+[2025-05-23 19:50:43] Columns in notifications table: ["notification_id","user_id","message","type","is_read","created_at"] at 2025-05-23 19:50:43
+[2025-05-23 19:50:43] Query params: {"filter":"All","category":"All Categories","sort":"Newest First","page":"1"} at 2025-05-23 19:50:43
+[2025-05-23 19:50:43] Executing SQL Query: SELECT * FROM notifications WHERE user_id = ? ORDER BY created_at DESC LIMIT 0, 10 with params: [1] at 2025-05-23 19:50:43
+[2025-05-23 19:50:43] Query executed successfully at 2025-05-23 19:50:43
+[2025-05-23 19:50:43] Fetched notifications: [{"notification_id":2,"user_id":1,"message":"Test notification1","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":3,"user_id":1,"message":"Test notification2","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":4,"user_id":1,"message":"Test notification3","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":5,"user_id":1,"message":"Test notification4","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":6,"user_id":1,"message":"Test notification5","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":7,"user_id":1,"message":"Test notification6","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":8,"user_id":1,"message":"Test notification7","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":1,"user_id":1,"message":"Test notification","type":"system","is_read":0,"created_at":"2025-05-24 00:11:04"}] at 2025-05-23 19:50:43
+[2025-05-23 19:50:43] Total notifications: 8, Total pages: 1 at 2025-05-23 19:50:43
+[2025-05-23 19:50:43] Session data: {"user_id":1,"login_attempts":0} at 2025-05-23 19:50:43
+[2025-05-23 19:50:43] User ID: 1 at 2025-05-23 19:50:43
+[2025-05-23 19:50:43] Columns in notifications table: ["notification_id","user_id","message","type","is_read","created_at"] at 2025-05-23 19:50:43
+[2025-05-23 19:50:43] Query params: {"filter":"All","category":"All Categories","sort":"Newest First","page":"1"} at 2025-05-23 19:50:43
+[2025-05-23 19:50:43] Executing SQL Query: SELECT * FROM notifications WHERE user_id = ? ORDER BY created_at DESC LIMIT 0, 10 with params: [1] at 2025-05-23 19:50:43
+[2025-05-23 19:50:43] Query executed successfully at 2025-05-23 19:50:43
+[2025-05-23 19:50:43] Fetched notifications: [{"notification_id":2,"user_id":1,"message":"Test notification1","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":3,"user_id":1,"message":"Test notification2","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":4,"user_id":1,"message":"Test notification3","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":5,"user_id":1,"message":"Test notification4","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":6,"user_id":1,"message":"Test notification5","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":7,"user_id":1,"message":"Test notification6","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":8,"user_id":1,"message":"Test notification7","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":1,"user_id":1,"message":"Test notification","type":"system","is_read":0,"created_at":"2025-05-24 00:11:04"}] at 2025-05-23 19:50:43
+[2025-05-23 19:50:43] Total notifications: 8, Total pages: 1 at 2025-05-23 19:50:43
+[2025-05-23 19:50:45] Session data: {"user_id":1,"login_attempts":0} at 2025-05-23 19:50:45
+[2025-05-23 19:50:45] User ID: 1 at 2025-05-23 19:50:45
+[2025-05-23 19:50:45] Columns in notifications table: ["notification_id","user_id","message","type","is_read","created_at"] at 2025-05-23 19:50:45
+[2025-05-23 19:50:45] Query params: [] at 2025-05-23 19:50:45
+[2025-05-23 19:50:45] Executing SQL Query: SELECT * FROM notifications WHERE user_id = ? ORDER BY created_at DESC LIMIT 0, 10 with params: [1] at 2025-05-23 19:50:45
+[2025-05-23 19:50:45] Query executed successfully at 2025-05-23 19:50:45
+[2025-05-23 19:50:45] Fetched notifications: [{"notification_id":2,"user_id":1,"message":"Test notification1","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":3,"user_id":1,"message":"Test notification2","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":4,"user_id":1,"message":"Test notification3","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":5,"user_id":1,"message":"Test notification4","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":6,"user_id":1,"message":"Test notification5","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":7,"user_id":1,"message":"Test notification6","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":8,"user_id":1,"message":"Test notification7","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":1,"user_id":1,"message":"Test notification","type":"system","is_read":0,"created_at":"2025-05-24 00:11:04"}] at 2025-05-23 19:50:45
+[2025-05-23 19:50:45] Total notifications: 8, Total pages: 1 at 2025-05-23 19:50:45
+[2025-05-23 19:51:08] Session data: {"user_id":1,"login_attempts":0} at 2025-05-23 19:51:08
+[2025-05-23 19:51:08] User ID: 1 at 2025-05-23 19:51:08
+[2025-05-23 19:51:08] Columns in notifications table: ["notification_id","user_id","message","type","is_read","created_at"] at 2025-05-23 19:51:08
+[2025-05-23 19:51:08] Query params: {"filter":"Unread","category":"All Categories","sort":"Newest First","page":"1"} at 2025-05-23 19:51:08
+[2025-05-23 19:51:08] Executing SQL Query: SELECT * FROM notifications WHERE user_id = ? AND is_read = 0 ORDER BY created_at DESC LIMIT 0, 10 with params: [1] at 2025-05-23 19:51:08
+[2025-05-23 19:51:08] Query executed successfully at 2025-05-23 19:51:08
+[2025-05-23 19:51:08] Fetched notifications: [{"notification_id":2,"user_id":1,"message":"Test notification1","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":3,"user_id":1,"message":"Test notification2","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":4,"user_id":1,"message":"Test notification3","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":5,"user_id":1,"message":"Test notification4","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":6,"user_id":1,"message":"Test notification5","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":7,"user_id":1,"message":"Test notification6","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":8,"user_id":1,"message":"Test notification7","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":1,"user_id":1,"message":"Test notification","type":"system","is_read":0,"created_at":"2025-05-24 00:11:04"}] at 2025-05-23 19:51:08
+[2025-05-23 19:51:08] Total notifications: 8, Total pages: 1 at 2025-05-23 19:51:08
+[2025-05-23 19:51:09] Session data: {"user_id":1,"login_attempts":0} at 2025-05-23 19:51:09
+[2025-05-23 19:51:09] User ID: 1 at 2025-05-23 19:51:09
+[2025-05-23 19:51:09] Columns in notifications table: ["notification_id","user_id","message","type","is_read","created_at"] at 2025-05-23 19:51:09
+[2025-05-23 19:51:09] Query params: {"filter":"Read","category":"All Categories","sort":"Newest First","page":"1"} at 2025-05-23 19:51:09
+[2025-05-23 19:51:09] Executing SQL Query: SELECT * FROM notifications WHERE user_id = ? AND is_read = 1 ORDER BY created_at DESC LIMIT 0, 10 with params: [1] at 2025-05-23 19:51:09
+[2025-05-23 19:51:09] Query executed successfully at 2025-05-23 19:51:09
+[2025-05-23 19:51:09] Fetched notifications: [] at 2025-05-23 19:51:09
+[2025-05-23 19:51:09] Total notifications: 8, Total pages: 1 at 2025-05-23 19:51:09
+[2025-05-23 19:51:10] Session data: {"user_id":1,"login_attempts":0} at 2025-05-23 19:51:10
+[2025-05-23 19:51:10] User ID: 1 at 2025-05-23 19:51:10
+[2025-05-23 19:51:10] Columns in notifications table: ["notification_id","user_id","message","type","is_read","created_at"] at 2025-05-23 19:51:10
+[2025-05-23 19:51:10] Query params: {"filter":"Unread","category":"All Categories","sort":"Newest First","page":"1"} at 2025-05-23 19:51:10
+[2025-05-23 19:51:10] Executing SQL Query: SELECT * FROM notifications WHERE user_id = ? AND is_read = 0 ORDER BY created_at DESC LIMIT 0, 10 with params: [1] at 2025-05-23 19:51:10
+[2025-05-23 19:51:10] Query executed successfully at 2025-05-23 19:51:10
+[2025-05-23 19:51:10] Fetched notifications: [{"notification_id":2,"user_id":1,"message":"Test notification1","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":3,"user_id":1,"message":"Test notification2","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":4,"user_id":1,"message":"Test notification3","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":5,"user_id":1,"message":"Test notification4","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":6,"user_id":1,"message":"Test notification5","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":7,"user_id":1,"message":"Test notification6","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":8,"user_id":1,"message":"Test notification7","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":1,"user_id":1,"message":"Test notification","type":"system","is_read":0,"created_at":"2025-05-24 00:11:04"}] at 2025-05-23 19:51:10
+[2025-05-23 19:51:10] Total notifications: 8, Total pages: 1 at 2025-05-23 19:51:10
+[2025-05-23 19:51:10] Session data: {"user_id":1,"login_attempts":0} at 2025-05-23 19:51:10
+[2025-05-23 19:51:10] User ID: 1 at 2025-05-23 19:51:10
+[2025-05-23 19:51:10] Columns in notifications table: ["notification_id","user_id","message","type","is_read","created_at"] at 2025-05-23 19:51:10
+[2025-05-23 19:51:10] Query params: {"filter":"All","category":"All Categories","sort":"Newest First","page":"1"} at 2025-05-23 19:51:10
+[2025-05-23 19:51:10] Executing SQL Query: SELECT * FROM notifications WHERE user_id = ? ORDER BY created_at DESC LIMIT 0, 10 with params: [1] at 2025-05-23 19:51:10
+[2025-05-23 19:51:10] Query executed successfully at 2025-05-23 19:51:10
+[2025-05-23 19:51:10] Fetched notifications: [{"notification_id":2,"user_id":1,"message":"Test notification1","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":3,"user_id":1,"message":"Test notification2","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":4,"user_id":1,"message":"Test notification3","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":5,"user_id":1,"message":"Test notification4","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":6,"user_id":1,"message":"Test notification5","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":7,"user_id":1,"message":"Test notification6","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":8,"user_id":1,"message":"Test notification7","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":1,"user_id":1,"message":"Test notification","type":"system","is_read":0,"created_at":"2025-05-24 00:11:04"}] at 2025-05-23 19:51:10
+[2025-05-23 19:51:10] Total notifications: 8, Total pages: 1 at 2025-05-23 19:51:10
+[2025-05-23 19:51:11] Session data: {"user_id":1,"login_attempts":0} at 2025-05-23 19:51:11
+[2025-05-23 19:51:11] User ID: 1 at 2025-05-23 19:51:11
+[2025-05-23 19:51:11] Columns in notifications table: ["notification_id","user_id","message","type","is_read","created_at"] at 2025-05-23 19:51:11
+[2025-05-23 19:51:11] Query params: {"filter":"All","category":"order","sort":"Newest First","page":"1"} at 2025-05-23 19:51:11
+[2025-05-23 19:51:11] Executing SQL Query: SELECT * FROM notifications WHERE user_id = ? AND type = ? ORDER BY created_at DESC LIMIT 0, 10 with params: [1,"order"] at 2025-05-23 19:51:11
+[2025-05-23 19:51:11] Query executed successfully at 2025-05-23 19:51:11
+[2025-05-23 19:51:11] Fetched notifications: [] at 2025-05-23 19:51:11
+[2025-05-23 19:51:11] Total notifications: 8, Total pages: 1 at 2025-05-23 19:51:11
+[2025-05-23 19:51:12] Session data: {"user_id":1,"login_attempts":0} at 2025-05-23 19:51:12
+[2025-05-23 19:51:12] User ID: 1 at 2025-05-23 19:51:12
+[2025-05-23 19:51:12] Columns in notifications table: ["notification_id","user_id","message","type","is_read","created_at"] at 2025-05-23 19:51:12
+[2025-05-23 19:51:12] Query params: {"filter":"All","category":"system","sort":"Newest First","page":"1"} at 2025-05-23 19:51:12
+[2025-05-23 19:51:12] Executing SQL Query: SELECT * FROM notifications WHERE user_id = ? AND type = ? ORDER BY created_at DESC LIMIT 0, 10 with params: [1,"system"] at 2025-05-23 19:51:12
+[2025-05-23 19:51:12] Query executed successfully at 2025-05-23 19:51:12
+[2025-05-23 19:51:12] Fetched notifications: [{"notification_id":2,"user_id":1,"message":"Test notification1","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":3,"user_id":1,"message":"Test notification2","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":4,"user_id":1,"message":"Test notification3","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":5,"user_id":1,"message":"Test notification4","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":6,"user_id":1,"message":"Test notification5","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":7,"user_id":1,"message":"Test notification6","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":8,"user_id":1,"message":"Test notification7","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":1,"user_id":1,"message":"Test notification","type":"system","is_read":0,"created_at":"2025-05-24 00:11:04"}] at 2025-05-23 19:51:12
+[2025-05-23 19:51:12] Total notifications: 8, Total pages: 1 at 2025-05-23 19:51:12
+[2025-05-23 19:51:14] Session data: {"user_id":1,"login_attempts":0} at 2025-05-23 19:51:14
+[2025-05-23 19:51:14] User ID: 1 at 2025-05-23 19:51:14
+[2025-05-23 19:51:14] Columns in notifications table: ["notification_id","user_id","message","type","is_read","created_at"] at 2025-05-23 19:51:14
+[2025-05-23 19:51:14] Query params: {"filter":"All","category":"message","sort":"Newest First","page":"1"} at 2025-05-23 19:51:14
+[2025-05-23 19:51:14] Executing SQL Query: SELECT * FROM notifications WHERE user_id = ? AND type = ? ORDER BY created_at DESC LIMIT 0, 10 with params: [1,"message"] at 2025-05-23 19:51:14
+[2025-05-23 19:51:14] Query executed successfully at 2025-05-23 19:51:14
+[2025-05-23 19:51:14] Fetched notifications: [] at 2025-05-23 19:51:14
+[2025-05-23 19:51:14] Total notifications: 8, Total pages: 1 at 2025-05-23 19:51:14
+[2025-05-23 19:51:16] Session data: {"user_id":1,"login_attempts":0} at 2025-05-23 19:51:16
+[2025-05-23 19:51:16] User ID: 1 at 2025-05-23 19:51:16
+[2025-05-23 19:51:16] Columns in notifications table: ["notification_id","user_id","message","type","is_read","created_at"] at 2025-05-23 19:51:16
+[2025-05-23 19:51:16] Query params: {"filter":"All","category":"social","sort":"Newest First","page":"1"} at 2025-05-23 19:51:16
+[2025-05-23 19:51:16] Executing SQL Query: SELECT * FROM notifications WHERE user_id = ? AND type = ? ORDER BY created_at DESC LIMIT 0, 10 with params: [1,"social"] at 2025-05-23 19:51:16
+[2025-05-23 19:51:16] Query executed successfully at 2025-05-23 19:51:16
+[2025-05-23 19:51:16] Fetched notifications: [] at 2025-05-23 19:51:16
+[2025-05-23 19:51:16] Total notifications: 8, Total pages: 1 at 2025-05-23 19:51:16
+[2025-05-23 19:51:18] Session data: {"user_id":1,"login_attempts":0} at 2025-05-23 19:51:18
+[2025-05-23 19:51:18] User ID: 1 at 2025-05-23 19:51:18
+[2025-05-23 19:51:18] Columns in notifications table: ["notification_id","user_id","message","type","is_read","created_at"] at 2025-05-23 19:51:18
+[2025-05-23 19:51:18] Query params: {"filter":"All","category":"events","sort":"Newest First","page":"1"} at 2025-05-23 19:51:18
+[2025-05-23 19:51:18] Executing SQL Query: SELECT * FROM notifications WHERE user_id = ? AND type = ? ORDER BY created_at DESC LIMIT 0, 10 with params: [1,"events"] at 2025-05-23 19:51:18
+[2025-05-23 19:51:18] Query executed successfully at 2025-05-23 19:51:18
+[2025-05-23 19:51:18] Fetched notifications: [] at 2025-05-23 19:51:18
+[2025-05-23 19:51:18] Total notifications: 8, Total pages: 1 at 2025-05-23 19:51:18
+[2025-05-23 19:51:20] Session data: {"user_id":1,"login_attempts":0} at 2025-05-23 19:51:20
+[2025-05-23 19:51:20] User ID: 1 at 2025-05-23 19:51:20
+[2025-05-23 19:51:20] Columns in notifications table: ["notification_id","user_id","message","type","is_read","created_at"] at 2025-05-23 19:51:20
+[2025-05-23 19:51:20] Query params: {"filter":"All","category":"All Categories","sort":"Newest First","page":"1"} at 2025-05-23 19:51:20
+[2025-05-23 19:51:20] Executing SQL Query: SELECT * FROM notifications WHERE user_id = ? ORDER BY created_at DESC LIMIT 0, 10 with params: [1] at 2025-05-23 19:51:20
+[2025-05-23 19:51:20] Query executed successfully at 2025-05-23 19:51:20
+[2025-05-23 19:51:20] Fetched notifications: [{"notification_id":2,"user_id":1,"message":"Test notification1","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":3,"user_id":1,"message":"Test notification2","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":4,"user_id":1,"message":"Test notification3","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":5,"user_id":1,"message":"Test notification4","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":6,"user_id":1,"message":"Test notification5","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":7,"user_id":1,"message":"Test notification6","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":8,"user_id":1,"message":"Test notification7","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":1,"user_id":1,"message":"Test notification","type":"system","is_read":0,"created_at":"2025-05-24 00:11:04"}] at 2025-05-23 19:51:20
+[2025-05-23 19:51:20] Total notifications: 8, Total pages: 1 at 2025-05-23 19:51:20
+[2025-05-23 19:51:23] Session data: {"user_id":1,"login_attempts":0} at 2025-05-23 19:51:23
+[2025-05-23 19:51:23] User ID: 1 at 2025-05-23 19:51:23
+[2025-05-23 19:51:23] Columns in notifications table: ["notification_id","user_id","message","type","is_read","created_at"] at 2025-05-23 19:51:23
+[2025-05-23 19:51:23] Query params: [] at 2025-05-23 19:51:23
+[2025-05-23 19:51:23] Executing SQL Query: SELECT * FROM notifications WHERE user_id = ? ORDER BY created_at DESC LIMIT 0, 10 with params: [1] at 2025-05-23 19:51:23
+[2025-05-23 19:51:23] Query executed successfully at 2025-05-23 19:51:23
+[2025-05-23 19:51:23] Fetched notifications: [{"notification_id":2,"user_id":1,"message":"Test notification1","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":3,"user_id":1,"message":"Test notification2","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":4,"user_id":1,"message":"Test notification3","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":5,"user_id":1,"message":"Test notification4","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":6,"user_id":1,"message":"Test notification5","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":7,"user_id":1,"message":"Test notification6","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":8,"user_id":1,"message":"Test notification7","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":1,"user_id":1,"message":"Test notification","type":"system","is_read":0,"created_at":"2025-05-24 00:11:04"}] at 2025-05-23 19:51:23
+[2025-05-23 19:51:23] Total notifications: 8, Total pages: 1 at 2025-05-23 19:51:23
+[2025-05-23 19:51:41] Session data: {"user_id":1,"login_attempts":0} at 2025-05-23 19:51:41
+[2025-05-23 19:51:41] User ID: 1 at 2025-05-23 19:51:41
+[2025-05-23 19:51:41] Columns in notifications table: ["notification_id","user_id","message","type","is_read","created_at"] at 2025-05-23 19:51:41
+[2025-05-23 19:51:41] Query params: [] at 2025-05-23 19:51:41
+[2025-05-23 19:51:41] Executing SQL Query: SELECT * FROM notifications WHERE user_id = ? ORDER BY created_at DESC LIMIT 0, 10 with params: [1] at 2025-05-23 19:51:41
+[2025-05-23 19:51:41] Query executed successfully at 2025-05-23 19:51:41
+[2025-05-23 19:51:41] Fetched notifications: [{"notification_id":2,"user_id":1,"message":"Test notification1","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":3,"user_id":1,"message":"Test notification2","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":4,"user_id":1,"message":"Test notification3","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":5,"user_id":1,"message":"Test notification4","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":6,"user_id":1,"message":"Test notification5","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":7,"user_id":1,"message":"Test notification6","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":8,"user_id":1,"message":"Test notification7","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":1,"user_id":1,"message":"Test notification","type":"system","is_read":0,"created_at":"2025-05-24 00:11:04"}] at 2025-05-23 19:51:41
+[2025-05-23 19:51:41] Total notifications: 8, Total pages: 1 at 2025-05-23 19:51:41
+[2025-05-23 19:51:42] Session data: {"user_id":1,"login_attempts":0} at 2025-05-23 19:51:42
+[2025-05-23 19:51:42] User ID: 1 at 2025-05-23 19:51:42
+[2025-05-23 19:51:42] Columns in notifications table: ["notification_id","user_id","message","type","is_read","created_at"] at 2025-05-23 19:51:42
+[2025-05-23 19:51:42] Query params: [] at 2025-05-23 19:51:42
+[2025-05-23 19:51:42] Executing SQL Query: SELECT * FROM notifications WHERE user_id = ? ORDER BY created_at DESC LIMIT 0, 10 with params: [1] at 2025-05-23 19:51:42
+[2025-05-23 19:51:42] Query executed successfully at 2025-05-23 19:51:42
+[2025-05-23 19:51:42] Fetched notifications: [{"notification_id":2,"user_id":1,"message":"Test notification1","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":3,"user_id":1,"message":"Test notification2","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":4,"user_id":1,"message":"Test notification3","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":5,"user_id":1,"message":"Test notification4","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":6,"user_id":1,"message":"Test notification5","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":7,"user_id":1,"message":"Test notification6","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":8,"user_id":1,"message":"Test notification7","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":1,"user_id":1,"message":"Test notification","type":"system","is_read":0,"created_at":"2025-05-24 00:11:04"}] at 2025-05-23 19:51:42
+[2025-05-23 19:51:42] Total notifications: 8, Total pages: 1 at 2025-05-23 19:51:42
+[2025-05-23 19:51:56] Session data: {"user_id":1,"login_attempts":0} at 2025-05-23 19:51:56
+[2025-05-23 19:51:56] User ID: 1 at 2025-05-23 19:51:56
+[2025-05-23 19:51:56] Columns in notifications table: ["notification_id","user_id","message","type","is_read","created_at"] at 2025-05-23 19:51:56
+[2025-05-23 19:51:56] Query params: {"filter":"Read","category":"All Categories","sort":"Newest First","page":"1"} at 2025-05-23 19:51:56
+[2025-05-23 19:51:56] Executing SQL Query: SELECT * FROM notifications WHERE user_id = ? AND is_read = 1 ORDER BY created_at DESC LIMIT 0, 10 with params: [1] at 2025-05-23 19:51:56
+[2025-05-23 19:51:56] Query executed successfully at 2025-05-23 19:51:56
+[2025-05-23 19:51:56] Fetched notifications: [] at 2025-05-23 19:51:56
+[2025-05-23 19:51:56] Total notifications: 8, Total pages: 1 at 2025-05-23 19:51:56
+[2025-05-23 19:51:57] Session data: {"user_id":1,"login_attempts":0} at 2025-05-23 19:51:57
+[2025-05-23 19:51:57] User ID: 1 at 2025-05-23 19:51:57
+[2025-05-23 19:51:57] Columns in notifications table: ["notification_id","user_id","message","type","is_read","created_at"] at 2025-05-23 19:51:57
+[2025-05-23 19:51:57] Query params: {"filter":"Unread","category":"All Categories","sort":"Newest First","page":"1"} at 2025-05-23 19:51:57
+[2025-05-23 19:51:57] Executing SQL Query: SELECT * FROM notifications WHERE user_id = ? AND is_read = 0 ORDER BY created_at DESC LIMIT 0, 10 with params: [1] at 2025-05-23 19:51:57
+[2025-05-23 19:51:57] Query executed successfully at 2025-05-23 19:51:57
+[2025-05-23 19:51:57] Fetched notifications: [{"notification_id":2,"user_id":1,"message":"Test notification1","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":3,"user_id":1,"message":"Test notification2","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":4,"user_id":1,"message":"Test notification3","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":5,"user_id":1,"message":"Test notification4","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":6,"user_id":1,"message":"Test notification5","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":7,"user_id":1,"message":"Test notification6","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":8,"user_id":1,"message":"Test notification7","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":1,"user_id":1,"message":"Test notification","type":"system","is_read":0,"created_at":"2025-05-24 00:11:04"}] at 2025-05-23 19:51:57
+[2025-05-23 19:51:57] Total notifications: 8, Total pages: 1 at 2025-05-23 19:51:57
+[2025-05-23 19:51:58] Session data: {"user_id":1,"login_attempts":0} at 2025-05-23 19:51:58
+[2025-05-23 19:51:58] User ID: 1 at 2025-05-23 19:51:58
+[2025-05-23 19:51:59] Columns in notifications table: ["notification_id","user_id","message","type","is_read","created_at"] at 2025-05-23 19:51:59
+[2025-05-23 19:51:59] Query params: {"filter":"Read","category":"All Categories","sort":"Newest First","page":"1"} at 2025-05-23 19:51:59
+[2025-05-23 19:51:59] Executing SQL Query: SELECT * FROM notifications WHERE user_id = ? AND is_read = 1 ORDER BY created_at DESC LIMIT 0, 10 with params: [1] at 2025-05-23 19:51:59
+[2025-05-23 19:51:59] Query executed successfully at 2025-05-23 19:51:59
+[2025-05-23 19:51:59] Fetched notifications: [] at 2025-05-23 19:51:59
+[2025-05-23 19:51:59] Total notifications: 8, Total pages: 1 at 2025-05-23 19:51:59
+[2025-05-23 19:51:59] Session data: {"user_id":1,"login_attempts":0} at 2025-05-23 19:51:59
+[2025-05-23 19:51:59] User ID: 1 at 2025-05-23 19:51:59
+[2025-05-23 19:51:59] Columns in notifications table: ["notification_id","user_id","message","type","is_read","created_at"] at 2025-05-23 19:51:59
+[2025-05-23 19:51:59] Query params: {"filter":"Unread","category":"All Categories","sort":"Newest First","page":"1"} at 2025-05-23 19:51:59
+[2025-05-23 19:51:59] Executing SQL Query: SELECT * FROM notifications WHERE user_id = ? AND is_read = 0 ORDER BY created_at DESC LIMIT 0, 10 with params: [1] at 2025-05-23 19:51:59
+[2025-05-23 19:51:59] Query executed successfully at 2025-05-23 19:51:59
+[2025-05-23 19:51:59] Fetched notifications: [{"notification_id":2,"user_id":1,"message":"Test notification1","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":3,"user_id":1,"message":"Test notification2","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":4,"user_id":1,"message":"Test notification3","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":5,"user_id":1,"message":"Test notification4","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":6,"user_id":1,"message":"Test notification5","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":7,"user_id":1,"message":"Test notification6","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":8,"user_id":1,"message":"Test notification7","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":1,"user_id":1,"message":"Test notification","type":"system","is_read":0,"created_at":"2025-05-24 00:11:04"}] at 2025-05-23 19:51:59
+[2025-05-23 19:51:59] Total notifications: 8, Total pages: 1 at 2025-05-23 19:51:59
+[2025-05-23 19:52:09] Session data: {"user_id":1,"login_attempts":0} at 2025-05-23 19:52:09
+[2025-05-23 19:52:09] User ID: 1 at 2025-05-23 19:52:09
+[2025-05-23 19:52:09] Columns in notifications table: ["notification_id","user_id","message","type","is_read","created_at"] at 2025-05-23 19:52:09
+[2025-05-23 19:52:09] Query params: [] at 2025-05-23 19:52:09
+[2025-05-23 19:52:09] Executing SQL Query: SELECT * FROM notifications WHERE user_id = ? ORDER BY created_at DESC LIMIT 0, 10 with params: [1] at 2025-05-23 19:52:09
+[2025-05-23 19:52:09] Query executed successfully at 2025-05-23 19:52:09
+[2025-05-23 19:52:09] Fetched notifications: [{"notification_id":2,"user_id":1,"message":"Test notification1","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":3,"user_id":1,"message":"Test notification2","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":4,"user_id":1,"message":"Test notification3","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":5,"user_id":1,"message":"Test notification4","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":6,"user_id":1,"message":"Test notification5","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":7,"user_id":1,"message":"Test notification6","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":8,"user_id":1,"message":"Test notification7","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":1,"user_id":1,"message":"Test notification","type":"system","is_read":0,"created_at":"2025-05-24 00:11:04"}] at 2025-05-23 19:52:09
+[2025-05-23 19:52:09] Total notifications: 8, Total pages: 1 at 2025-05-23 19:52:09
+[2025-05-23 19:52:10] Session data: {"user_id":1,"login_attempts":0} at 2025-05-23 19:52:10
+[2025-05-23 19:52:10] User ID: 1 at 2025-05-23 19:52:10
+[2025-05-23 19:52:10] Columns in notifications table: ["notification_id","user_id","message","type","is_read","created_at"] at 2025-05-23 19:52:10
+[2025-05-23 19:52:10] Query params: [] at 2025-05-23 19:52:10
+[2025-05-23 19:52:10] Executing SQL Query: SELECT * FROM notifications WHERE user_id = ? ORDER BY created_at DESC LIMIT 0, 10 with params: [1] at 2025-05-23 19:52:10
+[2025-05-23 19:52:10] Query executed successfully at 2025-05-23 19:52:10
+[2025-05-23 19:52:10] Fetched notifications: [{"notification_id":2,"user_id":1,"message":"Test notification1","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":3,"user_id":1,"message":"Test notification2","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":4,"user_id":1,"message":"Test notification3","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":5,"user_id":1,"message":"Test notification4","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":6,"user_id":1,"message":"Test notification5","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":7,"user_id":1,"message":"Test notification6","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":8,"user_id":1,"message":"Test notification7","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":1,"user_id":1,"message":"Test notification","type":"system","is_read":0,"created_at":"2025-05-24 00:11:04"}] at 2025-05-23 19:52:10
+[2025-05-23 19:52:10] Total notifications: 8, Total pages: 1 at 2025-05-23 19:52:10
+[2025-05-23 19:54:39] Session data: {"user_id":1,"login_attempts":0} at 2025-05-23 19:54:39
+[2025-05-23 19:54:39] User ID: 1 at 2025-05-23 19:54:39
+[2025-05-23 19:54:39] Columns in notifications table: ["notification_id","user_id","message","type","is_read","created_at"] at 2025-05-23 19:54:39
+[2025-05-23 19:54:39] Query params: {"filter":"Unread","category":"All Categories","sort":"Newest First","page":"1"} at 2025-05-23 19:54:39
+[2025-05-23 19:54:39] Executing SQL Query: SELECT * FROM notifications WHERE user_id = ? AND is_read = 0 ORDER BY created_at DESC LIMIT 0, 10 with params: [1] at 2025-05-23 19:54:39
+[2025-05-23 19:54:39] Query executed successfully at 2025-05-23 19:54:39
+[2025-05-23 19:54:39] Fetched notifications: [{"notification_id":2,"user_id":1,"message":"Test notification1","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":3,"user_id":1,"message":"Test notification2","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":4,"user_id":1,"message":"Test notification3","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":5,"user_id":1,"message":"Test notification4","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":6,"user_id":1,"message":"Test notification5","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":7,"user_id":1,"message":"Test notification6","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":8,"user_id":1,"message":"Test notification7","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":1,"user_id":1,"message":"Test notification","type":"system","is_read":0,"created_at":"2025-05-24 00:11:04"}] at 2025-05-23 19:54:39
+[2025-05-23 19:54:39] Total notifications: 8, Total pages: 1 at 2025-05-23 19:54:39
+[2025-05-23 19:55:30] Session data: {"user_id":1,"login_attempts":0} at 2025-05-23 19:55:30
+[2025-05-23 19:55:30] User ID: 1 at 2025-05-23 19:55:30
+[2025-05-23 19:55:30] Columns in notifications table: ["notification_id","user_id","message","type","is_read","created_at"] at 2025-05-23 19:55:30
+[2025-05-23 19:55:30] Query params: {"filter":"Read","category":"All Categories","sort":"Newest First","page":"1"} at 2025-05-23 19:55:30
+[2025-05-23 19:55:30] Executing SQL Query: SELECT * FROM notifications WHERE user_id = ? AND is_read = 1 ORDER BY created_at DESC LIMIT 0, 10 with params: [1] at 2025-05-23 19:55:30
+[2025-05-23 19:55:30] Query executed successfully at 2025-05-23 19:55:30
+[2025-05-23 19:55:30] Fetched notifications: [] at 2025-05-23 19:55:30
+[2025-05-23 19:55:30] Total notifications: 8, Total pages: 1 at 2025-05-23 19:55:30
+[2025-05-23 19:55:31] Session data: {"user_id":1,"login_attempts":0} at 2025-05-23 19:55:31
+[2025-05-23 19:55:31] User ID: 1 at 2025-05-23 19:55:31
+[2025-05-23 19:55:31] Columns in notifications table: ["notification_id","user_id","message","type","is_read","created_at"] at 2025-05-23 19:55:31
+[2025-05-23 19:55:31] Query params: {"filter":"Unread","category":"All Categories","sort":"Newest First","page":"1"} at 2025-05-23 19:55:31
+[2025-05-23 19:55:31] Executing SQL Query: SELECT * FROM notifications WHERE user_id = ? AND is_read = 0 ORDER BY created_at DESC LIMIT 0, 10 with params: [1] at 2025-05-23 19:55:31
+[2025-05-23 19:55:31] Query executed successfully at 2025-05-23 19:55:31
+[2025-05-23 19:55:31] Fetched notifications: [{"notification_id":2,"user_id":1,"message":"Test notification1","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":3,"user_id":1,"message":"Test notification2","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":4,"user_id":1,"message":"Test notification3","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":5,"user_id":1,"message":"Test notification4","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":6,"user_id":1,"message":"Test notification5","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":7,"user_id":1,"message":"Test notification6","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":8,"user_id":1,"message":"Test notification7","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":1,"user_id":1,"message":"Test notification","type":"system","is_read":0,"created_at":"2025-05-24 00:11:04"}] at 2025-05-23 19:55:31
+[2025-05-23 19:55:31] Total notifications: 8, Total pages: 1 at 2025-05-23 19:55:31
+[2025-05-23 19:55:31] Session data: {"user_id":1,"login_attempts":0} at 2025-05-23 19:55:31
+[2025-05-23 19:55:31] User ID: 1 at 2025-05-23 19:55:31
+[2025-05-23 19:55:31] Columns in notifications table: ["notification_id","user_id","message","type","is_read","created_at"] at 2025-05-23 19:55:31
+[2025-05-23 19:55:31] Query params: {"filter":"All","category":"All Categories","sort":"Newest First","page":"1"} at 2025-05-23 19:55:31
+[2025-05-23 19:55:31] Executing SQL Query: SELECT * FROM notifications WHERE user_id = ? ORDER BY created_at DESC LIMIT 0, 10 with params: [1] at 2025-05-23 19:55:31
+[2025-05-23 19:55:31] Query executed successfully at 2025-05-23 19:55:31
+[2025-05-23 19:55:31] Fetched notifications: [{"notification_id":2,"user_id":1,"message":"Test notification1","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":3,"user_id":1,"message":"Test notification2","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":4,"user_id":1,"message":"Test notification3","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":5,"user_id":1,"message":"Test notification4","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":6,"user_id":1,"message":"Test notification5","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":7,"user_id":1,"message":"Test notification6","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":8,"user_id":1,"message":"Test notification7","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":1,"user_id":1,"message":"Test notification","type":"system","is_read":0,"created_at":"2025-05-24 00:11:04"}] at 2025-05-23 19:55:31
+[2025-05-23 19:55:31] Total notifications: 8, Total pages: 1 at 2025-05-23 19:55:31
+[2025-05-23 19:55:36] Session data: {"user_id":1,"login_attempts":0} at 2025-05-23 19:55:36
+[2025-05-23 19:55:36] User ID: 1 at 2025-05-23 19:55:36
+[2025-05-23 19:55:36] Columns in notifications table: ["notification_id","user_id","message","type","is_read","created_at"] at 2025-05-23 19:55:36
+[2025-05-23 19:55:36] Query params: {"filter":"Unread","category":"All Categories","sort":"Newest First","page":"1"} at 2025-05-23 19:55:36
+[2025-05-23 19:55:36] Executing SQL Query: SELECT * FROM notifications WHERE user_id = ? AND is_read = 0 ORDER BY created_at DESC LIMIT 0, 10 with params: [1] at 2025-05-23 19:55:36
+[2025-05-23 19:55:36] Query executed successfully at 2025-05-23 19:55:36
+[2025-05-23 19:55:36] Fetched notifications: [{"notification_id":2,"user_id":1,"message":"Test notification1","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":3,"user_id":1,"message":"Test notification2","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":4,"user_id":1,"message":"Test notification3","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":5,"user_id":1,"message":"Test notification4","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":6,"user_id":1,"message":"Test notification5","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":7,"user_id":1,"message":"Test notification6","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":8,"user_id":1,"message":"Test notification7","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":1,"user_id":1,"message":"Test notification","type":"system","is_read":0,"created_at":"2025-05-24 00:11:04"}] at 2025-05-23 19:55:36
+[2025-05-23 19:55:36] Total notifications: 8, Total pages: 1 at 2025-05-23 19:55:36
+[2025-05-23 19:55:36] Session data: {"user_id":1,"login_attempts":0} at 2025-05-23 19:55:36
+[2025-05-23 19:55:36] User ID: 1 at 2025-05-23 19:55:36
+[2025-05-23 19:55:36] Columns in notifications table: ["notification_id","user_id","message","type","is_read","created_at"] at 2025-05-23 19:55:36
+[2025-05-23 19:55:36] Query params: {"filter":"Unread","category":"All Categories","sort":"Newest First","page":"1"} at 2025-05-23 19:55:36
+[2025-05-23 19:55:36] Executing SQL Query: SELECT * FROM notifications WHERE user_id = ? AND is_read = 0 ORDER BY created_at DESC LIMIT 0, 10 with params: [1] at 2025-05-23 19:55:36
+[2025-05-23 19:55:36] Query executed successfully at 2025-05-23 19:55:36
+[2025-05-23 19:55:36] Fetched notifications: [{"notification_id":2,"user_id":1,"message":"Test notification1","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":3,"user_id":1,"message":"Test notification2","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":4,"user_id":1,"message":"Test notification3","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":5,"user_id":1,"message":"Test notification4","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":6,"user_id":1,"message":"Test notification5","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":7,"user_id":1,"message":"Test notification6","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":8,"user_id":1,"message":"Test notification7","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":1,"user_id":1,"message":"Test notification","type":"system","is_read":0,"created_at":"2025-05-24 00:11:04"}] at 2025-05-23 19:55:36
+[2025-05-23 19:55:36] Total notifications: 8, Total pages: 1 at 2025-05-23 19:55:36
+[2025-05-23 19:55:38] Session data: {"user_id":1,"login_attempts":0} at 2025-05-23 19:55:38
+[2025-05-23 19:55:38] User ID: 1 at 2025-05-23 19:55:38
+[2025-05-23 19:55:38] Columns in notifications table: ["notification_id","user_id","message","type","is_read","created_at"] at 2025-05-23 19:55:38
+[2025-05-23 19:55:38] Query params: [] at 2025-05-23 19:55:38
+[2025-05-23 19:55:38] Executing SQL Query: SELECT * FROM notifications WHERE user_id = ? ORDER BY created_at DESC LIMIT 0, 10 with params: [1] at 2025-05-23 19:55:38
+[2025-05-23 19:55:38] Query executed successfully at 2025-05-23 19:55:38
+[2025-05-23 19:55:38] Fetched notifications: [{"notification_id":2,"user_id":1,"message":"Test notification1","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":3,"user_id":1,"message":"Test notification2","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":4,"user_id":1,"message":"Test notification3","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":5,"user_id":1,"message":"Test notification4","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":6,"user_id":1,"message":"Test notification5","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":7,"user_id":1,"message":"Test notification6","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":8,"user_id":1,"message":"Test notification7","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":1,"user_id":1,"message":"Test notification","type":"system","is_read":0,"created_at":"2025-05-24 00:11:04"}] at 2025-05-23 19:55:38
+[2025-05-23 19:55:38] Total notifications: 8, Total pages: 1 at 2025-05-23 19:55:38
+[2025-05-23 19:55:50] Session data: {"user_id":1,"login_attempts":0} at 2025-05-23 19:55:50
+[2025-05-23 19:55:50] User ID: 1 at 2025-05-23 19:55:50
+[2025-05-23 19:55:50] Columns in notifications table: ["notification_id","user_id","message","type","is_read","created_at"] at 2025-05-23 19:55:50
+[2025-05-23 19:55:50] Query params: {"filter":"All","category":"All Categories","sort":"Newest First","page":"1"} at 2025-05-23 19:55:50
+[2025-05-23 19:55:50] Executing SQL Query: SELECT * FROM notifications WHERE user_id = ? ORDER BY created_at DESC LIMIT 0, 10 with params: [1] at 2025-05-23 19:55:50
+[2025-05-23 19:55:50] Query executed successfully at 2025-05-23 19:55:50
+[2025-05-23 19:55:50] Fetched notifications: [{"notification_id":2,"user_id":1,"message":"Test notification1","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":3,"user_id":1,"message":"Test notification2","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":4,"user_id":1,"message":"Test notification3","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":5,"user_id":1,"message":"Test notification4","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":6,"user_id":1,"message":"Test notification5","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":7,"user_id":1,"message":"Test notification6","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":8,"user_id":1,"message":"Test notification7","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":1,"user_id":1,"message":"Test notification","type":"system","is_read":0,"created_at":"2025-05-24 00:11:04"}] at 2025-05-23 19:55:50
+[2025-05-23 19:55:50] Total notifications: 8, Total pages: 1 at 2025-05-23 19:55:50
+[2025-05-23 19:55:50] Session data: {"user_id":1,"login_attempts":0} at 2025-05-23 19:55:50
+[2025-05-23 19:55:50] User ID: 1 at 2025-05-23 19:55:50
+[2025-05-23 19:55:51] Columns in notifications table: ["notification_id","user_id","message","type","is_read","created_at"] at 2025-05-23 19:55:51
+[2025-05-23 19:55:51] Query params: {"filter":"Read","category":"All Categories","sort":"Newest First","page":"1"} at 2025-05-23 19:55:51
+[2025-05-23 19:55:51] Executing SQL Query: SELECT * FROM notifications WHERE user_id = ? AND is_read = 1 ORDER BY created_at DESC LIMIT 0, 10 with params: [1] at 2025-05-23 19:55:51
+[2025-05-23 19:55:51] Query executed successfully at 2025-05-23 19:55:51
+[2025-05-23 19:55:51] Fetched notifications: [] at 2025-05-23 19:55:51
+[2025-05-23 19:55:51] Total notifications: 8, Total pages: 1 at 2025-05-23 19:55:51
+[2025-05-23 19:55:52] Session data: {"user_id":1,"login_attempts":0} at 2025-05-23 19:55:52
+[2025-05-23 19:55:52] User ID: 1 at 2025-05-23 19:55:52
+[2025-05-23 19:55:52] Columns in notifications table: ["notification_id","user_id","message","type","is_read","created_at"] at 2025-05-23 19:55:52
+[2025-05-23 19:55:52] Query params: {"filter":"Unread","category":"All Categories","sort":"Newest First","page":"1"} at 2025-05-23 19:55:52
+[2025-05-23 19:55:52] Executing SQL Query: SELECT * FROM notifications WHERE user_id = ? AND is_read = 0 ORDER BY created_at DESC LIMIT 0, 10 with params: [1] at 2025-05-23 19:55:52
+[2025-05-23 19:55:52] Query executed successfully at 2025-05-23 19:55:52
+[2025-05-23 19:55:52] Fetched notifications: [{"notification_id":2,"user_id":1,"message":"Test notification1","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":3,"user_id":1,"message":"Test notification2","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":4,"user_id":1,"message":"Test notification3","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":5,"user_id":1,"message":"Test notification4","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":6,"user_id":1,"message":"Test notification5","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":7,"user_id":1,"message":"Test notification6","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":8,"user_id":1,"message":"Test notification7","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":1,"user_id":1,"message":"Test notification","type":"system","is_read":0,"created_at":"2025-05-24 00:11:04"}] at 2025-05-23 19:55:52
+[2025-05-23 19:55:52] Total notifications: 8, Total pages: 1 at 2025-05-23 19:55:52
+[2025-05-23 19:56:27] Session data: {"user_id":1,"login_attempts":0} at 2025-05-23 19:56:27
+[2025-05-23 19:56:27] User ID: 1 at 2025-05-23 19:56:27
+[2025-05-23 19:56:27] Columns in notifications table: ["notification_id","user_id","message","type","is_read","created_at"] at 2025-05-23 19:56:27
+[2025-05-23 19:56:27] Query params: {"filter":"Read","category":"All Categories","sort":"Newest First","page":"1"} at 2025-05-23 19:56:27
+[2025-05-23 19:56:27] Executing SQL Query: SELECT * FROM notifications WHERE user_id = ? AND is_read = 1 ORDER BY created_at DESC LIMIT 0, 10 with params: [1] at 2025-05-23 19:56:27
+[2025-05-23 19:56:27] Query executed successfully at 2025-05-23 19:56:27
+[2025-05-23 19:56:27] Fetched notifications: [] at 2025-05-23 19:56:27
+[2025-05-23 19:56:27] Total notifications: 8, Total pages: 1 at 2025-05-23 19:56:27
+[2025-05-23 19:56:28] Session data: {"user_id":1,"login_attempts":0} at 2025-05-23 19:56:28
+[2025-05-23 19:56:28] User ID: 1 at 2025-05-23 19:56:28
+[2025-05-23 19:56:28] Columns in notifications table: ["notification_id","user_id","message","type","is_read","created_at"] at 2025-05-23 19:56:28
+[2025-05-23 19:56:28] Query params: {"filter":"Unread","category":"All Categories","sort":"Newest First","page":"1"} at 2025-05-23 19:56:28
+[2025-05-23 19:56:28] Executing SQL Query: SELECT * FROM notifications WHERE user_id = ? AND is_read = 0 ORDER BY created_at DESC LIMIT 0, 10 with params: [1] at 2025-05-23 19:56:28
+[2025-05-23 19:56:28] Query executed successfully at 2025-05-23 19:56:28
+[2025-05-23 19:56:28] Fetched notifications: [{"notification_id":2,"user_id":1,"message":"Test notification1","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":3,"user_id":1,"message":"Test notification2","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":4,"user_id":1,"message":"Test notification3","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":5,"user_id":1,"message":"Test notification4","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":6,"user_id":1,"message":"Test notification5","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":7,"user_id":1,"message":"Test notification6","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":8,"user_id":1,"message":"Test notification7","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":1,"user_id":1,"message":"Test notification","type":"system","is_read":0,"created_at":"2025-05-24 00:11:04"}] at 2025-05-23 19:56:28
+[2025-05-23 19:56:28] Total notifications: 8, Total pages: 1 at 2025-05-23 19:56:28
+[2025-05-23 19:56:28] Session data: {"user_id":1,"login_attempts":0} at 2025-05-23 19:56:28
+[2025-05-23 19:56:28] User ID: 1 at 2025-05-23 19:56:28
+[2025-05-23 19:56:28] Columns in notifications table: ["notification_id","user_id","message","type","is_read","created_at"] at 2025-05-23 19:56:28
+[2025-05-23 19:56:28] Query params: {"filter":"All","category":"All Categories","sort":"Newest First","page":"1"} at 2025-05-23 19:56:28
+[2025-05-23 19:56:28] Executing SQL Query: SELECT * FROM notifications WHERE user_id = ? ORDER BY created_at DESC LIMIT 0, 10 with params: [1] at 2025-05-23 19:56:28
+[2025-05-23 19:56:28] Query executed successfully at 2025-05-23 19:56:28
+[2025-05-23 19:56:28] Fetched notifications: [{"notification_id":2,"user_id":1,"message":"Test notification1","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":3,"user_id":1,"message":"Test notification2","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":4,"user_id":1,"message":"Test notification3","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":5,"user_id":1,"message":"Test notification4","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":6,"user_id":1,"message":"Test notification5","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":7,"user_id":1,"message":"Test notification6","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":8,"user_id":1,"message":"Test notification7","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":1,"user_id":1,"message":"Test notification","type":"system","is_read":0,"created_at":"2025-05-24 00:11:04"}] at 2025-05-23 19:56:28
+[2025-05-23 19:56:28] Total notifications: 8, Total pages: 1 at 2025-05-23 19:56:28
+[2025-05-23 19:56:38] Session data: {"user_id":1,"login_attempts":0} at 2025-05-23 19:56:38
+[2025-05-23 19:56:38] User ID: 1 at 2025-05-23 19:56:38
+[2025-05-23 19:56:38] Columns in notifications table: ["notification_id","user_id","message","type","is_read","created_at"] at 2025-05-23 19:56:38
+[2025-05-23 19:56:38] Query params: [] at 2025-05-23 19:56:38
+[2025-05-23 19:56:38] Executing SQL Query: SELECT * FROM notifications WHERE user_id = ? ORDER BY created_at DESC LIMIT 0, 10 with params: [1] at 2025-05-23 19:56:38
+[2025-05-23 19:56:38] Query executed successfully at 2025-05-23 19:56:38
+[2025-05-23 19:56:38] Fetched notifications: [{"notification_id":2,"user_id":1,"message":"Test notification1","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":3,"user_id":1,"message":"Test notification2","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":4,"user_id":1,"message":"Test notification3","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":5,"user_id":1,"message":"Test notification4","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":6,"user_id":1,"message":"Test notification5","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":7,"user_id":1,"message":"Test notification6","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":8,"user_id":1,"message":"Test notification7","type":"system","is_read":0,"created_at":"2025-05-24 00:17:37"},{"notification_id":1,"user_id":1,"message":"Test notification","type":"system","is_read":0,"created_at":"2025-05-24 00:11:04"}] at 2025-05-23 19:56:38
+[2025-05-23 19:56:38] Total notifications: 8, Total pages: 1 at 2025-05-23 19:56:38
