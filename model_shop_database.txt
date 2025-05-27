@@ -13,7 +13,6 @@ CREATE TABLE IF NOT EXISTS users (
     full_name VARCHAR(255),
     gender VARCHAR(50),
     profile_image VARCHAR(255),
-    bio TEXT,
     is_active BOOLEAN DEFAULT TRUE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     INDEX idx_email (email),
@@ -163,18 +162,22 @@ CREATE TABLE IF NOT EXISTS comments (
     INDEX idx_product_id (product_id)
 );
 
--- Bảng 12: favorites
-CREATE TABLE IF NOT EXISTS favorites (
-    favorite_id INT AUTO_INCREMENT PRIMARY KEY,
+-- Bảng 12: favorites/wishlists
+CREATE TABLE IF NOT EXISTS user_saved_items (
+    saved_id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT NOT NULL,
     product_id INT,
     post_id INT,
+    save_type ENUM('favorite', 'wishlist') DEFAULT 'favorite',
+    saved_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE,
     FOREIGN KEY (product_id) REFERENCES products(product_id) ON DELETE CASCADE,
     FOREIGN KEY (post_id) REFERENCES posts(post_id) ON DELETE CASCADE,
+    UNIQUE KEY uniq_user_saved (user_id, product_id, post_id),
     INDEX idx_user_id (user_id),
     INDEX idx_product_id (product_id),
-    INDEX idx_post_id (post_id)
+    INDEX idx_post_id (post_id),
+    INDEX idx_save_type (save_type)
 );
 
 -- Bảng 13: guest_carts
@@ -247,18 +250,6 @@ CREATE TABLE IF NOT EXISTS reports (
     INDEX idx_target_product_id (target_product_id)
 );
 
--- Bảng 18: logs
-CREATE TABLE IF NOT EXISTS logs (
-    log_id INT AUTO_INCREMENT PRIMARY KEY,
-    user_id INT,
-    action VARCHAR(255) NOT NULL,
-    ip_address VARCHAR(45),
-    user_agent TEXT,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE SET NULL,
-    INDEX idx_user_id (user_id),
-    INDEX idx_action (action)
-);
 
 -- Bảng 19: promotions
 CREATE TABLE IF NOT EXISTS promotions (
@@ -338,21 +329,6 @@ CREATE TABLE IF NOT EXISTS transactions (
     INDEX idx_transaction_status (transaction_status)
 );
 
--- Bảng 24: wishlists
-CREATE TABLE IF NOT EXISTS wishlists (
-    wishlist_id INT AUTO_INCREMENT PRIMARY KEY,
-    user_id INT NOT NULL,
-    product_id INT,
-    post_id INT,
-    added_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE,
-    FOREIGN KEY (product_id) REFERENCES products(product_id) ON DELETE CASCADE,
-    FOREIGN KEY (post_id) REFERENCES posts(post_id) ON DELETE CASCADE,
-    UNIQUE KEY uniq_wishlist (user_id, product_id, post_id),
-    INDEX idx_user_id (user_id),
-    INDEX idx_product_id (product_id),
-    INDEX idx_post_id (post_id)
-);
 
 -- Bảng 25: likes
 CREATE TABLE IF NOT EXISTS likes (

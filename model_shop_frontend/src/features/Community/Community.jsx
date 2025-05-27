@@ -1,11 +1,15 @@
+import { useOutletContext } from "react-router-dom";
 import LeftSidebar from "./LeftSidebar";
 import FeaturedContent from "./FeaturedContent";
 import ForumsSection from "./ForumsSection";
 import ShowcaseSection from "./ShowcaseSection";
 import TutorialsEvents from "./TutorialsEvents";
 import RightSidebar from "./RightSidebar";
+import api from "../../api/index";
 
-function Community({ user }) {
+function Community() {
+  const { user } = useOutletContext(); // Access user from Outlet context
+
   return (
     <div className="bg-gray-50 font-inter">
       <section className="py-10">
@@ -18,7 +22,7 @@ function Community({ user }) {
               <ShowcaseSection />
               <TutorialsEvents />
             </div>
-            <RightSidebar user={user} />
+            {user && <RightSidebar user={user} />}
           </div>
         </div>
       </section>

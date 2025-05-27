@@ -21,8 +21,10 @@ const ProductManagement = () => {
     price: "",
     description: "",
     status: "new",
+    primary_image_index: -1,
   });
   const [images, setImages] = useState([]);
+  const [existingImages, setExistingImages] = useState([]);
   const [editProductId, setEditProductId] = useState(null);
 
   useEffect(() => {
@@ -117,8 +119,10 @@ const ProductManagement = () => {
       price: "",
       description: "",
       status: "new",
+      primary_image_index: -1,
     });
     setImages([]);
+    setExistingImages([]);
     setShowModal(true);
     setError("");
   };
@@ -133,8 +137,10 @@ const ProductManagement = () => {
       price: product.price || "",
       description: product.description || "",
       status: product.status || "new",
+      primary_image_index: -1,
     });
     setImages([]);
+    setExistingImages(product.images || []);
     setShowModal(true);
     setError("");
   };
@@ -143,6 +149,7 @@ const ProductManagement = () => {
     setShowModal(false);
     setEditProductId(null);
     setError("");
+    setExistingImages([]);
   };
 
   const handleChange = (e) => {
@@ -176,12 +183,39 @@ const ProductManagement = () => {
     } else {
       setError("");
       setImages(files);
+      setFormData((prev) => ({
+        ...prev,
+        primary_image_index: files.length > 0 ? 0 : -1,
+      }));
+    }
+  };
+
+  const handlePrimaryImageSelect = (index) => {
+    setFormData((prev) => ({
+      ...prev,
+      primary_image_index: index,
+    }));
+  };
+
+  const handleRemoveExistingImage = async (imageId) => {
+    if (!window.confirm("Are you sure you want to delete this image?")) return;
+    try {
+      const response = await api.delete(`/product_images.php?id=${imageId}`);
+      if (response.data.success) {
+        setExistingImages((prev) => prev.filter((img) => img.image_id !== imageId));
+        setError("");
+      } else {
+        setError(response.data.error || "Failed to delete image");
+      }
+    } catch (err) {
+      setError("Failed to delete image: " + (err.message || "Unknown error"));
+      console.error(err);
     }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (images.length > 0 && error) return; // Prevent submission if image validation failed
+    if (images.length > 0 && error) return;
 
     const data = new FormData();
     data.append("name", formData.name);
@@ -190,6 +224,7 @@ const ProductManagement = () => {
     data.append("price", formData.price);
     data.append("description", formData.description);
     data.append("status", formData.status);
+    data.append("primary_image_index", formData.primary_image_index);
     for (let i = 0; i < images.length; i++) {
       data.append("images[]", images[i]);
     }
@@ -478,7 +513,52 @@ const ProductManagement = () => {
                   onChange={handleImageChange}
                   className="w-full px-4 py-2 rounded-lg border focus:outline-none focus:ring-2 focus:ring-primary"
                 />
+                {images.length > 0 && (
+                  <div className="mt-2">
+                    <label className="block text-gray-700 mb-2">Select Primary Image</label>
+                    <div className="grid grid-cols-4 gap-2">
+                      {Array.from(images).map((img, index) => (
+                        <div key={index} className="relative">
+                          <img
+                            src={URL.createObjectURL(img)}
+                            alt={`Preview ${index}`}
+                            className={`w-full h-24 object-cover rounded-lg border-2 ${
+                              formData.primary_image_index === index
+                                ? "border-primary"
+                                : "border-gray-200"
+                            }`}
+                            onClick={() => handlePrimaryImageSelect(index)}
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
+              {modalMode === "edit" && existingImages.length > 0 && (
+                <div className="mb-4">
+                  <label className="block text-gray-700 mb-2">Existing Images</label>
+                  <div className="grid grid-cols-4 gap-2">
+                    {existingImages.map((img, index) => (
+                      <div key={img.image_id} className="relative">
+                        <img
+                          src={`/Uploads/${img.image_url}`}
+                          alt={`Existing ${index}`}
+                          className={`w-full h-24 object-cover rounded-lg border-2 ${
+                            img.is_main ? "border-primary" : "border-gray-200"
+                          }`}
+                        />
+                        <button
+                          onClick={() => handleRemoveExistingImage(img.image_id)}
+                          className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center"
+                        >
+                          <i className="ri-close-line"></i>
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
               <div className="flex gap-4">
                 <button
                   type="submit"

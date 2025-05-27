@@ -2,6 +2,7 @@
 require_once '../config/database.php';
 require_once '../config/functions.php';
 
+// Set headers for CORS and JSON response
 header('Content-Type: application/json');
 header('Access-Control-Allow-Origin: http://localhost:5173');
 header('Access-Control-Allow-Methods: GET, POST');
@@ -18,11 +19,11 @@ if (!$conn) {
 }
 
 try {
+    // Start session and validate user
     session_start();
-    log_error("Session data: " . json_encode($_SESSION) . " at " . date('Y-m-d H:i:s'));
     if (!isset($_SESSION['user_id'])) {
         http_response_code(403);
-        $errorMsg = 'Unauthorized';
+        $errorMsg = 'Unauthorized: No active session';
         log_error($errorMsg);
         echo json_encode(['success' => false, 'error' => $errorMsg]);
         $conn = null;
@@ -30,20 +31,20 @@ try {
     }
 
     $user_id = $_SESSION['user_id'];
-    log_error("User ID: $user_id at " . date('Y-m-d H:i:s'));
-
     if (!is_numeric($user_id) || $user_id <= 0) {
         http_response_code(400);
-        $errorMsg = "Invalid user_id format: $user_id";
+        $errorMsg = "Invalid user_id: $user_id";
         log_error($errorMsg);
         echo json_encode(['success' => false, 'error' => $errorMsg]);
         $conn = null;
         exit;
     }
 
-    $stmt = $conn->prepare("SELECT user_id FROM users WHERE user_id = ? AND is_active = TRUE");
-    $stmt->execute([$user_id]);
-    if ($stmt->rowCount() === 0) {
+    // Validate user exists and is active
+    $stmt = $conn->prepare("SELECT user_id, is_active FROM users WHERE user_id = :user_id");
+    $stmt->execute(['user_id' => $user_id]);
+    $user = $stmt->fetch(PDO::FETCH_ASSOC);
+    if (!$user || !$user['is_active']) {
         http_response_code(403);
         $errorMsg = "User not found or inactive";
         log_error($errorMsg);
@@ -52,6 +53,7 @@ try {
         exit;
     }
 
+    // Validate notifications table
     $tableCheck = $conn->query("SHOW TABLES LIKE 'notifications'");
     if ($tableCheck->rowCount() === 0) {
         throw new Exception("Table 'notifications' does not exist");
@@ -64,74 +66,92 @@ try {
     if (!empty($missingColumns)) {
         throw new Exception("Missing columns in notifications table: " . implode(', ', $missingColumns));
     }
-    log_error("Columns in notifications table: " . json_encode($columns) . " at " . date('Y-m-d H:i:s'));
 
-    if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
-        if ($_POST['action'] === 'markAsRead') {
-            $stmt = $conn->prepare("UPDATE notifications SET is_read = 1 WHERE user_id = ? AND is_read = 0");
-            if (!$stmt->execute([$user_id])) {
-                $errorInfo = $stmt->errorInfo();
-                $errorMsg = "Failed to execute update: " . json_encode($errorInfo);
-                log_error($errorMsg);
-                echo json_encode(['success' => false, 'error' => $errorMsg]);
-                $conn = null;
-                exit;
-            }
-            $rowsAffected = $stmt->rowCount();
-            if ($rowsAffected > 0) {
-                echo json_encode(['success' => true, 'status' => 'success', 'rows_affected' => $rowsAffected]);
-            } else {
-                echo json_encode(['success' => false, 'error' => 'No unread notifications found to mark as read']);
-            }
-            $conn = null;
-            exit;
-        } elseif ($_POST['action'] === 'markSingleAsRead' && isset($_POST['notification_id'])) {
-            $notification_id = (int)$_POST['notification_id'];
-            if ($notification_id <= 0) {
-                $errorMsg = "Invalid notification_id";
-                log_error($errorMsg);
-                echo json_encode(['success' => false, 'error' => $errorMsg]);
-                $conn = null;
-                exit;
-            }
-            $stmt = $conn->prepare("UPDATE notifications SET is_read = 1 WHERE notification_id = ? AND user_id = ? AND is_read = 0");
-            if (!$stmt->execute([$notification_id, $user_id])) {
-                $errorInfo = $stmt->errorInfo();
-                $errorMsg = "Failed to execute update: " . json_encode($errorInfo);
-                log_error($errorMsg);
-                echo json_encode(['success' => false, 'error' => $errorMsg]);
-                $conn = null;
-                exit;
-            }
-            $rowsAffected = $stmt->rowCount();
-            if ($rowsAffected > 0) {
-                echo json_encode(['success' => true, 'status' => 'success']);
-            } else {
-                echo json_encode(['success' => false, 'error' => 'Notification not found, not owned by user, or already read']);
-            }
-            $conn = null;
-            exit;
-        } elseif ($_POST['action'] === 'delete') {
-            $stmt = $conn->prepare("DELETE FROM notifications WHERE user_id = ?");
-            if (!$stmt->execute([$user_id])) {
-                $errorInfo = $stmt->errorInfo();
-                $errorMsg = "Failed to execute delete: " . json_encode($errorInfo);
-                log_error($errorMsg);
-                echo json_encode(['success' => false, 'error' => $errorMsg]);
-                $conn = null;
-                exit;
-            }
-            echo json_encode(['success' => true, 'status' => 'success']);
+    // Clear SSE cache when notifications are updated
+    $cache_file = sys_get_temp_dir() . "/notification_count_{$user_id}.txt";
+    $clearCache = function () use ($cache_file) {
+        if (file_exists($cache_file)) {
+            unlink($cache_file);
+        }
+    };
+
+    // Handle POST requests
+    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+        $postData = json_decode(file_get_contents('php://input'), true);
+        if (!isset($postData['action'])) {
+            http_response_code(400);
+            $errorMsg = 'Invalid action';
+            log_error($errorMsg);
+            echo json_encode(['success' => false, 'error' => $errorMsg]);
             $conn = null;
             exit;
         }
+
+        if ($postData['action'] === 'markAsRead') {
+            $stmt = $conn->prepare("UPDATE notifications SET is_read = 1 WHERE user_id = :user_id AND is_read = 0");
+            if (!$stmt->execute(['user_id' => $user_id])) {
+                $errorMsg = "Failed to mark notifications as read: " . json_encode($stmt->errorInfo());
+                log_error($errorMsg);
+                echo json_encode(['success' => false, 'error' => $errorMsg]);
+            } else {
+                $rowsAffected = $stmt->rowCount();
+                $clearCache();
+                log_error("Marked $rowsAffected notifications as read for user_id: $user_id");
+                echo json_encode(['success' => true, 'rows_affected' => $rowsAffected]);
+            }
+            $conn = null;
+            exit;
+        } elseif ($postData['action'] === 'markSingleAsRead' && isset($postData['notification_id'])) {
+            $notification_id = (int)$postData['notification_id'];
+            if ($notification_id <= 0) {
+                http_response_code(400);
+                $errorMsg = "Invalid notification_id: $notification_id";
+                log_error($errorMsg);
+                echo json_encode(['success' => false, 'error' => $errorMsg]);
+                $conn = null;
+                exit;
+            }
+            $stmt = $conn->prepare("UPDATE notifications SET is_read = 1 WHERE notification_id = :notification_id AND user_id = :user_id AND is_read = 0");
+            if (!$stmt->execute(['notification_id' => $notification_id, 'user_id' => $user_id])) {
+                $errorMsg = "Failed to mark notification as read: " . json_encode($stmt->errorInfo());
+                log_error($errorMsg);
+                echo json_encode(['success' => false, 'error' => $errorMsg]);
+            } else {
+                $rowsAffected = $stmt->rowCount();
+                $clearCache();
+                log_error("Marked notification $notification_id as read for user_id: $user_id");
+                echo json_encode(['success' => true, 'rows_affected' => $rowsAffected]);
+            }
+            $conn = null;
+            exit;
+        } elseif ($postData['action'] === 'delete') {
+            $stmt = $conn->prepare("DELETE FROM notifications WHERE user_id = :user_id");
+            if (!$stmt->execute(['user_id' => $user_id])) {
+                $errorMsg = "Failed to delete notifications: " . json_encode($stmt->errorInfo());
+                log_error($errorMsg);
+                echo json_encode(['success' => false, 'error' => $errorMsg]);
+            } else {
+                $rowsAffected = $stmt->rowCount();
+                $clearCache();
+                log_error("Deleted $rowsAffected notifications for user_id: $user_id");
+                echo json_encode(['success' => true, 'rows_affected' => $rowsAffected]);
+            }
+            $conn = null;
+            exit;
+        }
+        http_response_code(400);
+        $errorMsg = 'Invalid action';
+        log_error($errorMsg);
+        echo json_encode(['success' => false, 'error' => $errorMsg]);
+        $conn = null;
+        exit;
     }
 
+    // Handle GET requests
     if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['action']) && $_GET['action'] === 'count') {
-        $stmt = $conn->prepare("SELECT COUNT(*) FROM notifications WHERE user_id = ? AND is_read = 0");
-        if (!$stmt->execute([$user_id])) {
-            $errorInfo = $stmt->errorInfo();
-            $errorMsg = "Failed to execute count: " . json_encode($errorInfo);
+        $stmt = $conn->prepare("SELECT COUNT(*) FROM notifications WHERE user_id = :user_id AND is_read = 0");
+        if (!$stmt->execute(['user_id' => $user_id])) {
+            $errorMsg = "Failed to count notifications: " . json_encode($stmt->errorInfo());
             log_error($errorMsg);
             echo json_encode(['success' => false, 'error' => $errorMsg]);
             $conn = null;
@@ -143,6 +163,7 @@ try {
         exit;
     }
 
+    // Fetch notifications with filters
     $validFilters = ['All', 'Unread', 'Read'];
     $validCategories = ['All Categories', 'order', 'system', 'custom', 'message', 'social', 'shopping', 'events', 'account'];
     $validSorts = ['Newest First', 'Oldest First'];
@@ -153,37 +174,51 @@ try {
     $page = max(1, (int)($_GET['page'] ?? 1));
     $perPage = 10;
 
-    log_error("Query params: " . json_encode($_GET) . " at " . date('Y-m-d H:i:s'));
-    $query = "SELECT * FROM notifications WHERE user_id = ?";
-    $params = [$user_id];
-    if ($filter === 'Unread') $query .= " AND is_read = 0";
-    if ($filter === 'Read') $query .= " AND is_read = 1";
+    $offset = ($page - 1) * $perPage;
+
+    $query = "SELECT notification_id, user_id, message, type, is_read, created_at FROM notifications WHERE user_id = :user_id";
+    $params = ['user_id' => $user_id];
+    if ($filter === 'Unread') {
+        $query .= " AND is_read = :is_read";
+        $params['is_read'] = 0;
+    } elseif ($filter === 'Read') {
+        $query .= " AND is_read = :is_read";
+        $params['is_read'] = 1;
+    }
     if ($category !== 'All Categories') {
-        $query .= " AND type = ?";
-        $params[] = $category;
+        $query .= " AND type = :category";
+        $params['category'] = strtolower($category); // Ensure case consistency
     }
     $query .= $sort === 'Newest First' ? " ORDER BY created_at DESC" : " ORDER BY created_at ASC";
-    $offset = ($page - 1) * $perPage;
+    // Append LIMIT clause directly with sanitized integers
     $query .= " LIMIT " . (int)$offset . ", " . (int)$perPage;
 
-    log_error("Executing SQL Query: $query with params: " . json_encode($params) . " at " . date('Y-m-d H:i:s'));
     $stmt = $conn->prepare($query);
     if (!$stmt->execute($params)) {
-        $errorInfo = $stmt->errorInfo();
-        $errorMsg = "Failed to execute query: " . json_encode($errorInfo);
+        $errorMsg = "Failed to fetch notifications: " . json_encode($stmt->errorInfo());
         log_error($errorMsg);
         echo json_encode(['success' => false, 'error' => $errorMsg]);
         $conn = null;
         exit;
     }
-    log_error("Query executed successfully at " . date('Y-m-d H:i:s'));
     $notifications = $stmt->fetchAll(PDO::FETCH_ASSOC);
-    log_error("Fetched notifications: " . json_encode($notifications) . " at " . date('Y-m-d H:i:s'));
 
-    $totalStmt = $conn->prepare("SELECT COUNT(*) FROM notifications WHERE user_id = ?");
-    if (!$totalStmt->execute([$user_id])) {
-        $errorInfo = $totalStmt->errorInfo();
-        $errorMsg = "Failed to execute count query: " . json_encode($errorInfo);
+    $totalQuery = "SELECT COUNT(*) FROM notifications WHERE user_id = :user_id";
+    $totalParams = ['user_id' => $user_id];
+    if ($filter === 'Unread') {
+        $totalQuery .= " AND is_read = :is_read";
+        $totalParams['is_read'] = 0;
+    } elseif ($filter === 'Read') {
+        $totalQuery .= " AND is_read = :is_read";
+        $totalParams['is_read'] = 1;
+    }
+    if ($category !== 'All Categories') {
+        $totalQuery .= " AND type = :category";
+        $totalParams['category'] = strtolower($category);
+    }
+    $totalStmt = $conn->prepare($totalQuery);
+    if (!$totalStmt->execute($totalParams)) {
+        $errorMsg = "Failed to count total notifications: " . json_encode($totalStmt->errorInfo());
         log_error($errorMsg);
         echo json_encode(['success' => false, 'error' => $errorMsg]);
         $conn = null;
@@ -191,7 +226,6 @@ try {
     }
     $total = $totalStmt->fetchColumn();
     $totalPages = ceil($total / $perPage);
-    log_error("Total notifications: $total, Total pages: $totalPages at " . date('Y-m-d H:i:s'));
 
     echo json_encode([
         'success' => true,
@@ -200,11 +234,9 @@ try {
     ]);
 } catch (Exception $e) {
     http_response_code(500);
-    $errorMsg = "Server error: " . $e->getMessage() . " at " . date('Y-m-d H:i:s');
+    $errorMsg = "Server error: " . $e->getMessage();
     log_error($errorMsg);
     echo json_encode(['success' => false, 'error' => $errorMsg]);
-    $conn = null;
-    exit;
 }
 
 $conn = null;

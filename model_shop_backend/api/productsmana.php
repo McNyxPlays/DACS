@@ -57,6 +57,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
             $stmt->execute([$id]);
             $product = $stmt->fetch(PDO::FETCH_ASSOC);
             if ($product) {
+                // Fetch images with is_main status
+                $stmt = $conn->prepare("
+                    SELECT image_id, image_url, is_main
+                    FROM product_images
+                    WHERE product_id = ?
+                    ORDER BY is_main DESC, image_id ASC
+                ");
+                $stmt->execute([$id]);
+                $images = $stmt->fetchAll(PDO::FETCH_ASSOC);
+                $product['images'] = $images;
                 echo json_encode(['success' => true, 'data' => [$product]]);
             } else {
                 http_response_code(404);
@@ -115,6 +125,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $description = $_POST['description'] ?? '';
     $status = $_POST['status'] ?? 'new';
     $images = isset($_FILES['images']) ? $_FILES['images'] : null;
+    $primary_image_index = isset($_POST['primary_image_index']) ? intval($_POST['primary_image_index']) : -1;
 
     if (empty($name) || $category_id <= 0 || $brand_id <= 0 || empty($price)) {
         http_response_code(400);
@@ -161,7 +172,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         // Handle image uploads
         if ($images && $images['name'][0] !== '') {
-            $upload_dir = '../uploads/';
+            $upload_dir = '../Uploads/';
             if (!is_dir($upload_dir)) {
                 mkdir($upload_dir, 0777, true);
             }
@@ -176,11 +187,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $new_filename = uniqid() . '.' . $ext;
                     $destination = $upload_dir . $new_filename;
                     if (move_uploaded_file($images['tmp_name'][$key], $destination)) {
+                        $is_main = ($key === $primary_image_index) ? 1 : 0;
                         $stmt = $conn->prepare("
-                            INSERT INTO product_images (product_id, image_url)
-                            VALUES (?, ?)
+                            INSERT INTO product_images (product_id, image_url, is_main)
+                            VALUES (?, ?, ?)
                         ");
-                        $stmt->execute([$product_id, $new_filename]);
+                        $stmt->execute([$product_id, $new_filename, $is_main]);
                     }
                 }
             }
@@ -203,6 +215,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'PUT') {
     $description = $put_data['description'] ?? '';
     $status = $put_data['status'] ?? 'new';
     $images = isset($_FILES['images']) ? $_FILES['images'] : null;
+    $primary_image_index = isset($put_data['primary_image_index']) ? intval($put_data['primary_image_index']) : -1;
 
     if ($id <= 0 || empty($name) || $category_id <= 0 || $brand_id <= 0 || empty($price)) {
         http_response_code(400);
@@ -264,6 +277,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'PUT') {
                 mkdir($upload_dir, 0777, true);
             }
 
+            // Reset is_main for existing images
+            $stmt = $conn->prepare("UPDATE product_images SET is_main = 0 WHERE product_id = ?");
+            $stmt->execute([$id]);
+
             foreach ($images['name'] as $key => $image_name) {
                 if ($images['error'][$key] === UPLOAD_ERR_OK) {
                     $ext = strtolower(pathinfo($image_name, PATHINFO_EXTENSION));
@@ -274,11 +291,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'PUT') {
                     $new_filename = uniqid() . '.' . $ext;
                     $destination = $upload_dir . $new_filename;
                     if (move_uploaded_file($images['tmp_name'][$key], $destination)) {
+                        $is_main = ($key === $primary_image_index) ? 1 : 0;
                         $stmt = $conn->prepare("
-                            INSERT INTO product_images (product_id, image_url)
-                            VALUES (?, ?)
+                            INSERT INTO product_images (product_id, image_url, is_main)
+                            VALUES (?, ?, ?)
                         ");
-                        $stmt->execute([$id, $new_filename]);
+                        $stmt->execute([$id, $new_filename, $is_main]);
                     }
                 }
             }
@@ -314,7 +332,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'DELETE') {
         $stmt = $conn->prepare("DELETE FROM product_images WHERE product_id = ?");
         $stmt->execute([$id]);
 
-        // Delete product
         $stmt = $conn->prepare("DELETE FROM products WHERE product_id = ?");
         $stmt->execute([$id]);
 

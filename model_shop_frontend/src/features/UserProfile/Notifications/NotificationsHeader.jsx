@@ -12,9 +12,6 @@ const NotificationsHeader = ({ sort, onSortChange, onMarkAsRead, onDelete }) => 
           <option value="Newest First">Newest First</option>
           <option value="Oldest First">Oldest First</option>
         </select>
-        <select className="px-4 py-2 rounded bg-gray-100 focus:outline-none ml-2">
-          <option>All</option>
-        </select>
       </div>
       <div>
         <button

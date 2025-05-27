@@ -43,12 +43,13 @@ try {
                 exit;
             }
 
+            // Fetch favorites (save_type = 'favorite') for the user
             $stmt = $conn->prepare("
-                SELECT f.favorite_id, p.product_id, p.name, p.price, pi.image_url
-                FROM favorites f
-                JOIN products p ON f.product_id = p.product_id
+                SELECT usi.saved_id, p.product_id, p.name, p.price, pi.image_url
+                FROM user_saved_items usi
+                JOIN products p ON usi.product_id = p.product_id
                 LEFT JOIN product_images pi ON p.product_id = pi.product_id AND pi.is_main = 1
-                WHERE f.user_id = ?
+                WHERE usi.user_id = ? AND usi.save_type = 'favorite' AND usi.product_id IS NOT NULL
             ");
             $stmt->execute([$user_id]);
             $favorites = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -79,12 +80,14 @@ try {
                 exit;
             }
 
+            // Validate session
             if (isset($_SESSION['user_id']) && $user_id !== (int)$_SESSION['user_id']) {
                 http_response_code(401);
                 echo json_encode(['status' => 'error', 'message' => 'Session mismatch']);
                 exit;
             }
 
+            // Verify user exists
             $stmt = $conn->prepare("SELECT user_id FROM users WHERE user_id = ? AND is_active = TRUE");
             $stmt->execute([$user_id]);
             if (!$stmt->fetch()) {
@@ -93,6 +96,7 @@ try {
                 exit;
             }
 
+            // Verify product exists
             $stmt = $conn->prepare("SELECT product_id FROM products WHERE product_id = ?");
             $stmt->execute([$product_id]);
             if (!$stmt->fetch()) {
@@ -101,7 +105,12 @@ try {
                 exit;
             }
 
-            $stmt = $conn->prepare("SELECT favorite_id FROM favorites WHERE user_id = ? AND product_id = ?");
+            // Check if product is already in favorites
+            $stmt = $conn->prepare("
+                SELECT saved_id 
+                FROM user_saved_items 
+                WHERE user_id = ? AND product_id = ? AND save_type = 'favorite'
+            ");
             $stmt->execute([$user_id, $product_id]);
             if ($stmt->fetch()) {
                 http_response_code(400);
@@ -109,20 +118,24 @@ try {
                 exit;
             }
 
-            $stmt = $conn->prepare("INSERT INTO favorites (user_id, product_id) VALUES (?, ?)");
+            // Insert new favorite
+            $stmt = $conn->prepare("
+                INSERT INTO user_saved_items (user_id, product_id, save_type) 
+                VALUES (?, ?, 'favorite')
+            ");
             $stmt->execute([$user_id, $product_id]);
-            $favorite_id = $conn->lastInsertId();
-            echo json_encode(['status' => 'success', 'favorite_id' => $favorite_id]);
+            $saved_id = $conn->lastInsertId();
+            echo json_encode(['status' => 'success', 'saved_id' => $saved_id]);
             break;
 
         case 'DELETE':
             $data = json_decode(file_get_contents('php://input'), true);
-            $favorite_id = isset($data['favorite_id']) ? (int)$data['favorite_id'] : 0;
+            $saved_id = isset($data['saved_id']) ? (int)$data['saved_id'] : 0;
             $user_id = isset($data['user_id']) ? (int)$data['user_id'] : 0;
 
-            if ($favorite_id <= 0) {
+            if ($saved_id <= 0) {
                 http_response_code(400);
-                echo json_encode(['status' => 'error', 'message' => 'Invalid favorite ID']);
+                echo json_encode(['status' => 'error', 'message' => 'Invalid saved ID']);
                 exit;
             }
             if ($user_id <= 0) {
@@ -131,19 +144,24 @@ try {
                 exit;
             }
 
+            // Validate session
             if (isset($_SESSION['user_id']) && $user_id !== (int)$_SESSION['user_id']) {
                 http_response_code(401);
                 echo json_encode(['status' => 'error', 'message' => 'Session mismatch']);
                 exit;
             }
 
-            $stmt = $conn->prepare("DELETE FROM favorites WHERE favorite_id = ? AND user_id = ?");
-            $stmt->execute([$favorite_id, $user_id]);
+            // Delete favorite
+            $stmt = $conn->prepare("
+                DELETE FROM user_saved_items 
+                WHERE saved_id = ? AND user_id = ? AND save_type = 'favorite'
+            ");
+            $stmt->execute([$saved_id, $user_id]);
             if ($stmt->rowCount() > 0) {
                 echo json_encode(['status' => 'success']);
             } else {
                 http_response_code(400);
-                echo json_encode(['status' => 'error', 'message' => 'Invalid favorite_id or user_id']);
+                echo json_encode(['status' => 'error', 'message' => 'Invalid saved_id or user_id']);
             }
             break;
 

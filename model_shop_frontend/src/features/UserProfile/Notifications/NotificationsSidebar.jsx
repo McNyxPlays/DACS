@@ -35,7 +35,7 @@ const NotificationsSidebar = ({
         "account",
       ].map((c) => (
         <option key={c} value={c}>
-          {c.charAt(0).toUpperCase() + c.slice(1)} {/* Hiển thị đẹp hơn */}
+          {c.charAt(0).toUpperCase() + c.slice(1)}
         </option>
       ))}
     </select>

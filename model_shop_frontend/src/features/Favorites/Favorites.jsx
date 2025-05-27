@@ -98,14 +98,14 @@ function Favorites() {
     };
   }, [user]);
 
-  const handleRemoveItem = async (favoriteId) => {
+  const handleRemoveItem = async (savedId) => {
     if (!user || !user.user_id) {
       setError("Please log in to remove favorites.");
       return;
     }
     try {
       const response = await api.delete("/favorites.php", {
-        data: { favorite_id: favoriteId, user_id: user.user_id },
+        data: { saved_id: savedId, user_id: user.user_id },
       });
       if (response.data.status === "success") {
         const event = new CustomEvent("favoritesUpdated");
@@ -160,7 +160,7 @@ function Favorites() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {favorites.map((item) => (
             <FavoriteItem
-              key={item.favorite_id}
+              key={item.saved_id}
               item={item}
               onRemove={handleRemoveItem}
             />

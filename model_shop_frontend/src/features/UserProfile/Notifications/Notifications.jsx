@@ -5,6 +5,7 @@ import NotificationsSidebar from "./NotificationsSidebar";
 import NotificationsHeader from "./NotificationsHeader";
 import NotificationItem from "./NotificationItem";
 import NotificationsPagination from "./NotificationsPagination";
+import { Toastify } from "../../../components/Toastify";
 
 const Notifications = () => {
   const { user } = useOutletContext();
@@ -15,28 +16,38 @@ const Notifications = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     const fetchNotifications = async () => {
-      if (!user?.user_id) return;
+      if (!user?.user_id) {
+        setError("Please log in to view notifications.");
+        setLoading(false);
+        return;
+      }
       setLoading(true);
+      setError(null);
       try {
         const response = await api.get("/notifications.php", {
-          params: { filter, category, sort, page: currentPage },
+          params: { filter, category: category === "All Categories" ? "" : category, sort, page: currentPage },
+          withCredentials: true,
         });
         if (response.data.success) {
           const formattedNotifications = response.data.notifications.map((n) => ({
             id: n.notification_id,
-            title: n.type.charAt(0).toUpperCase() + n.type.slice(1) + " Notification",
+            title: n.type ? `${n.type.charAt(0).toUpperCase()}${n.type.slice(1)} Notification` : "Notification",
             time: new Date(n.created_at).toLocaleString(),
-            description: n.message,
-            actionText: n.is_read ? "View" : "Mark as Read",
+            description: n.message || "No description available",
             read: n.is_read === 1,
           }));
           setNotifications(formattedNotifications);
-          setTotalPages(response.data.totalPages);
+          setTotalPages(response.data.totalPages || 1);
+        } else {
+          setError(`Failed to fetch notifications: ${response.data.error || "Unknown error"}`);
         }
       } catch (error) {
+        const errorMessage = error.response?.data?.error || error.message || "Network error";
+        setError(`Failed to fetch notifications: ${errorMessage}`);
         console.error("Error fetching notifications:", error);
       } finally {
         setLoading(false);
@@ -63,30 +74,57 @@ const Notifications = () => {
   const handlePageChange = (page) => setCurrentPage(page);
 
   const handleMarkAsRead = async () => {
+    if (!user?.user_id) {
+      Toastify.error("Please log in to perform this action.");
+      return;
+    }
     try {
-      const response = await api.post("/notifications.php", { action: "markAsRead" });
+      const response = await api.post(
+        "/notifications.php",
+        { action: "markAsRead" },
+        { withCredentials: true, headers: { "Content-Type": "application/json" } }
+      );
       if (response.data.success) {
-        setNotifications(notifications.map((n) => ({ ...n, read: true, actionText: "View" })));
+        setNotifications(notifications.map((n) => ({ ...n, read: true })));
+        Toastify.success("All notifications marked as read");
+      } else {
+        Toastify.error(`Failed to mark as read: ${response.data.error || "Unknown error"}`);
       }
     } catch (error) {
+      const errorMessage = error.response?.data?.error || error.message || "Network error";
+      Toastify.error(`Failed to mark as read: ${errorMessage}`);
       console.error("Error marking all as read:", error);
     }
   };
 
   const handleDelete = async () => {
+    if (!user?.user_id) {
+      Toastify.error("Please log in to perform this action.");
+      return;
+    }
     try {
-      const response = await api.post("/notifications.php", { action: "delete" });
+      const response = await api.post(
+        "/notifications.php",
+        { action: "delete" },
+        { withCredentials: true, headers: { "Content-Type": "application/json" } }
+      );
       if (response.data.success) {
         setNotifications([]);
+        setCurrentPage(1);
+        Toastify.success("All notifications deleted");
+      } else {
+        Toastify.error(`Failed to delete: ${response.data.error || "Unknown error"}`);
       }
     } catch (error) {
+      const errorMessage = error.response?.data?.error || error.message || "Network error";
+      Toastify.error(`Failed to delete: ${errorMessage}`);
       console.error("Error deleting notifications:", error);
     }
   };
 
   const handleSingleMarkAsRead = (notificationId) => {
     setNotifications(
-      notifications.map((n) => (n.id === notificationId ? { ...n, read: true, actionText: "View" } : n))
+      notifications.map((n) => (n.id === notificationId ? { ...n, read: true } : n))
     );
   };
 
@@ -107,6 +145,8 @@ const Notifications = () => {
         />
         {loading ? (
           <div className="text-center py-4">Loading...</div>
+        ) : error ? (
+          <div className="text-center py-4 text-red-500">{error}</div>
         ) : notifications.length === 0 ? (
           <div className="text-center py-4">No notifications found.</div>
         ) : (

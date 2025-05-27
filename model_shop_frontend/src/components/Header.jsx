@@ -97,7 +97,7 @@ const Header = ({
 
     // Set up SSE for real-time notification updates
     if (user) {
-      const eventSource = new EventSource("http://localhost:80/notifications_sse.php", {
+      const eventSource = new EventSource("/api/notifications_sse.php", {
         withCredentials: true,
       });
 
