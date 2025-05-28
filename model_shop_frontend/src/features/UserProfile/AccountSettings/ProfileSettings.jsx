@@ -157,40 +157,47 @@ const ProfileSettings = ({ activeSection, user: initialUser, onUserUpdate }) => 
         }
 
         const formDataToSend = new FormData();
-        // Debug: Log the formData state before sending
-        console.log("FormData before sending:", {
-            full_name: formData.full_name,
-            email: formData.email,
-            phone_number: formData.phone_number,
-            address: formData.address,
-            gender: formData.gender,
-            custom_gender: formData.custom_gender,
-        });
-        formDataToSend.append("full_name", formData.full_name.trim());
+        // Debug: Log each appended value
+        const fullName = formData.full_name.trim();
+        console.log("Appending full_name:", fullName);
+        formDataToSend.append("full_name", fullName);
         formDataToSend.append("email", formData.email);
         const sanitizedPhoneNumber = formData.phone_number
             ? formData.phone_number.replace(/[^0-9+]/g, "").replace(/^(\+\d{1,3})(\d+)/, "$1$2")
             : "";
+        console.log("Appending phone_number:", sanitizedPhoneNumber);
         formDataToSend.append("phone_number", sanitizedPhoneNumber);
         formDataToSend.append("address", formData.address || "");
+        console.log("Appending gender:", formData.gender === "other" ? formData.custom_gender : formData.gender || "");
         formDataToSend.append(
             "gender",
             formData.gender === "other" ? formData.custom_gender : formData.gender || ""
         );
         if (formData.profile_image) {
+            console.log("Appending profile_image:", formData.profile_image.name);
             formDataToSend.append("profile_image", formData.profile_image);
         } else if (!initialUser?.profile_image && !profilePicture) {
+            console.log("Appending remove_profile_image: true");
             formDataToSend.append("remove_profile_image", "true");
         }
-        if (formData.currentPassword)
+        if (formData.currentPassword) {
+            console.log("Appending current_password:", formData.currentPassword);
             formDataToSend.append("current_password", formData.currentPassword);
-        if (formData.newPassword)
+        }
+        if (formData.newPassword) {
+            console.log("Appending new_password:", formData.newPassword);
             formDataToSend.append("new_password", formData.newPassword);
+        }
+
+       
+        for (let pair of formDataToSend.entries()) {
+            console.log("FormData entry:", pair[0] + ': ' + pair[1]);
+        }
 
         try {
-            const response = await api.put("/api/user.php", formDataToSend, {
-                headers: { "Content-Type": "multipart/form-data" },
-            });
+            console.log("Making PUT request to:", api.defaults.baseURL + "/user.php");
+            const response = await api.put("/user.php", formDataToSend); 
+            console.log("Response from server:", response.data);
             if (response.data.status === "success") {
                 setSuccess("Profile settings saved successfully!");
                 const updatedUser = response.data.user;

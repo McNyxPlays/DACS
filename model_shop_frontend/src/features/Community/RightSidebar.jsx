@@ -32,14 +32,17 @@ function RightSidebar({ user }) {
     <div className="w-full lg:w-80 space-y-6">
       <div className="bg-white rounded-lg shadow-sm p-4">
         <div className="flex items-center gap-3 mb-4">
-          <img
-            src={
-              userData?.profile_image ||
-              "https://readdy.ai/api/search-image?query=professional%2520portrait%2520photo%2520of%2520a%2520young%2520man%2520with%2520short%2520brown%2520hair%2520and%2520casual%2520attire%252C%2520neutral%2520expression%252C%2520looking%2520at%2520camera%252C%2520indoor%2520studio%2520lighting%252C%2520high%2520quality%252C%2520photorealistic&width=100&height=100&seq=1001&orientation=squarish"
-            }
-            alt="User Profile"
-            className="w-12 h-12 rounded-full object-cover"
-          />
+          {userData?.profile_image ? (
+            <img
+              src={`http://localhost:8080/${userData.profile_image}`}
+              alt="User Profile"
+              className="w-12 h-12 rounded-full object-cover"
+            />
+          ) : (
+            <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center">
+              <i className="ri-user-line ri-lg text-gray-700"></i>
+            </div>
+          )}
           <div>
             <div className="font-medium text-gray-900">
               {userData?.full_name || user?.full_name || "User"}

@@ -36,10 +36,7 @@ const ProductManagement = () => {
   const fetchCategories = async () => {
     try {
       const response = await api.get("/categoriesmana.php");
-      if (
-        response.data.status === "success" &&
-        Array.isArray(response.data.data)
-      ) {
+      if (response.data.status === "success" && Array.isArray(response.data.data)) {
         setCategories(response.data.data);
       } else {
         setCategories([]);
@@ -47,9 +44,7 @@ const ProductManagement = () => {
       }
     } catch (err) {
       setCategories([]);
-      setError(
-        "Failed to fetch categories: " + (err.message || "Unknown error")
-      );
+      setError("Failed to fetch categories: " + (err.message || "Unknown error"));
       console.error(err);
     }
   };
@@ -57,10 +52,7 @@ const ProductManagement = () => {
   const fetchBrands = async () => {
     try {
       const response = await api.get("/brandsmana.php");
-      if (
-        response.data.status === "success" &&
-        Array.isArray(response.data.data)
-      ) {
+      if (response.data.status === "success" && Array.isArray(response.data.data)) {
         setBrands(response.data.data);
       } else {
         setBrands([]);
@@ -100,9 +92,7 @@ const ProductManagement = () => {
           setError("Failed to fetch products");
         }
       } else {
-        setError(
-          "Failed to fetch products: " + (err.message || "Unknown error")
-        );
+        setError("Failed to fetch products: " + (err.message || "Unknown error"));
       }
       console.error(err);
     } finally {
@@ -154,16 +144,13 @@ const ProductManagement = () => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData({
-      ...formData,
-      [name]: value,
-    });
+    setFormData({ ...formData, [name]: value });
   };
 
   const handleImageChange = (e) => {
     const files = e.target.files;
     const validImageTypes = ["image/jpeg", "image/png", "image/gif"];
-    const maxSize = 5 * 1024 * 1024; // 5MB
+    const maxSize = 5 * 1024 * 1024;
     let errorMsg = "";
 
     for (let i = 0; i < files.length; i++) {
@@ -183,18 +170,12 @@ const ProductManagement = () => {
     } else {
       setError("");
       setImages(files);
-      setFormData((prev) => ({
-        ...prev,
-        primary_image_index: files.length > 0 ? 0 : -1,
-      }));
+      setFormData((prev) => ({ ...prev, primary_image_index: files.length > 0 ? 0 : -1 }));
     }
   };
 
   const handlePrimaryImageSelect = (index) => {
-    setFormData((prev) => ({
-      ...prev,
-      primary_image_index: index,
-    }));
+    setFormData((prev) => ({ ...prev, primary_image_index: index }));
   };
 
   const handleRemoveExistingImage = async (imageId) => {
@@ -256,40 +237,25 @@ const ProductManagement = () => {
         }
       }
     } catch (err) {
-      if (err.response && err.response.data.error) {
-        setError(err.response.data.error);
-      } else {
-        setError(
-          modalMode === "add"
-            ? "Failed to add product"
-            : "Failed to update product"
-        );
-      }
+      setError(
+        modalMode === "add" ? "Failed to add product" : "Failed to update product"
+      );
       console.error(err);
     }
   };
 
   const handleDelete = async (productId) => {
-    if (!window.confirm("Are you sure you want to delete this product?"))
-      return;
+    if (!window.confirm("Are you sure you want to delete this product?")) return;
     try {
       const response = await api.delete(`/productsmana.php?id=${productId}`);
       if (response.data.success) {
-        setProducts(
-          products.filter((product) => product.product_id !== productId)
-        );
+        setProducts(products.filter((product) => product.product_id !== productId));
         setError("");
       } else {
         setError(response.data.error || "Failed to delete product");
       }
     } catch (err) {
-      if (err.response && err.response.status === 403) {
-        setError("You do not have permission to perform this action.");
-      } else {
-        setError(
-          "Failed to delete product: " + (err.message || "Unknown error")
-        );
-      }
+      setError("Failed to delete product: " + (err.message || "Unknown error"));
       console.error(err);
     }
   };
@@ -297,18 +263,18 @@ const ProductManagement = () => {
   return (
     <div className="container mx-auto px-4 py-8">
       <h1 className="text-2xl font-bold mb-6">Product Management</h1>
-      <div className="mb-4 flex flex-col sm:flex-row gap-4">
+      <div className="mb-4 flex flex-wrap gap-4">
         <input
           type="text"
           placeholder="Search products..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="w-full sm:w-1/3 px-4 py-2 rounded-lg border focus:outline-none focus:ring-2 focus:ring-primary"
+          className="w-full sm:w-1/3 px-3 py-2 rounded-lg border focus:outline-none focus:ring-2 focus:ring-primary"
         />
         <select
           value={categoryId}
           onChange={(e) => setCategoryId(parseInt(e.target.value))}
-          className="w-full sm:w-1/4 px-4 py-2 rounded-lg border focus:outline-none focus:ring-2 focus:ring-primary"
+          className="w-full sm:w-1/4 px-3 py-2 rounded-lg border focus:outline-none focus:ring-2 focus:ring-primary"
         >
           <option value={0}>All Categories</option>
           {categories.map((category) => (
@@ -320,7 +286,7 @@ const ProductManagement = () => {
         <select
           value={brandId}
           onChange={(e) => setBrandId(parseInt(e.target.value))}
-          className="w-full sm:w-1/4 px-4 py-2 rounded-lg border focus:outline-none focus:ring-2 focus:ring-primary"
+          className="w-full sm:w-1/4 px-3 py-2 rounded-lg border focus:outline-none focus:ring-2 focus:ring-primary"
         >
           <option value={0}>All Brands</option>
           {brands.map((brand) => (
@@ -332,7 +298,7 @@ const ProductManagement = () => {
         <select
           value={status}
           onChange={(e) => setStatus(e.target.value)}
-          className="w-full sm:w-1/4 px-4 py-2 rounded-lg border focus:outline-none focus:ring-2 focus:ring-primary"
+          className="w-full sm:w-1/4 px-3 py-2 rounded-lg border focus:outline-none focus:ring-2 focus:ring-primary"
         >
           <option value="">All Status</option>
           <option value="new">New</option>
@@ -344,7 +310,7 @@ const ProductManagement = () => {
         </select>
         <button
           onClick={openAddModal}
-          className="bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary-dark"
+          className="w-full sm:w-auto bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary-dark"
         >
           Add Product
         </button>
@@ -357,32 +323,26 @@ const ProductManagement = () => {
           <table className="min-w-full bg-white border">
             <thead>
               <tr>
-                <th className="px-4 py-2 border">ID</th>
-                <th className="px-4 py-2 border">Name</th>
-                <th className="px-4 py-2 border">Category</th>
-                <th className="px-4 py-2 border">Brand</th>
-                <th className="px-4 py-2 border">Price</th>
-                <th className="px-4 py-2 border">Status</th>
-                <th className="px-4 py-2 border">Actions</th>
+                <th className="px-3 py-2 border">ID</th>
+                <th className="px-3 py-2 border">Name</th>
+                <th className="px-3 py-2 border">Category</th>
+                <th className="px-3 py-2 border">Brand</th>
+                <th className="px-3 py-2 border">Price</th>
+                <th className="px-3 py-2 border">Status</th>
+                <th className="px-3 py-2 border">Actions</th>
               </tr>
             </thead>
             <tbody>
               {Array.isArray(products) && products.length > 0 ? (
                 products.map((product) => (
                   <tr key={product.product_id}>
-                    <td className="px-4 py-2 border">{product.product_id}</td>
-                    <td className="px-4 py-2 border">{product.name}</td>
-                    <td className="px-4 py-2 border">
-                      {product.category_name || "-"}
-                    </td>
-                    <td className="px-4 py-2 border">
-                      {product.brand_name || "-"}
-                    </td>
-                    <td className="px-4 py-2 border">
-                      ${parseFloat(product.price).toFixed(2)}
-                    </td>
-                    <td className="px-4 py-2 border">{product.status}</td>
-                    <td className="px-4 py-2 border flex gap-2">
+                    <td className="px-3 py-2 border">{product.product_id}</td>
+                    <td className="px-3 py-2 border">{product.name}</td>
+                    <td className="px-3 py-2 border">{product.category_name || "-"}</td>
+                    <td className="px-3 py-2 border">{product.brand_name || "-"}</td>
+                    <td className="px-3 py-2 border">${parseFloat(product.price).toFixed(2)}</td>
+                    <td className="px-3 py-2 border">{product.status}</td>
+                    <td className="px-3 py-2 border flex gap-2">
                       <button
                         onClick={() => openEditModal(product)}
                         className="text-blue-500 hover:underline"
@@ -400,7 +360,7 @@ const ProductManagement = () => {
                 ))
               ) : (
                 <tr>
-                  <td colSpan="7" className="px-4 py-2 border text-center">
+                  <td colSpan="7" className="px-3 py-2 border text-center">
                     No products found
                   </td>
                 </tr>
@@ -412,7 +372,7 @@ const ProductManagement = () => {
 
       {showModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 max-w-lg w-full">
+          <div className="bg-white rounded-lg p-6 max-w-lg w-full" style={{ maxHeight: "70vh", overflowY: "auto" }}>
             <h2 className="text-xl font-bold mb-4">
               {modalMode === "add" ? "Add New Product" : "Edit Product"}
             </h2>
@@ -426,7 +386,7 @@ const ProductManagement = () => {
                   value={formData.name}
                   onChange={handleChange}
                   required
-                  className="w-full px-4 py-2 rounded-lg border focus:outline-none focus:ring-2 focus:ring-primary"
+                  className="w-full px-3 py-2 rounded-lg border focus:outline-none focus:ring-2 focus:ring-primary"
                 />
               </div>
               <div className="mb-4">
@@ -436,14 +396,11 @@ const ProductManagement = () => {
                   value={formData.category_id}
                   onChange={handleChange}
                   required
-                  className="w-full px-4 py-2 rounded-lg border focus:outline-none focus:ring-2 focus:ring-primary"
+                  className="w-full px-3 py-2 rounded-lg border focus:outline-none focus:ring-2 focus:ring-primary"
                 >
                   <option value={0}>Select Category</option>
                   {categories.map((category) => (
-                    <option
-                      key={category.category_id}
-                      value={category.category_id}
-                    >
+                    <option key={category.category_id} value={category.category_id}>
                       {category.name}
                     </option>
                   ))}
@@ -456,7 +413,7 @@ const ProductManagement = () => {
                   value={formData.brand_id}
                   onChange={handleChange}
                   required
-                  className="w-full px-4 py-2 rounded-lg border focus:outline-none focus:ring-2 focus:ring-primary"
+                  className="w-full px-3 py-2 rounded-lg border focus:outline-none focus:ring-2 focus:ring-primary"
                 >
                   <option value={0}>Select Brand</option>
                   {brands.map((brand) => (
@@ -476,7 +433,7 @@ const ProductManagement = () => {
                   required
                   min="0"
                   step="0.01"
-                  className="w-full px-4 py-2 rounded-lg border focus:outline-none focus:ring-2 focus:ring-primary"
+                  className="w-full px-3 py-2 rounded-lg border focus:outline-none focus:ring-2 focus:ring-primary"
                 />
               </div>
               <div className="mb-4">
@@ -485,7 +442,7 @@ const ProductManagement = () => {
                   name="description"
                   value={formData.description}
                   onChange={handleChange}
-                  className="w-full px-4 py-2 rounded-lg border focus:outline-none focus:ring-2 focus:ring-primary"
+                  className="w-full px-3 py-2 rounded-lg border focus:outline-none focus:ring-2 focus:ring-primary h-24"
                 />
               </div>
               <div className="mb-4">
@@ -494,7 +451,7 @@ const ProductManagement = () => {
                   name="status"
                   value={formData.status}
                   onChange={handleChange}
-                  className="w-full px-4 py-2 rounded-lg border focus:outline-none focus:ring-2 focus:ring-primary"
+                  className="w-full px-3 py-2 rounded-lg border focus:outline-none focus:ring-2 focus:ring-primary"
                 >
                   <option value="new">New</option>
                   <option value="used">Used</option>
@@ -511,18 +468,18 @@ const ProductManagement = () => {
                   multiple
                   accept="image/jpeg,image/png,image/gif"
                   onChange={handleImageChange}
-                  className="w-full px-4 py-2 rounded-lg border focus:outline-none focus:ring-2 focus:ring-primary"
+                  className="w-full px-3 py-2 rounded-lg border focus:outline-none focus:ring-2 focus:ring-primary"
                 />
                 {images.length > 0 && (
-                  <div className="mt-2">
-                    <label className="block text-gray-700 mb-2">Select Primary Image</label>
-                    <div className="grid grid-cols-4 gap-2">
-                      {Array.from(images).map((img, index) => (
+                  <div className="mt-2 overflow-x-auto flex gap-2">
+                    {Array.from(images)
+                      .slice(0, 4)
+                      .map((img, index) => (
                         <div key={index} className="relative">
                           <img
                             src={URL.createObjectURL(img)}
                             alt={`Preview ${index}`}
-                            className={`w-full h-24 object-cover rounded-lg border-2 ${
+                            className={`w-20 h-20 object-cover rounded-lg border-2 ${
                               formData.primary_image_index === index
                                 ? "border-primary"
                                 : "border-gray-200"
@@ -531,20 +488,22 @@ const ProductManagement = () => {
                           />
                         </div>
                       ))}
-                    </div>
+                    {images.length > 4 && (
+                      <span className="text-gray-500">+{images.length - 4} more</span>
+                    )}
                   </div>
                 )}
               </div>
               {modalMode === "edit" && existingImages.length > 0 && (
                 <div className="mb-4">
                   <label className="block text-gray-700 mb-2">Existing Images</label>
-                  <div className="grid grid-cols-4 gap-2">
-                    {existingImages.map((img, index) => (
+                  <div className="mt-2 overflow-x-auto flex gap-2">
+                    {existingImages.slice(0, 4).map((img, index) => (
                       <div key={img.image_id} className="relative">
                         <img
                           src={`/Uploads/${img.image_url}`}
                           alt={`Existing ${index}`}
-                          className={`w-full h-24 object-cover rounded-lg border-2 ${
+                          className={`w-20 h-20 object-cover rounded-lg border-2 ${
                             img.is_main ? "border-primary" : "border-gray-200"
                           }`}
                         />
@@ -556,6 +515,9 @@ const ProductManagement = () => {
                         </button>
                       </div>
                     ))}
+                    {existingImages.length > 4 && (
+                      <span className="text-gray-500">+{existingImages.length - 4} more</span>
+                    )}
                   </div>
                 </div>
               )}

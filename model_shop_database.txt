@@ -119,22 +119,16 @@ CREATE TABLE IF NOT EXISTS order_details (
     INDEX idx_product_id (product_id)
 );
 
--- Bảng 9: posts
 CREATE TABLE IF NOT EXISTS posts (
     post_id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT NOT NULL,
-    category_id INT,
     title VARCHAR(255) NOT NULL,
     content TEXT,
-    status ENUM('new', 'used', 'custom') NOT NULL,
-    is_for_sale BOOLEAN DEFAULT FALSE,
-    price DECIMAL(10, 2),
-    is_approved BOOLEAN DEFAULT FALSE,
+    post_time_status ENUM('new', 'recent', 'old') NOT NULL DEFAULT 'new',
+    is_approved BOOLEAN DEFAULT TRUE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE,
-    FOREIGN KEY (category_id) REFERENCES categories(category_id) ON DELETE SET NULL,
-    INDEX idx_user_id (user_id),
-    INDEX idx_category_id (category_id)
+    INDEX idx_user_id (user_id)
 );
 
 -- Bảng 10: post_images

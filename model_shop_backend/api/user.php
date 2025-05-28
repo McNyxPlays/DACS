@@ -9,6 +9,98 @@ header('Access-Control-Allow-Credentials: true');
 require '../config/database.php';
 require '../config/functions.php';
 
+// Function to parse multipart/form-data for PUT requests
+function parse_multipart_formdata() {
+    $input = file_get_contents('php://input');
+    if (empty($input)) {
+        log_error("No raw input received for multipart/form-data parsing");
+        return [[], []];
+    }
+
+    // Extract boundary
+    $boundary = substr($input, 0, strpos($input, "\r\n"));
+    if (empty($boundary)) {
+        log_error("Failed to extract boundary from multipart/form-data");
+        return [[], []];
+    }
+
+    // Split into parts
+    $parts = array_slice(explode($boundary, $input), 1, -1);
+    if (empty($parts)) {
+        log_error("No parts found in multipart/form-data");
+        return [[], []];
+    }
+
+    $data = [];
+    $files = [];
+
+    foreach ($parts as $part) {
+        if (strpos($part, 'Content-Disposition') === false) {
+            continue;
+        }
+
+        // Extract name
+        preg_match('/name="([^"]+)"/', $part, $nameMatch);
+        $name = $nameMatch[1] ?? '';
+        if (empty($name)) {
+            log_error("Failed to extract name from part: " . substr($part, 0, 100));
+            continue;
+        }
+
+        // Check if it's a file
+        if (preg_match('/filename="([^"]+)"/', $part, $filenameMatch)) {
+            $filename = $filenameMatch[1];
+            preg_match('/Content-Type: (.*?)\r\n\r\n(.*)$/s', $part, $fileContentMatch);
+            $contentType = $fileContentMatch[1] ?? '';
+            $content = $fileContentMatch[2] ?? '';
+
+            // Remove the trailing boundary line
+            $content = preg_replace('/\r\n--$/', '', $content);
+            log_error("Extracted file content length for $filename: " . strlen($content));
+
+            if (strlen($content) === 0) {
+                log_error("File content is empty for $filename");
+                $files[$name] = [
+                    'name' => $filename,
+                    'type' => $contentType,
+                    'tmp_name' => '',
+                    'error' => UPLOAD_ERR_NO_FILE,
+                    'size' => 0,
+                ];
+                continue;
+            }
+
+            // Create a temporary file
+            $tmpFile = tempnam(sys_get_temp_dir(), 'php');
+            if ($tmpFile === false) {
+                log_error("Failed to create temporary file for $filename");
+                continue;
+            }
+
+            $bytesWritten = file_put_contents($tmpFile, $content);
+            if ($bytesWritten === false) {
+                log_error("Failed to write content to temporary file for $filename");
+                continue;
+            }
+
+            $files[$name] = [
+                'name' => $filename,
+                'type' => $contentType,
+                'tmp_name' => $tmpFile,
+                'error' => UPLOAD_ERR_OK,
+                'size' => $bytesWritten,
+            ];
+        } else {
+            // Extract field value
+            preg_match('/\r\n\r\n(.*)\r\n/s', $part, $valueMatch);
+            $value = trim($valueMatch[1] ?? '');
+            $data[$name] = $value;
+        }
+    }
+
+    return [$data, $files];
+}
+
 $conn = db_connect();
 if ($conn === null) {
     http_response_code(500);
@@ -79,6 +171,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     $conn->beginTransaction();
 
     try {
+        // Debug logging for incoming request
+        log_error("PUT request received at " . date('Y-m-d H:i:s') . ", URI: " . $_SERVER['REQUEST_URI']);
+        log_error("Raw POST data: " . file_get_contents("php://input"));
+
+        // Parse multipart/form-data manually
+        [$formData, $files] = parse_multipart_formdata();
+        log_error("Parsed form data: " . json_encode($formData));
+        log_error("Parsed files: " . json_encode($files));
+
         $stmt = $conn->prepare("SELECT email, password, profile_image, role, is_active FROM users WHERE user_id = ? AND is_active = TRUE");
         $stmt->execute([$user_id]);
         $current_user = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -87,17 +188,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
             throw new Exception('User not found');
         }
 
-        // Handle form data from multipart/form-data
-        $full_name = sanitize_input($_POST['full_name'] ?? '');
-        $email = sanitize_input($_POST['email'] ?? $current_user['email']);
-        $phone_number = sanitize_input($_POST['phone_number'] ?? null);
-        $gender = sanitize_input($_POST['gender'] ?? null);
-        $address = sanitize_input($_POST['address'] ?? null);
+        // Use parsed form data instead of $_POST
+        $full_name = sanitize_input($formData['full_name'] ?? '');
+        $email = sanitize_input($formData['email'] ?? $current_user['email']);
+        $phone_number = sanitize_input($formData['phone_number'] ?? null);
+        $gender = sanitize_input($formData['gender'] ?? null);
+        $address = sanitize_input($formData['address'] ?? null);
         $role = $current_user['role'];
         $is_active = $current_user['is_active'];
-        $current_password = $_POST['current_password'] ?? '';
-        $new_password = $_POST['new_password'] ?? '';
-        $profile_image = $_FILES['profile_image'] ?? null;
+        $current_password = $formData['current_password'] ?? '';
+        $new_password = $formData['new_password'] ?? '';
+        $profile_image = $files['profile_image'] ?? null;
 
         log_error("Received data in PUT request: full_name=$full_name, email=$email, phone_number=$phone_number, gender=$gender, address=$address, role=$role, is_active=$is_active, profile_image=" . ($profile_image ? json_encode($profile_image) : 'null'));
 
@@ -127,26 +228,32 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
             if ($profile_image['size'] > $maxFileSize) {
                 throw new Exception('Profile image size exceeds 5MB limit');
             }
-            $upload_dir = '../public/uploads/avatars/';
+            $upload_dir = '../uploads/avatars/'; // Updated path
             if (!file_exists($upload_dir)) {
                 if (!mkdir($upload_dir, 0777, true)) {
+                    log_error("Failed to create upload directory: $upload_dir");
                     throw new Exception('Failed to create upload directory');
                 }
             }
             if (!is_writable($upload_dir)) {
+                log_error("Upload directory is not writable: $upload_dir");
                 throw new Exception('Upload directory is not writable');
             }
             $file_name = uniqid() . '_' . basename($profile_image['name']);
             $target_file = $upload_dir . $file_name;
+            log_error("Attempting to move file from " . $profile_image['tmp_name'] . " to $target_file");
             if (move_uploaded_file($profile_image['tmp_name'], $target_file)) {
-                $profile_image_path = 'uploads/avatars/' . $file_name;
+                $profile_image_path = 'uploads/avatars/' . $file_name; // Updated path
+                log_error("File successfully moved to $target_file");
             } else {
+                log_error("Failed to move file from " . $profile_image['tmp_name'] . " to $target_file");
                 throw new Exception('Failed to upload image');
             }
-        } elseif (isset($_POST['remove_profile_image']) && $_POST['remove_profile_image'] === 'true') {
+        } elseif (isset($formData['remove_profile_image']) && $formData['remove_profile_image'] === 'true') {
             $profile_image_path = null;
-            if ($current_user['profile_image'] && file_exists('../public/' . $current_user['profile_image'])) {
-                unlink('../public/' . $current_user['profile_image']);
+            if ($current_user['profile_image'] && file_exists('../' . $current_user['profile_image'])) { // Updated path
+                unlink('../' . $current_user['profile_image']);
+                log_error("Removed existing profile image: " . $current_user['profile_image']);
             }
         }
 

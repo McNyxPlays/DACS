@@ -22,19 +22,14 @@ const AddProduct = () => {
     const fetchCategories = async () => {
       try {
         const response = await api.get("/categoriesmana.php");
-        if (
-          response.data.status === "success" &&
-          Array.isArray(response.data.data)
-        ) {
+        if (response.data.status === "success" && Array.isArray(response.data.data)) {
           setCategories(response.data.data);
         } else {
           setCategories([]);
           setError("Invalid categories response format");
         }
       } catch (err) {
-        setError(
-          "Failed to fetch categories: " + (err.message || "Unknown error")
-        );
+        setError("Failed to fetch categories: " + (err.message || "Unknown error"));
         console.error(err);
       }
     };
@@ -42,10 +37,7 @@ const AddProduct = () => {
     const fetchBrands = async () => {
       try {
         const response = await api.get("/brandsmana.php");
-        if (
-          response.data.status === "success" &&
-          Array.isArray(response.data.data)
-        ) {
+        if (response.data.status === "success" && Array.isArray(response.data.data)) {
           setBrands(response.data.data);
         } else {
           setBrands([]);
@@ -63,10 +55,7 @@ const AddProduct = () => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData({
-      ...formData,
-      [name]: value,
-    });
+    setFormData({ ...formData, [name]: value });
   };
 
   const handleImageChange = (e) => {
@@ -92,18 +81,12 @@ const AddProduct = () => {
     } else {
       setError("");
       setImages(files);
-      setFormData((prev) => ({
-        ...prev,
-        primary_image_index: files.length > 0 ? 0 : -1,
-      }));
+      setFormData((prev) => ({ ...prev, primary_image_index: files.length > 0 ? 0 : -1 }));
     }
   };
 
   const handlePrimaryImageSelect = (index) => {
-    setFormData((prev) => ({
-      ...prev,
-      primary_image_index: index,
-    }));
+    setFormData((prev) => ({ ...prev, primary_image_index: index }));
   };
 
   const handleSubmit = async (e) => {
@@ -140,11 +123,7 @@ const AddProduct = () => {
         setError(response.data.error || "Failed to add product");
       }
     } catch (err) {
-      if (err.response && err.response.data.error) {
-        setError(err.response.data.error);
-      } else {
-        setError("Failed to add product: " + (err.message || "Unknown error"));
-      }
+      setError("Failed to add product: " + (err.message || "Unknown error"));
       console.error(err);
     }
   };
@@ -153,10 +132,10 @@ const AddProduct = () => {
     <div className="container mx-auto px-4 py-8">
       <h1 className="text-2xl font-bold mb-6">Add New Product</h1>
       {error && <p className="text-red-500 mb-4">{error}</p>}
-      <div className="max-w-4xl overflow-y-auto" style={{ maxHeight: "80vh" }}>
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="flex flex-wrap gap-4">
-            <div className="flex-1 min-w-[200px]">
+      <div className="max-w-4xl overflow-y-auto" style={{ maxHeight: "70vh" }}>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
               <label className="block text-gray-700 mb-2">Name</label>
               <input
                 type="text"
@@ -164,17 +143,17 @@ const AddProduct = () => {
                 value={formData.name}
                 onChange={handleChange}
                 required
-                className="w-full px-4 py-2 rounded-lg border focus:outline-none focus:ring-2 focus:ring-primary"
+                className="w-full px-3 py-2 rounded-lg border focus:outline-none focus:ring-2 focus:ring-primary"
               />
             </div>
-            <div className="flex-1 min-w-[200px]">
+            <div>
               <label className="block text-gray-700 mb-2">Category</label>
               <select
                 name="category_id"
                 value={formData.category_id}
                 onChange={handleChange}
                 required
-                className="w-full px-4 py-2 rounded-lg border focus:outline-none focus:ring-2 focus:ring-primary"
+                className="w-full px-3 py-2 rounded-lg border focus:outline-none focus:ring-2 focus:ring-primary"
               >
                 <option value={0}>Select Category</option>
                 {categories.map((category) => (
@@ -184,14 +163,14 @@ const AddProduct = () => {
                 ))}
               </select>
             </div>
-            <div className="flex-1 min-w-[200px]">
+            <div>
               <label className="block text-gray-700 mb-2">Brand</label>
               <select
                 name="brand_id"
                 value={formData.brand_id}
                 onChange={handleChange}
                 required
-                className="w-full px-4 py-2 rounded-lg border focus:outline-none focus:ring-2 focus:ring-primary"
+                className="w-full px-3 py-2 rounded-lg border focus:outline-none focus:ring-2 focus:ring-primary"
               >
                 <option value={0}>Select Brand</option>
                 {brands.map((brand) => (
@@ -202,8 +181,8 @@ const AddProduct = () => {
               </select>
             </div>
           </div>
-          <div className="flex flex-wrap gap-4">
-            <div className="flex-1 min-w-[200px]">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
               <label className="block text-gray-700 mb-2">Price</label>
               <input
                 type="number"
@@ -213,25 +192,16 @@ const AddProduct = () => {
                 required
                 min="0"
                 step="0.01"
-                className="w-full px-4 py-2 rounded-lg border focus:outline-none focus:ring-2 focus:ring-primary"
+                className="w-full px-3 py-2 rounded-lg border focus:outline-none focus:ring-2 focus:ring-primary"
               />
             </div>
-            <div className="flex-1 min-w-[200px]">
-              <label className="block text-gray-700 mb-2">Description</label>
-              <textarea
-                name="description"
-                value={formData.description}
-                onChange={handleChange}
-                className="w-full px-4 py-2 rounded-lg border focus:outline-none focus:ring-2 focus:ring-primary"
-              />
-            </div>
-            <div className="flex-1 min-w-[200px]">
+            <div>
               <label className="block text-gray-700 mb-2">Status</label>
               <select
                 name="status"
                 value={formData.status}
                 onChange={handleChange}
-                className="w-full px-4 py-2 rounded-lg border focus:outline-none focus:ring-2 focus:ring-primary"
+                className="w-full px-3 py-2 rounded-lg border focus:outline-none focus:ring-2 focus:ring-primary"
               >
                 <option value="new">New</option>
                 <option value="used">Used</option>
@@ -243,36 +213,47 @@ const AddProduct = () => {
             </div>
           </div>
           <div>
+            <label className="block text-gray-700 mb-2">Description</label>
+            <textarea
+              name="description"
+              value={formData.description}
+              onChange={handleChange}
+              className="w-full px-3 py-2 rounded-lg border focus:outline-none focus:ring-2 focus:ring-primary h-24"
+            />
+          </div>
+          <div>
             <label className="block text-gray-700 mb-2">Upload Images</label>
             <input
               type="file"
               multiple
               accept="image/jpeg,image/png,image/gif"
               onChange={handleImageChange}
-              className="w-full px-4 py-2 rounded-lg border focus:outline-none focus:ring-2 focus:ring-primary"
+              className="w-full px-3 py-2 rounded-lg border focus:outline-none focus:ring-2 focus:ring-primary"
             />
-          </div>
-          {images.length > 0 && (
-            <div>
-              <label className="block text-gray-700 mb-2">Primary Image</label>
-              <div className="flex overflow-x-auto gap-2">
-                {Array.from(images).map((img, index) => (
-                  <div key={index} className="relative">
-                    <img
-                      src={URL.createObjectURL(img)}
-                      alt={`Preview ${index}`}
-                      className={`w-32 h-32 object-cover rounded-lg border-2 ${
-                        formData.primary_image_index === index
-                          ? "border-primary"
-                          : "border-gray-200"
-                      }`}
-                      onClick={() => handlePrimaryImageSelect(index)}
-                    />
-                  </div>
-                ))}
+            {images.length > 0 && (
+              <div className="mt-2 overflow-x-auto flex gap-2">
+                {Array.from(images)
+                  .slice(0, 4)
+                  .map((img, index) => (
+                    <div key={index} className="relative">
+                      <img
+                        src={URL.createObjectURL(img)}
+                        alt={`Preview ${index}`}
+                        className={`w-20 h-20 object-cover rounded-lg border-2 ${
+                          formData.primary_image_index === index
+                            ? "border-primary"
+                            : "border-gray-200"
+                        }`}
+                        onClick={() => handlePrimaryImageSelect(index)}
+                      />
+                    </div>
+                  ))}
+                {images.length > 4 && (
+                  <span className="text-gray-500">+{images.length - 4} more</span>
+                )}
               </div>
-            </div>
-          )}
+            )}
+          </div>
           <div className="flex gap-4">
             <button
               type="submit"
