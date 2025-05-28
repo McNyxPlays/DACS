@@ -6,15 +6,15 @@ const ProfileStats = ({ userData }) => {
       <div className="container mx-auto px-4">
         <div className="flex justify-center sm:justify-start space-x-8 sm:space-x-12">
           <div className="text-center">
-            <div className="text-xl font-bold">{userData.posts}</div>
+            <div className="text-xl font-bold">{userData.posts || 0}</div>
             <div className="text-sm text-gray-500">Posts</div>
           </div>
           <div className="text-center">
-            <div className="text-xl font-bold">{userData.followers}</div>
+            <div className="text-xl font-bold">{userData.followers || 0}</div>
             <div className="text-sm text-gray-500">Followers</div>
           </div>
           <div className="text-center">
-            <div className="text-xl font-bold">{userData.following}</div>
+            <div className="text-xl font-bold">{userData.comments || 0}</div>
             <div className="text-sm text-gray-500">Following</div>
           </div>
         </div>

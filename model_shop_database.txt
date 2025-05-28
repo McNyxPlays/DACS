@@ -344,6 +344,7 @@ CREATE TABLE IF NOT EXISTS user_social_links (
     platform ENUM('instagram', 'youtube', 'twitter', 'facebook', 'other') NOT NULL,
     link_url VARCHAR(255) NOT NULL,
     display_name VARCHAR(255) NOT NULL,
+    bio TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE,
     INDEX idx_user_id (user_id),

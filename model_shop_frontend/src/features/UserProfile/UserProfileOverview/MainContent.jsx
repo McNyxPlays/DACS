@@ -1,29 +1,74 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
+import api from "../../../api/index";
+import { Toastify } from "../../../components/Toastify";
 
 const MainContent = ({ activeTab, setActiveTab }) => {
+  const [posts, setPosts] = useState([]);
+  const [dropdownOpen, setDropdownOpen] = useState(null);
+
+  // Fetch user-specific posts
+  useEffect(() => {
+    if (activeTab === "posts") {
+      api
+        .get("/posts.php", {
+          params: { limit: 10, offset: 0, user_id: "current" },
+        })
+        .then(async (response) => {
+          if (response.data.status === "success") {
+            const postsData = response.data.posts;
+            const postsWithImages = await Promise.all(
+              postsData.map(async (post) => {
+                const imageResponse = await api.get("/posts_images.php", {
+                  params: { post_id: post.post_id },
+                });
+                return { ...post, images: imageResponse.data.images || [] };
+              })
+            );
+            setPosts(postsWithImages);
+          }
+        })
+        .catch((error) => {
+          console.error("Error fetching posts:", error);
+          Toastify.error("Failed to load posts.");
+        });
+    }
+  }, [activeTab]);
+
+  const handleDeletePost = (postId) => {
+    api
+      .delete(`/posts.php?post_id=${postId}`)
+      .then((response) => {
+        if (response.data.status === "success") {
+          setPosts(posts.filter((post) => post.post_id !== postId));
+          Toastify.success("Post deleted successfully.");
+        } else {
+          Toastify.error(response.data.message || "Failed to delete post.");
+        }
+      })
+      .catch((error) => {
+        console.error("Error deleting post:", error);
+        Toastify.error("Failed to delete post.");
+      });
+    setDropdownOpen(null);
+  };
+
+  const toggleDropdown = (postId) => {
+    setDropdownOpen(dropdownOpen === postId ? null : postId);
+  };
+
   return (
     <div className="w-full md:w-3/5">
       <div className="bg-white rounded-lg shadow-sm mb-6">
         <div className="border-b flex">
           <button
             className={`px-4 py-3 text-sm font-medium ${
-              activeTab === "builds"
+              activeTab === "posts"
                 ? "text-blue-600 border-b-2 border-blue-600"
                 : "text-gray-600 hover:text-blue-600"
             }`}
-            onClick={() => setActiveTab("builds")}
+            onClick={() => setActiveTab("posts")}
           >
-            Builds
-          </button>
-          <button
-            className={`px-4 py-3 text-sm font-medium ${
-              activeTab === "activity"
-                ? "text-blue-600 border-b-2 border-blue-600"
-                : "text-gray-600 hover:text-blue-600"
-            }`}
-            onClick={() => setActiveTab("activity")}
-          >
-            Activity
+            My Posts
           </button>
           <button
             className={`px-4 py-3 text-sm font-medium ${
@@ -57,180 +102,93 @@ const MainContent = ({ activeTab, setActiveTab }) => {
           </button>
         </div>
 
-        {activeTab === "builds" && (
+        {activeTab === "posts" && (
           <div className="p-4">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="font-bold">My Builds</h2>
-              <div className="flex space-x-2">
-                <button className="border border-gray-300 text-gray-700 px-3 py-1 rounded text-sm hover:bg-gray-50 !rounded-button whitespace-nowrap cursor-pointer">
-                  <i className="fas fa-filter mr-1"></i> Filter
-                </button>
-                <button className="border border-gray-300 text-gray-700 px-3 py-1 rounded text-sm hover:bg-gray-50 !rounded-button whitespace-nowrap cursor-pointer">
-                  <i className="fas fa-sort mr-1"></i> Sort
-                </button>
-                <button className="bg-blue-600 text-white px-3 py-1 rounded text-sm hover:bg-blue-700 !rounded-button whitespace-nowrap cursor-pointer">
-                  <i className="fas fa-plus mr-1"></i> New Build
-                </button>
-              </div>
+            <div className="mb-4">
+              <h2 className="font-bold">My Posts</h2>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {/* Build 1 */}
-              <div className="border border-gray-200 rounded-lg overflow-hidden hover:shadow-md transition-shadow">
-                <div className="relative">
-                  <img
-                    src="https://readdy.ai/api/search-image?query=highly%2520detailed%2520Gundam%2520model%2520kit%252C%2520RG%2520Gundam%252000%2520The%25200%2520Raiser%252C%2520perfect%2520lighting%252C%2520studio%2520photography%252C%2520dramatic%2520pose%252C%2520high%2520resolution%252C%2520professional%2520product%2520photography%252C%2520clean%2520background%252C%2520intricate%2520details%2520visible&width=400&height=300&seq=16&orientation=landscape"
-                    alt="Gundam model"
-                    className="w-full h-48 object-cover object-top"
-                  />
-                  <div className="absolute top-2 right-2 bg-blue-600 text-white text-xs px-2 py-1 rounded-full">
-                    Featured
+              {posts.map((post) => (
+                <div
+                  key={post.post_id}
+                  className="border border-gray-200 rounded-lg overflow-hidden hover:shadow-md transition-shadow relative"
+                >
+                  {/* Three-dot dropdown in top-left */}
+                  <div className="absolute top-2 left-2">
+                    <button
+                      onClick={() => toggleDropdown(post.post_id)}
+                      className="text-gray-500 hover:text-gray-700 focus:outline-none"
+                    >
+                      <i className="fas fa-ellipsis-v"></i>
+                    </button>
+                    {dropdownOpen === post.post_id && (
+                      <div className="absolute left-0 mt-2 w-32 bg-white border border-gray-200 rounded-md shadow-lg z-10">
+                        <button
+                          onClick={() => handleDeletePost(post.post_id)}
+                          className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
+                        >
+                          Delete Post
+                        </button>
+                      </div>
+                    )}
                   </div>
-                </div>
-                <div className="p-3">
-                  <h3 className="font-medium text-gray-900">
-                    RG Gundam 00 Raiser
-                  </h3>
-                  <div className="flex flex-wrap gap-1 my-2">
-                    <span className="bg-gray-100 text-gray-700 text-xs px-2 py-1 rounded-full">
-                      Gunpla
-                    </span>
-                    <span className="bg-gray-100 text-gray-700 text-xs px-2 py-1 rounded-full">
-                      1/144
-                    </span>
-                    <span className="bg-gray-100 text-gray-700 text-xs px-2 py-1 rounded-full">
-                      Weathered
-                    </span>
-                  </div>
-                  <div className="flex justify-between text-sm text-gray-500">
-                    <span>April 15, 2025</span>
-                    <div className="flex space-x-3">
-                      <span className="flex items-center">
-                        <i className="far fa-heart mr-1"></i> 42
-                      </span>
-                      <span className="flex items-center">
-                        <i className="far fa-comment mr-1"></i> 15
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </div>
 
-              {/* Build 2 */}
-              <div className="border border-gray-200 rounded-lg overflow-hidden hover:shadow-md transition-shadow">
-                <div className="relative">
-                  <img
-                    src="https://readdy.ai/api/search-image?query=highly%2520detailed%25201%252F35%2520scale%2520King%2520Tiger%2520tank%2520model%252C%2520perfect%2520weathering%252C%2520realistic%2520diorama%2520with%2520vegetation%2520and%2520terrain%252C%2520studio%2520lighting%252C%2520professional%2520photography%252C%2520high%2520resolution%252C%2520intricate%2520details%2520visible%252C%2520museum%2520quality%2520model&width=400&height=300&seq=17&orientation=landscape"
-                    alt="Tank model"
-                    className="w-full h-48 object-cover object-top"
-                  />
-                </div>
-                <div className="p-3">
-                  <h3 className="font-medium text-gray-900">
-                    King Tiger Tank Diorama
-                  </h3>
-                  <div className="flex flex-wrap gap-1 my-2">
-                    <span className="bg-gray-100 text-gray-700 text-xs px-2 py-1 rounded-full">
-                      Military
-                    </span>
-                    <span className="bg-gray-100 text-gray-700 text-xs px-2 py-1 rounded-full">
-                      1/35
-                    </span>
-                    <span className="bg-gray-100 text-gray-700 text-xs px-2 py-1 rounded-full">
-                      Diorama
-                    </span>
-                  </div>
-                  <div className="flex justify-between text-sm text-gray-500">
-                    <span>March 28, 2025</span>
-                    <div className="flex space-x-3">
-                      <span className="flex items-center">
-                        <i className="far fa-heart mr-1"></i> 67
-                      </span>
-                      <span className="flex items-center">
-                        <i className="far fa-comment mr-1"></i> 23
-                      </span>
+                  {post.images && post.images.length > 0 ? (
+                    <>
+                      <div className="relative">
+                        <img
+                          src={`http://localhost:8080/${post.images[0]}`}
+                          alt={post.title}
+                          className="w-full h-48 object-cover object-top"
+                        />
+                      </div>
+                      <div className="p-3">
+                        <h3 className="font-serif font-bold text-gray-900">{post.title}</h3>
+                        <p className="font-sans text-sm text-gray-600 mt-1">{post.content}</p>
+                        <div className="flex flex-wrap gap-1 my-2"></div>
+                        <div className="flex justify-between text-sm text-gray-500">
+                          <span>
+                            {new Date(post.created_at).toLocaleDateString("en-US", {
+                              month: "long",
+                              day: "numeric",
+                              year: "numeric",
+                            })}
+                          </span>
+                          <span>
+                            {post.like_count || 0} Likes {post.comment_count || 0} Comments
+                          </span>
+                        </div>
+                      </div>
+                    </>
+                  ) : (
+                    <div className="p-3">
+                      <h3 className="font-serif font-bold text-gray-900">{post.title}</h3>
+                      <p className="font-sans text-sm text-gray-600 mt-1">{post.content}</p>
+                      <div className="flex flex-wrap gap-1 my-2"></div>
+                      <div className="flex justify-between text-sm text-gray-500">
+                        <span>
+                          {new Date(post.created_at).toLocaleDateString("en-US", {
+                            month: "long",
+                            day: "numeric",
+                            year: "numeric",
+                          })}
+                        </span>
+                        <span>
+                          {post.like_count || 0} Likes {post.comment_count || 0} Comments
+                        </span>
+                      </div>
                     </div>
-                  </div>
+                  )}
                 </div>
-              </div>
-
-              {/* Build 3 */}
-              <div className="border border-gray-200 rounded-lg overflow-hidden hover:shadow-md transition-shadow">
-                <div className="relative">
-                  <img
-                    src="https://readdy.ai/api/search-image?query=highly%2520detailed%2520aircraft%2520model%252C%2520perfect%2520weathering%252C%2520realistic%2520details%252C%2520studio%2520lighting%252C%2520professional%2520photography%252C%2520high%2520resolution%252C%2520intricate%2520details%2520visible%252C%2520museum%2520quality%2520model%252C%25201%252F48%2520scale&width=400&height=300&seq=18&orientation=landscape"
-                    alt="Aircraft model"
-                    className="w-full h-48 object-cover object-top"
-                  />
-                </div>
-                <div className="p-3">
-                  <h3 className="font-medium text-gray-900">P-51D Mustang</h3>
-                  <div className="flex flex-wrap gap-1 my-2">
-                    <span className="bg-gray-100 text-gray-700 text-xs px-2 py-1 rounded-full">
-                      Aircraft
-                    </span>
-                    <span className="bg-gray-100 text-gray-700 text-xs px-2 py-1 rounded-full">
-                      1/48
-                    </span>
-                    <span className="bg-gray-100 text-gray-700 text-xs px-2 py-1 rounded-full">
-                      WWII
-                    </span>
-                  </div>
-                  <div className="flex justify-between text-sm text-gray-500">
-                    <span>February 12, 2025</span>
-                    <div className="flex space-x-3">
-                      <span className="flex items-center">
-                        <i className="far fa-heart mr-1"></i> 38
-                      </span>
-                      <span className="flex items-center">
-                        <i className="far fa-comment mr-1"></i> 11
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Build 4 */}
-              <div className="border border-gray-200 rounded-lg overflow-hidden hover:shadow-md transition-shadow">
-                <div className="relative">
-                  <img
-                    src="https://readdy.ai/api/search-image?query=highly%2520detailed%2520sci-fi%2520mecha%2520model%2520kit%252C%2520perfect%2520lighting%252C%2520studio%2520photography%252C%2520dramatic%2520pose%252C%2520high%2520resolution%252C%2520professional%2520product%2520photography%252C%2520clean%2520background%252C%2520intricate%2520details%2520visible%252C%2520custom%2520paint%2520job&width=400&height=300&seq=19&orientation=landscape"
-                    alt="Mecha model"
-                    className="w-full h-48 object-cover object-top"
-                  />
-                </div>
-                <div className="p-3">
-                  <h3 className="font-medium text-gray-900">
-                    MG Barbatos Custom
-                  </h3>
-                  <div className="flex flex-wrap gap-1 my-2">
-                    <span className="bg-gray-100 text-gray-700 text-xs px-2 py-1 rounded-full">
-                      Gunpla
-                    </span>
-                    <span className="bg-gray-100 text-gray-700 text-xs px-2 py-1 rounded-full">
-                      1/100
-                    </span>
-                    <span className="bg-gray-100 text-gray-700 text-xs px-2 py-1 rounded-full">
-                      Custom
-                    </span>
-                  </div>
-                  <div className="flex justify-between text-sm text-gray-500">
-                    <span>January 30, 2025</span>
-                    <div className="flex space-x-3">
-                      <span className="flex items-center">
-                        <i className="far fa-heart mr-1"></i> 54
-                      </span>
-                      <span className="flex items-center">
-                        <i className="far fa-comment mr-1"></i> 19
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </div>
+              ))}
+              {posts.length === 0 && (
+                <div className="text-center text-gray-500">No posts yet.</div>
+              )}
             </div>
 
             <div className="mt-6 text-center">
-              <button className="border border-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-50 !rounded-button whitespace-nowrap cursor-pointer">
+              <button className="border border-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-50 whitespace-nowrap cursor-pointer">
                 Load More
               </button>
             </div>

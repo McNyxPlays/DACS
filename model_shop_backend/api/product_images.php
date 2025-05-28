@@ -56,7 +56,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'DELETE') {
         $stmt->execute([$id]);
         $image = $stmt->fetch(PDO::FETCH_ASSOC);
         if ($image) {
-            $file_path = '../Uploads/' . $image['image_url'];
+            $file_path = '../Uploads/products/' . $image['image_url'];
             if (file_exists($file_path)) {
                 unlink($file_path);
             }

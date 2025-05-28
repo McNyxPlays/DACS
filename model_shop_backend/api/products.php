@@ -104,7 +104,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
                             $stmt->execute([$id]);
                             $imgs = $stmt->fetchAll(PDO::FETCH_ASSOC);
                             foreach ($imgs as $img) {
-                                $images[] = '/Uploads/' . $img['image_url'];
+                                $images[] = '/Uploads/products/' . $img['image_url'];
                             }
                             if (empty($images)) {
                                 $images[] = '/placeholder.jpg';
@@ -288,7 +288,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
                     $stmt->execute([$product['product_id']]);
                     $images = $stmt->fetchAll(PDO::FETCH_ASSOC);
                     $product['images'] = array_map(function($img) {
-                        return '/Uploads/' . $img['image_url'];
+                        return '/Uploads/products/' . $img['image_url'];
                     }, $images);
                     if (empty($product['images'])) {
                         $product['images'] = ['/placeholder.jpg'];

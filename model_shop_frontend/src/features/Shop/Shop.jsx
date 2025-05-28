@@ -113,12 +113,6 @@ function Shop() {
               />
             </div>
           </div>
-          <button
-            onClick={clearAllFilters}
-            className="mt-4 bg-gray-100 text-gray-700 py-2 px-4 rounded-button hover:bg-gray-200 transition"
-          >
-            Clear All Filters
-          </button>
         </div>
       </section>
     </div>
