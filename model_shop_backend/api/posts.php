@@ -14,7 +14,6 @@ $pdo = $database->getConnection();
 
 function validateInput($data) {
     return [
-        'title' => sanitize_input($data['title'] ?? ''),
         'content' => sanitize_input($data['content'] ?? ''),
         'post_time_status' => sanitize_input($data['post_time_status'] ?? 'new')
     ];
@@ -32,9 +31,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $validated = validateInput($data);
     $images = $_FILES['images'] ?? null;
 
-    if (empty($validated['title']) || empty($validated['content'])) {
+    if (empty($validated['content'])) {
         http_response_code(400);
-        echo json_encode(['status' => 'error', 'message' => 'Title and content are required']);
+        echo json_encode(['status' => 'error', 'message' => 'Content is required']);
         exit;
     }
 
@@ -48,12 +47,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $pdo->beginTransaction();
 
         $stmt = $pdo->prepare(
-            "INSERT INTO posts (user_id, title, content, post_time_status, is_approved) 
-             VALUES (?, ?, ?, ?, TRUE)"
+            "INSERT INTO posts (user_id, content, post_time_status, is_approved) 
+             VALUES (?, ?, ?, TRUE)"
         );
         $stmt->execute([
             $user_id,
-            $validated['title'],
             $validated['content'],
             $validated['post_time_status']
         ]);
@@ -63,13 +61,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if ($images && is_array($images['name'])) {
             $upload_dir = '../Uploads/posts/';
             if (!file_exists($upload_dir)) {
-                mkdir($upload_dir, 0777, true);
+                if (!mkdir($upload_dir, 0755, true)) {
+                    throw new Exception("Failed to create upload directory: $upload_dir");
+                }
+            }
+
+            // Check if directory is writable
+            if (!is_writable($upload_dir)) {
+                throw new Exception("Upload directory is not writable: $upload_dir");
             }
 
             foreach ($images['name'] as $index => $name) {
                 if ($images['error'][$index] === UPLOAD_ERR_OK) {
-                    $file_name = uniqid() . '_' . basename($name);
+                    $file_extension = pathinfo($name, PATHINFO_EXTENSION);
+                    $file_base = pathinfo($name, PATHINFO_FILENAME);
+                    // Clean filename: remove 'download_' prefix and any special characters
+                    $file_base = preg_replace('/^download_/', '', $file_base);
+                    $file_base = preg_replace('/[^a-zA-Z0-9_-]/', '_', $file_base);
+                    $file_name = uniqid() . '_' . $file_base . '.' . $file_extension;
                     $target_file = $upload_dir . $file_name;
+
+                    // Debug: Log the file paths
+                    error_log("Uploading file: {$images['tmp_name'][$index]} to $target_file");
+
                     if (move_uploaded_file($images['tmp_name'][$index], $target_file)) {
                         $image_url = 'Uploads/posts/' . $file_name;
                         $stmt = $pdo->prepare(
@@ -77,9 +91,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         );
                         $stmt->execute([$post_id, $image_url]);
                         $image_urls[] = $image_url;
+
+                        // Debug: Confirm file exists after move
+                        if (!file_exists($target_file)) {
+                            error_log("File not found after move: $target_file");
+                        } else {
+                            error_log("File successfully uploaded: $target_file");
+                        }
                     } else {
+                        error_log("Failed to move file: {$images['tmp_name'][$index]} to $target_file");
                         throw new Exception("Failed to move uploaded file: $name");
                     }
+                } elseif ($images['error'][$index] !== UPLOAD_ERR_NO_FILE) {
+                    error_log("Upload error for file $name: " . $images['error'][$index]);
+                    throw new Exception("File upload error: " . $images['error'][$index]);
                 }
             }
         }
@@ -100,10 +125,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         $stmt = $pdo->prepare(
-            "SELECT full_name, profile_image FROM users WHERE user_id = ?"
+            "SELECT full_name FROM users WHERE user_id = ?"
         );
         $stmt->execute([$user_id]);
         $user_info = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        $stmt_image = $pdo->prepare(
+            "SELECT image_url FROM user_images WHERE user_id = ? AND image_type = 'profile' AND is_active = TRUE LIMIT 1"
+        );
+        $stmt_image->execute([$user_id]);
+        $profile_image = $stmt_image->fetchColumn();
 
         $pdo->commit();
         http_response_code(201);
@@ -113,7 +144,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             'post' => [
                 'post_id' => $post_id,
                 'user_id' => $user_id,
-                'title' => $validated['title'],
                 'content' => $validated['content'],
                 'post_time_status' => $validated['post_time_status'],
                 'images' => $image_urls,
@@ -122,11 +152,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 'comment_count' => 0,
                 'is_liked' => $is_liked,
                 'full_name' => $user_info['full_name'] ?? 'Unknown User',
-                'profile_image' => $user_info['profile_image']
+                'profile_image' => $profile_image ?: null
             ]
         ]);
     } catch (Exception $e) {
         $pdo->rollBack();
+        error_log("Error creating post: " . $e->getMessage());
         http_response_code(500);
         echo json_encode(['status' => 'error', 'message' => 'Error creating post: ' . $e->getMessage()]);
     }
@@ -192,7 +223,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $comment_id = $pdo->lastInsertId();
 
             $stmt = $pdo->prepare(
-                "SELECT c.comment_id, c.content, c.created_at, u.full_name, u.profile_image 
+                "SELECT c.comment_id, c.content, c.created_at, u.full_name
                  FROM comments c 
                  JOIN users u ON c.user_id = u.user_id 
                  WHERE c.comment_id = ?"
@@ -225,8 +256,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     try {
         $stmt = $pdo->prepare(
-            "SELECT p.post_id, p.user_id, p.title, p.content, p.post_time_status, p.created_at, 
-                    u.full_name, u.profile_image,
+            "SELECT p.post_id, p.user_id, p.content, p.post_time_status, p.created_at, 
+                    u.full_name,
+                    (SELECT image_url FROM user_images WHERE user_id = p.user_id AND image_type = 'profile' AND is_active = TRUE LIMIT 1) as profile_image,
                     (SELECT COUNT(*) FROM likes w WHERE w.post_id = p.post_id) as like_count,
                     (SELECT COUNT(*) FROM comments c WHERE c.post_id = p.post_id) as comment_count
              FROM posts p 
@@ -239,6 +271,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $posts = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
         foreach ($posts as &$post) {
+            $stmt = $pdo->prepare("SELECT image_url FROM post_images WHERE post_id = ? ORDER BY image_id ASC");
+            $stmt->execute([$post['post_id']]);
+            $images = $stmt->fetchAll(PDO::FETCH_COLUMN);
+            $post['images'] = !empty($images) ? $images : [];
+
             if (isset($_SESSION['user_id'])) {
                 $stmt = $pdo->prepare("SELECT like_id FROM likes WHERE user_id = ? AND post_id = ?");
                 $stmt->execute([$_SESSION['user_id'], $post['post_id']]);
@@ -254,6 +291,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             'posts' => $posts
         ]);
     } catch (Exception $e) {
+        error_log("Error fetching posts: " . $e->getMessage());
         http_response_code(500);
         echo json_encode(['status' => 'error', 'message' => 'Error fetching posts: ' . $e->getMessage()]);
     }
@@ -275,7 +313,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     try {
         $pdo->beginTransaction();
 
-        // Kiểm tra xem người dùng có phải là tác giả của bài viết không
         $stmt = $pdo->prepare("SELECT user_id FROM posts WHERE post_id = ?");
         $stmt->execute([$post_id]);
         $post = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -286,11 +323,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             exit;
         }
 
-        // Xóa các hình ảnh liên quan
+        $stmt = $pdo->prepare("SELECT image_url FROM post_images WHERE post_id = ?");
+        $stmt->execute([$post_id]);
+        $images = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        foreach ($images as $image) {
+            $file_path = '../' . $image['image_url'];
+            if (file_exists($file_path)) {
+                unlink($file_path);
+            }
+        }
+
         $stmt = $pdo->prepare("DELETE FROM post_images WHERE post_id = ?");
         $stmt->execute([$post_id]);
 
-        // Xóa bài viết
+        $stmt = $pdo->prepare("DELETE FROM likes WHERE post_id = ?");
+        $stmt->execute([$post_id]);
+
+        $stmt = $pdo->prepare("DELETE FROM comments WHERE post_id = ?");
+        $stmt->execute([$post_id]);
+
         $stmt = $pdo->prepare("DELETE FROM posts WHERE post_id = ?");
         $stmt->execute([$post_id]);
 

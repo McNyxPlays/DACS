@@ -15,23 +15,18 @@ function Community() {
 
   useEffect(() => {
     fetchPosts();
-  }, []);
+  }, []); // Fetch posts on mount
 
   const fetchPosts = async () => {
     try {
       const response = await api.get("/posts.php", {
         params: { limit: 10, offset: 0 },
       });
-      const postsData = response.data.posts;
-      const postsWithImages = await Promise.all(
-        postsData.map(async (post) => {
-          const imageResponse = await api.get("/posts_images.php", {
-            params: { post_id: post.post_id },
-          });
-          return { ...post, images: imageResponse.data.images || [] };
-        })
-      );
-      setPosts(postsWithImages);
+      if (response.data.status === "success") {
+        setPosts(response.data.posts);
+      } else {
+        Toastify.error("Failed to fetch posts: " + (response.data.message || "Unknown error"));
+      }
     } catch (err) {
       console.error("Error fetching posts:", err);
       Toastify.error("Failed to fetch posts.");
@@ -86,13 +81,18 @@ function Community() {
     setPosts(posts.filter((post) => post.post_id !== postId));
   };
 
+  // Optional: Add a refresh function to trigger fetchPosts on navigation
+  const refreshPosts = () => {
+    fetchPosts();
+  };
+
   return (
     <div className="bg-gray-50 font-inter">
       <section className="py-10">
-        <div className="container mx-auto px-4">
+        <div className="container mx-auto px-4 max-w-7xl">
           <div className="flex flex-col lg:flex-row gap-8">
             <LeftSidebar />
-            <div className="flex-1">
+            <div className="flex-1 max-w-[650px] mx-auto">
               <FeaturedContent user={user} onPostSubmit={handlePostSubmit} />
               <FeaturedPosts
                 posts={posts}
@@ -104,7 +104,9 @@ function Community() {
               <ForumsSection />
               <TutorialsEvents />
             </div>
-            {user && <RightSidebar user={user} />}
+            <div className="lg:w-80">
+              {user ? <RightSidebar user={user} /> : <div className="hidden lg:block"></div>}
+            </div>
           </div>
         </div>
       </section>

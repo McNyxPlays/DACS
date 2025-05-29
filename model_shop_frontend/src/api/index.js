@@ -17,7 +17,7 @@ api.interceptors.response.use(
     return Promise.reject(error);
   }
 );
-
+/*
 // Endpoints cho notifications
 export const getNotifications = (params) =>
   api.get("/notifications.php", { params });
@@ -58,5 +58,5 @@ export const updateUserById = (id, userData) =>
 
 // Xóa người dùng (admin)
 export const deleteUser = (id) => api.delete(`/Usersmana.php?id=${id}`);
-
+*/
 export default api;

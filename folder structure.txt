@@ -4,7 +4,6 @@ backend  mysql+xampp
 
 
 model_shop_backend
-│
 │   .htaccess
 │
 ├───api
@@ -16,20 +15,36 @@ model_shop_backend
 │       guest_carts.php
 │       index.php
 │       login.php
+│       notifications.php
+│       notifications_sse.php
+│       posts.php
+│       posts_images.php
 │       products.php
 │       productsmana.php
+│       product_images.php
+│       promotions.php
 │       register.php
+│       social_links.php
 │       user.php
 │       Usersmana.php
+│       user_images.php
+│       user_stats.php
 │
 ├───config
 │       database.php
 │       functions.php
 │
 ├───includes
-└───logs
-        error.log
-        error_log.txt
+├───logs
+│       error.log
+│       error_log.txt
+│
+├───public
+└───Uploads
+    ├───avatars
+    ├───posts
+
+
 model_shop_frontend
 │
 ├───public
@@ -88,6 +103,10 @@ model_shop_frontend
     │   │       Cart.jsx
     │   │       Cartitem.jsx
     │   │
+    │   ├───checkout
+    │   │       checkout.jsx
+    │   │       OrderConfirmation.jsx
+    │   │
     │   ├───Community
     │   │       Community.jsx
     │   │       FeaturedContent.jsx
@@ -95,7 +114,6 @@ model_shop_frontend
     │   │       ForumsSection.jsx
     │   │       LeftSidebar.jsx
     │   │       RightSidebar.jsx
-    │   │       Showcase.jsx
     │   │       ShowcaseSection.jsx
     │   │       TutorialsEvents.jsx
     │   │
@@ -142,6 +160,11 @@ model_shop_frontend
     │       │       NotificationsHeader.jsx
     │       │       NotificationsPagination.jsx
     │       │       NotificationsSidebar.jsx
+    │       │
+    │       ├───Order
+    │       │       OrderDetailsView.jsx
+    │       │       Orders.jsx
+    │       │       OrdersSidebar.jsx
     │       │
     │       └───UserProfileOverview
     │               MainContent.jsx

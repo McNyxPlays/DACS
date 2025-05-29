@@ -12,6 +12,11 @@ export default defineConfig({
         secure: false,
         rewrite: (path) => path.replace(/^\/api/, ""),
       },
+      "/Uploads": {
+        target: "http://localhost:8080/model_shop_backend",
+        changeOrigin: true,
+        secure: false,
+      },
     },
   },
   build: {

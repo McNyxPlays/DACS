@@ -4,7 +4,6 @@ import { Toastify } from "../../components/Toastify";
 
 function FeaturedContent({ user, onPostSubmit }) {
   const [newPost, setNewPost] = useState({
-    title: "",
     content: "",
     images: [],
   });
@@ -17,7 +16,6 @@ function FeaturedContent({ user, onPostSubmit }) {
     }
 
     const formData = new FormData();
-    formData.append("title", newPost.title);
     formData.append("content", newPost.content);
     formData.append("post_time_status", "new");
     newPost.images.forEach((image, index) => {
@@ -28,13 +26,8 @@ function FeaturedContent({ user, onPostSubmit }) {
       const response = await api.post("/posts.php", formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
-      const newPostData = response.data.post;
-      const imageResponse = await api.get("/posts_images.php", {
-        params: { post_id: newPostData.post_id },
-      });
-      newPostData.images = imageResponse.data.images || [];
-      if (onPostSubmit) onPostSubmit(newPostData);
-      setNewPost({ title: "", content: "", images: [] });
+      if (onPostSubmit) onPostSubmit(response.data.post);
+      setNewPost({ content: "", images: [] });
       Toastify.success("Post created successfully!");
     } catch (err) {
       console.error("Error creating post:", err);
@@ -54,9 +47,11 @@ function FeaturedContent({ user, onPostSubmit }) {
         <button className="flex-1 py-4 px-6 text-gray-600 hover:text-gray-900 transition">
           Popular
         </button>
-        <button className="flex-1 py-4 px-6 text-gray-600 hover:text-gray-900 transition">
-          Following
-        </button>
+        {user && (
+          <button className="flex-1 py-4 px-6 text-gray-600 hover:text-gray-900 transition">
+            Following
+          </button>
+        )}
       </div>
       {user && (
         <div className="p-4 border-b border-gray-200">
@@ -64,9 +59,10 @@ function FeaturedContent({ user, onPostSubmit }) {
             <div className="flex items-start gap-3">
               {user.profile_image ? (
                 <img
-                  src={`http://localhost:8080/${user.profile_image}`}
+                  src={`/Uploads/avatars/${user.profile_image}`}
                   alt="User Profile"
                   className="w-10 h-10 rounded-full object-cover"
+                  onError={(e) => (e.target.src = "/placeholder.jpg")}
                 />
               ) : (
                 <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center">
@@ -74,15 +70,8 @@ function FeaturedContent({ user, onPostSubmit }) {
                 </div>
               )}
               <div className="flex-1">
-                <input
-                  type="text"
-                  placeholder="What's on your mind?"
-                  value={newPost.title}
-                  onChange={(e) => setNewPost({ ...newPost, title: e.target.value })}
-                  className="w-full mb-2 px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 text-lg"
-                />
                 <textarea
-                  placeholder="Share more details..."
+                  placeholder="What's on your mind?"
                   value={newPost.content}
                   onChange={(e) => setNewPost({ ...newPost, content: e.target.value })}
                   className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
@@ -107,7 +96,7 @@ function FeaturedContent({ user, onPostSubmit }) {
                           }
                           className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center"
                         >
-                          &times;
+                          ×
                         </button>
                       </div>
                     ))}

@@ -1,10 +1,42 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import api from "../../api/index";
 import { Toastify } from "../../components/Toastify";
+import PostDetail from "./PostDetail";
+import { useNavigate } from "react-router-dom";
+
+const BASE_URL = "http://localhost:5173";
 
 const FeaturedPosts = ({ posts, user, onLike, onCommentSubmit, onDeletePost }) => {
   const [commentInputs, setCommentInputs] = useState({});
   const [dropdownOpen, setDropdownOpen] = useState(null);
+  const [selectedPost, setSelectedPost] = useState(null);
+  const [imageLoaded, setImageLoaded] = useState({});
+  const [expandedPosts, setExpandedPosts] = useState({});
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    setImageLoaded({});
+    posts.forEach((post) => {
+      if (post.images && post.images.length > 0) {
+        post.images.forEach((image) => {
+          const fullImageUrl = `${BASE_URL}/${image}`;
+          console.log(`Attempting to load image: ${fullImageUrl}`); // Debug log
+          if (!imageLoaded[fullImageUrl]) {
+            const img = new Image();
+            img.src = fullImageUrl;
+            img.onload = () => {
+              console.log(`Image loaded successfully: ${fullImageUrl}`);
+              setImageLoaded((prev) => ({ ...prev, [fullImageUrl]: true }));
+            };
+            img.onerror = () => {
+              console.log(`Image failed to load: ${fullImageUrl}`);
+              setImageLoaded((prev) => ({ ...prev, [fullImageUrl]: false }));
+            };
+          }
+        });
+      }
+    });
+  }, [posts]);
 
   const handleCommentChange = (postId, value) => {
     setCommentInputs({ ...commentInputs, [postId]: value });
@@ -29,7 +61,7 @@ const FeaturedPosts = ({ posts, user, onLike, onCommentSubmit, onDeletePost }) =
     try {
       await api.delete(`/posts.php?post_id=${postId}`);
       Toastify.success("Post deleted successfully!");
-      if (onDeletePost) onDeletePost(postId); // Notify parent to update posts
+      if (onDeletePost) onDeletePost(postId);
     } catch (err) {
       console.error("Error deleting post:", err);
       Toastify.error("Failed to delete post.");
@@ -37,20 +69,49 @@ const FeaturedPosts = ({ posts, user, onLike, onCommentSubmit, onDeletePost }) =
     setDropdownOpen(null);
   };
 
+  const openPostDetail = (post) => {
+    setSelectedPost(post);
+  };
+
+  const closePostDetail = () => {
+    setSelectedPost(null);
+  };
+
+  const navigateToProfile = (userId) => {
+    navigate(`/profile/${userId}`);
+  };
+
+  const toggleExpandPost = (postId) => {
+    setExpandedPosts((prev) => ({ ...prev, [postId]: !prev[postId] }));
+  };
+
+  const isContentLong = (content) => {
+    return content.length > 100 || content.split('\n').length > 1;
+  };
+
   return (
     <div className="p-4">
       {posts.map((post) => (
         <div
           key={post.post_id}
-          className="border-2 border-gray-300 rounded-lg p-4 mb-4 post-card relative"
+          className="border border-gray-200 rounded-lg p-4 mb-6 bg-white shadow-sm max-w-[10000px] mx-auto"
+          style={{ width: "100%", maxWidth: "10000px" }}
+          onClick={() => openPostDetail(post)}
         >
-          <div className="flex justify-between mb-3">
-            <div className="flex items-center gap-3">
+          <div className="flex justify-between mb-2">
+            <div
+              className="flex items-center gap-2 cursor-pointer"
+              onClick={(e) => {
+                e.stopPropagation();
+                navigateToProfile(post.user_id);
+              }}
+            >
               {post.profile_image ? (
                 <img
-                  src={`http://localhost:8080/${post.profile_image}`}
+                  src={`${BASE_URL}/Uploads/avatars/${post.profile_image}`}
                   alt="User Profile"
                   className="w-10 h-10 rounded-full object-cover"
+                  onError={(e) => (e.target.src = "/placeholder.jpg")}
                 />
               ) : (
                 <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center">
@@ -68,7 +129,7 @@ const FeaturedPosts = ({ posts, user, onLike, onCommentSubmit, onDeletePost }) =
               </div>
             </div>
             {user && user.user_id === post.user_id && (
-              <div className="relative">
+              <div className="relative" onClick={(e) => e.stopPropagation()}>
                 <button
                   onClick={() => toggleDropdown(post.post_id)}
                   className="text-gray-500 hover:text-gray-700 focus:outline-none"
@@ -88,31 +149,61 @@ const FeaturedPosts = ({ posts, user, onLike, onCommentSubmit, onDeletePost }) =
               </div>
             )}
           </div>
-          <h3 className="text-gray-800 font-semibold mb-2">{post.title}</h3>
-          <p className="text-gray-800 mb-3 whitespace-pre-wrap">{post.content}</p>
+          <p
+            className={`text-gray-800 mb-2 whitespace-pre-wrap break-words ${
+              !expandedPosts[post.post_id] && isContentLong(post.content)
+                ? "line-clamp-1"
+                : ""
+            }`}
+          >
+            {post.content}
+          </p>
+          {isContentLong(post.content) && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                toggleExpandPost(post.post_id);
+              }}
+              className="text-blue-600 hover:underline text-sm"
+            >
+              {expandedPosts[post.post_id] ? "See Less" : "See More"}
+            </button>
+          )}
           {post.images && post.images.length > 0 && (
-            <div className="grid grid-cols-2 gap-2">
-              {post.images.map((image, index) => (
-                <img
-                  key={index}
-                  src={`http://localhost:8080/${image}`}
-                  alt="Post Image"
-                  className="w-full h-48 object-cover rounded-lg"
-                />
-              ))}
+            <div className="grid grid-cols-1 gap-2 mb-2">
+              {post.images.map((image, index) => {
+                const fullImageUrl = `${BASE_URL}/${image}`;
+                return (
+                  <div key={index} className="relative">
+                    {imageLoaded[fullImageUrl] === undefined ? (
+                      <div className="w-full h-48 bg-gray-200 rounded-lg animate-pulse"></div>
+                    ) : (
+                      <img
+                        src={imageLoaded[fullImageUrl] ? fullImageUrl : "/placeholder.jpg"}
+                        alt="Post Image"
+                        className="w-full rounded-lg object-cover border-l-2 border-r-2 border-gray-700"
+                        onError={(e) => (e.target.src = "/placeholder.jpg")}
+                      />
+                    )}
+                  </div>
+                );
+              })}
             </div>
           )}
-          <div className="flex items-center justify-between text-sm mt-3">
+          <div className="flex items-center justify-between text-sm mb-2">
             <div className="flex items-center gap-1 text-gray-500">
               <i className="ri-thumb-up-fill text-blue-600"></i>
               <span>{post.like_count || 0}</span>
             </div>
-            <div className="flex items-center gap-4 text-gray-500">
+            <div className="flex items-center gap-3 text-gray-500">
               <span>{post.comment_count || 0} comments</span>
               <span>shares</span>
             </div>
           </div>
-          <div className="flex items-center justify-between mt-3 pt-3 border-t border-gray-200">
+          <div
+            className="flex items-center justify-between pt-2 border-t border-gray-200"
+            onClick={(e) => e.stopPropagation()}
+          >
             <button
               onClick={() => onLike(post.post_id, post.is_liked)}
               className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg transition ${
@@ -136,15 +227,16 @@ const FeaturedPosts = ({ posts, user, onLike, onCommentSubmit, onDeletePost }) =
               <span>Share</span>
             </button>
           </div>
-          <div className="mt-3">
-            <div className="flex items-center gap-3">
+          <div className="mt-2" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center gap-2">
               {user && (
                 <>
                   {user.profile_image ? (
                     <img
-                      src={`http://localhost:8080/${user.profile_image}`}
+                      src={`${BASE_URL}/Uploads/avatars/${user.profile_image}`}
                       alt="User Profile"
                       className="w-8 h-8 rounded-full object-cover"
+                      onError={(e) => (e.target.src = "/placeholder.jpg")}
                     />
                   ) : (
                     <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center">
@@ -173,6 +265,10 @@ const FeaturedPosts = ({ posts, user, onLike, onCommentSubmit, onDeletePost }) =
           View More Posts
         </button>
       </div>
+
+      {selectedPost && (
+        <PostDetail post={selectedPost} user={user} onClose={closePostDetail} />
+      )}
     </div>
   );
 };

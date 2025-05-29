@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from "react";
 import api from "../../../api/index";
+import { Toastify } from "../../../components/Toastify";
 
 const ProfileSettings = ({ activeSection, user: initialUser, onUserUpdate }) => {
     const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
@@ -16,24 +17,20 @@ const ProfileSettings = ({ activeSection, user: initialUser, onUserUpdate }) => 
         confirmPassword: "",
         profile_image: null,
     });
-    const [userData, setUserData] = useState({
-        role: "user",
-        is_active: true,
-        created_at: "",
-    });
     const [errors, setErrors] = useState({});
     const [success, setSuccess] = useState("");
     const [isLoading, setIsLoading] = useState(false);
     const [isFetched, setIsFetched] = useState(false);
-    const [isAdmin, setIsAdmin] = useState(false);
 
     const fetchUserData = useCallback(async () => {
         try {
             const response = await api.get("/user.php");
             if (response.data.status === "success") {
                 const fetchedUser = response.data.user;
-                setFormData({
-                    full_name: fetchedUser.full_name || "",
+                console.log("Fetched user data:", fetchedUser); // Debug fetched data
+                setFormData((prev) => ({
+                    ...prev,
+                    full_name: fetchedUser.full_name || "Default Name",
                     email: fetchedUser.email || "",
                     phone_number: fetchedUser.phone_number || "",
                     address: fetchedUser.address || "",
@@ -46,13 +43,7 @@ const ProfileSettings = ({ activeSection, user: initialUser, onUserUpdate }) => 
                     newPassword: "",
                     confirmPassword: "",
                     profile_image: null,
-                });
-                setUserData({
-                    role: fetchedUser.role || "user",
-                    is_active: fetchedUser.is_active || true,
-                    created_at: fetchedUser.created_at || "",
-                });
-                setIsAdmin(fetchedUser.role === "admin");
+                }));
                 setProfilePicture(
                     fetchedUser.profile_image
                         ? `http://localhost:8080/${fetchedUser.profile_image}`
@@ -61,10 +52,12 @@ const ProfileSettings = ({ activeSection, user: initialUser, onUserUpdate }) => 
                 if (onUserUpdate) onUserUpdate(fetchedUser);
             } else {
                 setErrors({ general: "Failed to fetch user data." });
+                Toastify.error("Failed to fetch user data.");
             }
         } catch (err) {
             console.error("Error fetching user data:", err);
             setErrors({ general: err.response?.data?.message || "Error fetching user data." });
+            Toastify.error(err.response?.data?.message || "Error fetching user data.");
         } finally {
             setIsFetched(true);
         }
@@ -78,8 +71,10 @@ const ProfileSettings = ({ activeSection, user: initialUser, onUserUpdate }) => 
 
     useEffect(() => {
         if (initialUser && !isFetched) {
-            setFormData({
-                full_name: initialUser.full_name || "",
+            console.log("Initial user prop:", initialUser); // Debug initialUser
+            setFormData((prev) => ({
+                ...prev,
+                full_name: initialUser.full_name || "Default Name",
                 email: initialUser.email || "",
                 phone_number: initialUser.phone_number || "",
                 address: initialUser.address || "",
@@ -92,13 +87,7 @@ const ProfileSettings = ({ activeSection, user: initialUser, onUserUpdate }) => 
                 newPassword: "",
                 confirmPassword: "",
                 profile_image: null,
-            });
-            setUserData({
-                role: initialUser.role || "user",
-                is_active: initialUser.is_active || true,
-                created_at: initialUser.created_at || "",
-            });
-            setIsAdmin(initialUser.role === "admin");
+            }));
             setProfilePicture(
                 initialUser.profile_image
                     ? `http://localhost:8080/${initialUser.profile_image}`
@@ -110,14 +99,26 @@ const ProfileSettings = ({ activeSection, user: initialUser, onUserUpdate }) => 
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
+        console.log(`Input changed - ${name}: ${value}`);
         setFormData((prev) => ({ ...prev, [name]: value }));
-        setErrors((prev) => ({ ...prev, [name]: "" }));
+        setErrors((prev) => ({ ...prev, [name]: "", general: "" }));
     };
 
     const handleProfilePictureChange = (e) => {
         const file = e.target.files[0];
         if (file) {
+            if (!["image/jpeg", "image/png", "image/gif"].includes(file.type)) {
+                setErrors({ profile_image: "Only JPEG, PNG, or GIF images are allowed." });
+                Toastify.error("Only JPEG, PNG, or GIF images are allowed.");
+                return;
+            }
+            if (file.size > 5 * 1024 * 1024) {
+                setErrors({ profile_image: "Image size exceeds 5MB limit." });
+                Toastify.error("Image size exceeds 5MB limit.");
+                return;
+            }
             setFormData((prev) => ({ ...prev, profile_image: file }));
+            setErrors((prev) => ({ ...prev, profile_image: "" }));
             const reader = new FileReader();
             reader.onloadend = () => setProfilePicture(reader.result);
             reader.readAsDataURL(file);
@@ -126,9 +127,12 @@ const ProfileSettings = ({ activeSection, user: initialUser, onUserUpdate }) => 
 
     const validateForm = () => {
         const newErrors = {};
-        if (!formData.full_name.trim()) newErrors.full_name = "Display Name is required.";
-        if (!formData.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email))
+        if (!formData.full_name.trim()) {
+            newErrors.full_name = "Display Name is required.";
+        }
+        if (!formData.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
             newErrors.email = "Valid email is required.";
+        }
         if (formData.phone_number) {
             const phoneRegex = /^\+?[\d\s()-]{10,15}$/;
             if (!phoneRegex.test(formData.phone_number)) {
@@ -136,10 +140,12 @@ const ProfileSettings = ({ activeSection, user: initialUser, onUserUpdate }) => 
                     "Invalid phone number format (10-15 digits, may include spaces, dashes, or parentheses).";
             }
         }
-        if (formData.gender === "other" && !formData.custom_gender.trim())
+        if (formData.gender === "other" && !formData.custom_gender.trim()) {
             newErrors.custom_gender = "Please specify your gender.";
-        if (formData.newPassword && formData.newPassword !== formData.confirmPassword)
+        }
+        if (formData.newPassword && formData.newPassword !== formData.confirmPassword) {
             newErrors.confirmPassword = "New password and confirm password do not match.";
+        }
         return newErrors;
     };
 
@@ -149,68 +155,51 @@ const ProfileSettings = ({ activeSection, user: initialUser, onUserUpdate }) => 
         setSuccess("");
         setIsLoading(true);
 
+        console.log("Form data before submission:", formData);
+
         const validationErrors = validateForm();
         if (Object.keys(validationErrors).length > 0) {
+            console.log("Validation errors:", validationErrors);
             setErrors(validationErrors);
             setIsLoading(false);
             return;
         }
 
         const formDataToSend = new FormData();
-        // Debug: Log each appended value
-        const fullName = formData.full_name.trim();
-        console.log("Appending full_name:", fullName);
-        formDataToSend.append("full_name", fullName);
+        formDataToSend.append("full_name", formData.full_name.trim() || "Jane Doe");
         formDataToSend.append("email", formData.email);
         const sanitizedPhoneNumber = formData.phone_number
             ? formData.phone_number.replace(/[^0-9+]/g, "").replace(/^(\+\d{1,3})(\d+)/, "$1$2")
             : "";
-        console.log("Appending phone_number:", sanitizedPhoneNumber);
         formDataToSend.append("phone_number", sanitizedPhoneNumber);
         formDataToSend.append("address", formData.address || "");
-        console.log("Appending gender:", formData.gender === "other" ? formData.custom_gender : formData.gender || "");
         formDataToSend.append(
             "gender",
             formData.gender === "other" ? formData.custom_gender : formData.gender || ""
         );
         if (formData.profile_image) {
-            console.log("Appending profile_image:", formData.profile_image.name);
             formDataToSend.append("profile_image", formData.profile_image);
         } else if (!initialUser?.profile_image && !profilePicture) {
-            console.log("Appending remove_profile_image: true");
             formDataToSend.append("remove_profile_image", "true");
         }
         if (formData.currentPassword) {
-            console.log("Appending current_password:", formData.currentPassword);
             formDataToSend.append("current_password", formData.currentPassword);
         }
         if (formData.newPassword) {
-            console.log("Appending new_password:", formData.newPassword);
             formDataToSend.append("new_password", formData.newPassword);
         }
 
-       
-        for (let pair of formDataToSend.entries()) {
-            console.log("FormData entry:", pair[0] + ': ' + pair[1]);
+        for (let [key, value] of formDataToSend.entries()) {
+            console.log(`FormData entry - ${key}: ${value}`);
         }
 
         try {
-            console.log("Making PUT request to:", api.defaults.baseURL + "/user.php");
-            const response = await api.put("/user.php", formDataToSend); 
-            console.log("Response from server:", response.data);
+            const response = await api.put("/user.php", formDataToSend, {
+                headers: { "Content-Type": "multipart/form-data" },
+            });
             if (response.data.status === "success") {
                 setSuccess("Profile settings saved successfully!");
                 const updatedUser = response.data.user;
-                setUserData({
-                    role: updatedUser.role || "user",
-                    is_active: updatedUser.is_active || true,
-                    created_at: updatedUser.created_at || "",
-                });
-                setProfilePicture(
-                    updatedUser.profile_image
-                        ? `http://localhost:8080/${updatedUser.profile_image}`
-                        : ""
-                );
                 setFormData((prev) => ({
                     ...prev,
                     full_name: updatedUser.full_name || "",
@@ -223,19 +212,33 @@ const ProfileSettings = ({ activeSection, user: initialUser, onUserUpdate }) => 
                             ? updatedUser.gender
                             : "",
                     profile_image: updatedUser.profile_image ? null : prev.profile_image,
+                    currentPassword: "",
+                    newPassword: "",
+                    confirmPassword: "",
                 }));
-                setIsAdmin(updatedUser.role === "admin");
+                setProfilePicture(
+                    updatedUser.profile_image
+                        ? `http://localhost:8080/${updatedUser.profile_image}`
+                        : ""
+                );
                 if (onUserUpdate) onUserUpdate(updatedUser);
+                Toastify.success("Profile updated successfully!");
             } else {
                 setErrors({ general: response.data.message || "Failed to save changes." });
+                Toastify.error(response.data.message || "Failed to save changes.");
             }
         } catch (err) {
-            console.error("Error response:", err.response?.data || err.message);
-            const errorMessage = err.response?.data?.message || err.message || "Error updating profile.";
+            console.error("Error updating profile:", err);
+            const errorMessage =
+                err.response?.data?.message || err.message || "Error updating profile.";
             setErrors({
                 general:
-                    errorMessage === "Failed to upload image"
-                        ? "Failed to upload profile image. Please try again."
+                    errorMessage === "Failed to upload image: Unable to move file to destination"
+                        ? "Failed to upload profile image. The server may have permission issues with the upload directory. Please try again or contact support."
+                        : errorMessage === "Failed to create upload directory"
+                        ? "Failed to upload profile image. The server could not create the upload directory. Please contact support."
+                        : errorMessage === "Upload directory is not writable"
+                        ? "Failed to upload profile image. The server upload directory is not writable. Please contact support."
                         : errorMessage === "Email already exists"
                         ? "This email is already in use. Please use a different email."
                         : errorMessage === "Current password is incorrect"
@@ -244,6 +247,7 @@ const ProfileSettings = ({ activeSection, user: initialUser, onUserUpdate }) => 
                         ? "Please enter a display name."
                         : "An error occurred while saving changes. Please try again.",
             });
+            Toastify.error(errors.general);
         } finally {
             setIsLoading(false);
         }
@@ -272,14 +276,9 @@ const ProfileSettings = ({ activeSection, user: initialUser, onUserUpdate }) => 
                         <div className="mb-6 flex flex-col md:flex-row items-start">
                             <div className="mb-4 md:mb-0 md:mr-8">
                                 <div className="relative">
-                                    {profilePicture || initialUser?.profile_image ? (
+                                    {profilePicture ? (
                                         <img
-                                            src={
-                                                profilePicture ||
-                                                (initialUser?.profile_image
-                                                    ? `http://localhost:8080/${initialUser.profile_image}`
-                                                    : "")
-                                            }
+                                            src={profilePicture}
                                             alt="Profile"
                                             className="w-24 h-24 rounded-full object-cover border-4 border-white shadow-sm"
                                         />
@@ -308,10 +307,11 @@ const ProfileSettings = ({ activeSection, user: initialUser, onUserUpdate }) => 
                                         Upload New Picture
                                         <input
                                             type="file"
-                                            accept="image/*"
+                                            accept="image/jpeg,image/png,image/gif"
                                             onChange={handleProfilePictureChange}
                                             className="hidden"
                                             disabled={isLoading}
+                                            name="profile_image"
                                         />
                                     </label>
                                     <button
@@ -326,6 +326,9 @@ const ProfileSettings = ({ activeSection, user: initialUser, onUserUpdate }) => 
                                         Remove
                                     </button>
                                 </div>
+                                {errors.profile_image && (
+                                    <p className="text-red-500 text-sm mt-1">{errors.profile_image}</p>
+                                )}
                             </div>
                         </div>
 
@@ -430,53 +433,6 @@ const ProfileSettings = ({ activeSection, user: initialUser, onUserUpdate }) => 
                                     <p className="text-red-500 text-sm mt-1">{errors.custom_gender}</p>
                                 )}
                             </div>
-                            {isAdmin && (
-                                <>
-                                    <div className="mb-4">
-                                        <label htmlFor="role" className="block text-sm font-medium text-gray-700 mb-1">
-                                            Role
-                                        </label>
-                                        <input
-                                            type="text"
-                                            id="role"
-                                            name="role"
-                                            value={userData.role}
-                                            readOnly
-                                            className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none bg-gray-100"
-                                            disabled={true}
-                                        />
-                                    </div>
-                                    <div className="mb-4">
-                                        <label htmlFor="is_active" className="block text-sm font-medium text-gray-700 mb-1">
-                                            Active Status
-                                        </label>
-                                        <input
-                                            type="checkbox"
-                                            id="is_active"
-                                            name="is_active"
-                                            checked={userData.is_active}
-                                            readOnly
-                                            className="w-5 h-5 text-blue-600 focus:ring-2 focus:ring-blue-500"
-                                            disabled={true}
-                                        />
-                                        <span className="ml-2">Account is Active</span>
-                                    </div>
-                                    <div className="mb-4">
-                                        <label htmlFor="created_at" className="block text-sm font-medium text-gray-700 mb-1">
-                                            Created At
-                                        </label>
-                                        <input
-                                            type="text"
-                                            id="created_at"
-                                            name="created_at"
-                                            value={userData.created_at}
-                                            readOnly
-                                            className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none bg-gray-100"
-                                            disabled={true}
-                                        />
-                                    </div>
-                                </>
-                            )}
                         </div>
 
                         <div className="border-t border-gray-200 pt-6 mt-6">

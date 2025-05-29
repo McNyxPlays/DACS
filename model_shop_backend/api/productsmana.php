@@ -172,7 +172,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         // Handle image uploads
         if ($images && $images['name'][0] !== '') {
-            $upload_dir = '../Uploads/';
+            $upload_dir = '../Uploads/products/';
             if (!is_dir($upload_dir)) {
                 mkdir($upload_dir, 0777, true);
             }
@@ -272,7 +272,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'PUT') {
 
         // Handle image uploads
         if ($images && $images['name'][0] !== '') {
-            $upload_dir = '../Uploads/';
+            $upload_dir = '../Uploads/products/';
             if (!is_dir($upload_dir)) {
                 mkdir($upload_dir, 0777, true);
             }
@@ -323,7 +323,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'DELETE') {
         $stmt->execute([$id]);
         $images = $stmt->fetchAll(PDO::FETCH_ASSOC);
         foreach ($images as $image) {
-            $file_path = '../Uploads/' . $image['image_url'];
+            $file_path = '../Uploads/products/' . $image['image_url'];
             if (file_exists($file_path)) {
                 unlink($file_path);
             }

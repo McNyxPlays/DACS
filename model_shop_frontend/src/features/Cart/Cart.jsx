@@ -69,45 +69,52 @@ function Cart({ isOpen, setIsOpen }) {
     };
   }, [isOpen, setIsOpen]);
 
-  const fetchCartItems = async () => {
-    setLoading(true);
-    try {
-      const endpoint = user ? "/carts.php" : "/guest_carts.php";
-      const params = user
-        ? { user_id: user.user_id }
-        : { session_key: sessionKey };
-      const response = await api.get(endpoint, { params });
-      if (response.data.status === "success") {
-        const items = (response.data.data || []).map((item) => ({
-          ...item,
-          price: parseFloat(item.price) || 0,
-          quantity: parseInt(item.quantity, 10) || 1,
-        }));
-        setCartItems(items);
-        setError("");
-      } else {
-        setError(
-          `Failed to fetch cart: ${response.data.message || "Unknown error"}`
-        );
-        Toastify.error(
-          `Failed to fetch cart: ${response.data.message || "Unknown error"}`
-        );
-      }
-    } catch (err) {
-      const errorMsg =
-        err.response?.data?.message || err.message || "Network or server error";
-      setError(`Failed to fetch cart: ${errorMsg}`);
-      Toastify.error(`Failed to fetch cart: ${errorMsg}`);
-      console.error("Fetch cart error:", {
-        error: err,
-        response: err.response,
-        status: err.response?.status,
-        data: err.response?.data,
-      });
-    } finally {
-      setLoading(false);
+const fetchCartItems = async () => {
+  if (!user && !sessionStorage.getItem("guest_session_key")) {
+    setCartItems([]);
+    setLoading(false);
+    setError("");
+    return;
+  }
+
+  setLoading(true);
+  try {
+    const endpoint = user ? "/carts.php" : "/guest_carts.php";
+    const params = user
+      ? { user_id: user.user_id }
+      : { session_key: sessionKey };
+    const response = await api.get(endpoint, { params });
+    if (response.data.status === "success") {
+      const items = (response.data.data || []).map((item) => ({
+        ...item,
+        price: parseFloat(item.price) || 0,
+        quantity: parseInt(item.quantity, 10) || 1,
+      }));
+      setCartItems(items);
+      setError("");
+    } else {
+      setError(
+        `Failed to fetch cart: ${response.data.message || "Unknown error"}`
+      );
+      Toastify.error(
+        `Failed to fetch cart: ${response.data.message || "Unknown error"}`
+      );
     }
-  };
+  } catch (err) {
+    const errorMsg =
+      err.response?.data?.message || err.message || "Network or server error";
+    setError(`Failed to fetch cart: ${errorMsg}`);
+    Toastify.error(`Failed to fetch cart: ${errorMsg}`);
+    console.error("Fetch cart error:", {
+      error: err,
+      response: err.response,
+      status: err.response?.status,
+      data: err.response?.data,
+    });
+  } finally {
+    setLoading(false);
+  }
+};
 
   const handleQuantityChange = async (itemId, delta) => {
     const item = cartItems.find(

@@ -6,13 +6,10 @@ export default function Checkout() {
   const [cartItems, setCartItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
-  const [address1, setAddress1] = useState("");
-  const [address2, setAddress2] = useState("");
-  const [zipCode, setZipCode] = useState("");
-  const [city, setCity] = useState("");
-  const [state, setState] = useState("");
+  const [fullName, setFullName] = useState("");
+  const [address, setAddress] = useState("");
+  const [guestEmail, setGuestEmail] = useState(""); // Thêm trường email
+  const [guestPhone, setGuestPhone] = useState(""); // Thêm trường phone
   const [promoCode, setPromoCode] = useState("");
   const [discount, setDiscount] = useState(0);
   const exchangeRate = 25000; // 1 USD = 25,000 VND
@@ -77,6 +74,7 @@ export default function Checkout() {
       if (response.data.status === "success") {
         const discountValue = response.data.discount || 0;
         setDiscount(discountValue);
+        setError("");
       } else {
         setError(
           `Invalid promo code: ${response.data.message || "Unknown error"}`
@@ -85,9 +83,7 @@ export default function Checkout() {
       }
     } catch (err) {
       setError(
-        `Failed to apply promo code: ${
-          err.message || "Network or server error"
-        }`
+        `Failed to apply promo code: ${err.message || "Network or server error"}`
       );
       setDiscount(0);
     }
@@ -95,30 +91,29 @@ export default function Checkout() {
 
   const handlePlaceOrder = async (e) => {
     e.preventDefault();
-    if (!firstName || !lastName || !address1 || !zipCode || !city || !state) {
+    if (!fullName || !address || (!user && (!guestEmail || !guestPhone))) {
       setError("All fields marked with * are required.");
       return;
     }
 
-    const shippingAddress = `${address1}, ${
-      address2 || ""
-    }, ${city}, ${state}, ${zipCode}`;
+    const shippingAddress = address;
     const totalAmount = subtotal - discount;
 
     try {
       const orderData = {
         user_id: user ? user.user_id : null,
-        guest_email: user ? null : "guest@example.com", // Thêm input email cho khách nếu cần
-        guest_phone: user ? null : "1234567890", // Thêm input phone cho khách nếu cần
-        total_amount: totalAmount / exchangeRate, // Lưu bằng USD
+        guest_email: user ? null : guestEmail,
+        guest_phone: user ? null : guestPhone,
+        total_amount: totalAmount / exchangeRate,
         discount_amount: discount / exchangeRate,
         shipping_address: shippingAddress,
-        payment_method: "cod", // Mặc định COD, có thể thêm chọn phương thức
+        payment_method: "cod",
         order_details: cartItems.map((item) => ({
           product_id: item.product_id,
           quantity: item.quantity,
           price_at_purchase: item.price,
         })),
+        promo_code: promoCode || null, // Gửi promoCode
       };
 
       const response = await api.post("/orders.php", orderData);
@@ -130,8 +125,14 @@ export default function Checkout() {
           : { session_key: sessionKey };
         await api.delete(endpoint, { data: payload });
 
-        navigate("/order-confirmation", {
-          state: { order: response.data.data },
+        // Truyền thêm cartItems để hiển thị chi tiết trong OrderConfirmation
+        navigate("/orderconfirmation", {
+          state: {
+            order: {
+              ...response.data.data,
+              items: cartItems,
+            },
+          },
         });
       } else {
         setError(
@@ -162,7 +163,6 @@ export default function Checkout() {
             {(subtotal / exchangeRate).toFixed(2)}
           </p>
           <div className="mt-6 space-y-6">
-            {/* Step 1: Shipping Address */}
             <div className="bg-white p-6 rounded shadow">
               <div className="flex items-center gap-2 mb-4">
                 <div className="w-6 h-6 rounded-full bg-black text-white flex items-center justify-center text-sm">
@@ -182,70 +182,46 @@ export default function Checkout() {
                 .
               </p>
               <form onSubmit={handlePlaceOrder} className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 gap-4">
                   <input
                     type="text"
-                    placeholder="First name *"
-                    value={firstName}
-                    onChange={(e) => setFirstName(e.target.value)}
-                    className="border p-2 rounded w-full"
-                    required
-                  />
-                  <input
-                    type="text"
-                    placeholder="Last name *"
-                    value={lastName}
-                    onChange={(e) => setLastName(e.target.value)}
+                    placeholder="Full name *"
+                    value={fullName}
+                    onChange={(e) => setFullName(e.target.value)}
                     className="border p-2 rounded w-full"
                     required
                   />
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 gap-4">
                   <input
                     type="text"
-                    placeholder="Address 1 - Street or P.O. Box *"
-                    value={address1}
-                    onChange={(e) => setAddress1(e.target.value)}
+                    placeholder="Address *"
+                    value={address}
+                    onChange={(e) => setAddress(e.target.value)}
                     className="border p-2 rounded w-full"
                     required
-                  />
-                  <input
-                    type="text"
-                    placeholder="Address 2 - Apt, Suite, Floor"
-                    value={address2}
-                    onChange={(e) => setAddress2(e.target.value)}
-                    className="border p-2 rounded w-full"
                   />
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <input
-                    type="text"
-                    placeholder="ZIP code *"
-                    value={zipCode}
-                    onChange={(e) => setZipCode(e.target.value)}
-                    className="border p-2 rounded w-full"
-                    required
-                  />
-                  <input
-                    type="text"
-                    placeholder="City *"
-                    value={city}
-                    onChange={(e) => setCity(e.target.value)}
-                    className="border p-2 rounded w-full"
-                    required
-                  />
-                  <select
-                    value={state}
-                    onChange={(e) => setState(e.target.value)}
-                    className="border p-2 rounded w-full"
-                    required
-                  >
-                    <option value="">State</option>
-                    <option value="CA">California</option>
-                    <option value="NY">New York</option>
-                    {/* Thêm các state khác nếu cần */}
-                  </select>
-                </div>
+                {!user && (
+                  <div className="grid grid-cols-1 gap-4">
+                    <input
+                      type="email"
+                      placeholder="Email *"
+                      value={guestEmail}
+                      onChange={(e) => setGuestEmail(e.target.value)}
+                      className="border p-2 rounded w-full"
+                      required
+                    />
+                    <input
+                      type="tel"
+                      placeholder="Phone *"
+                      value={guestPhone}
+                      onChange={(e) => setGuestPhone(e.target.value)}
+                      className="border p-2 rounded w-full"
+                      required
+                    />
+                  </div>
+                )}
                 <button
                   type="submit"
                   className="mt-4 bg-black text-white py-2 px-4 rounded hover:bg-gray-800 w-full"
@@ -255,7 +231,6 @@ export default function Checkout() {
               </form>
             </div>
 
-            {/* Steps 2, 3, 4 (placeholder) */}
             {["Shipping method", "Payment", "Review & place order"].map(
               (label, i) => (
                 <div key={i} className="bg-white p-6 rounded shadow">
@@ -312,9 +287,7 @@ export default function Checkout() {
               <hr />
               <div className="flex justify-between font-semibold">
                 <span>Total</span>
-                <span>
-                  ${((subtotal - discount) / exchangeRate).toFixed(2)}
-                </span>
+                <span>${((subtotal - discount) / exchangeRate).toFixed(2)}</span>
               </div>
               <p className="text-xs text-gray-500 mt-2">
                 Or 4 interest-free payments of $

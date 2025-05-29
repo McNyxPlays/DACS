@@ -5,7 +5,7 @@ class Database {
     private $dbname = 'model_shop';
     private $username = 'root';
     private $password = '';
-    private $conn = null; // Thêm thuộc tính để tái sử dụng kết nối
+    private $conn = null;
 
     public function getConnection() {
         if ($this->conn === null) {
@@ -16,11 +16,11 @@ class Database {
                     $this->password
                 );
                 $this->conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-                $this->conn->setAttribute(PDO::ATTR_EMULATE_PREPARES, false); // Tắt emulate prepares
+                $this->conn->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
                 error_log("Database connection established successfully");
             } catch (PDOException $e) {
                 error_log("Connection failed: " . $e->getMessage());
-                throw new PDOException("Database connection failed: " . $e->getMessage()); // Ném lỗi để xử lý ở cấp cao hơn
+                throw new PDOException("Database connection failed: " . $e->getMessage());
             }
         }
         return $this->conn;
@@ -35,7 +35,6 @@ class Database {
         }
     }
 
-    // Đóng kết nối (tùy chọn, gọi khi không cần nữa)
     public function closeConnection() {
         $this->conn = null;
     }

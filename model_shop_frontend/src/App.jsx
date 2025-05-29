@@ -15,6 +15,7 @@ import Favorites from "./features/Favorites/Favorites";
 import Cart from "./features/Cart/Cart";
 import Messages from "./features/UserProfile/Messages/Messages";
 import Checkout from "./features/Checkout/Checkout";
+import OrderConfirmation from "./features/checkout/OrderConfirmation";
 import Notifications from "./features/UserProfile/Notifications/Notifications";
 
 const Layout = ({
@@ -152,6 +153,7 @@ const App = () => {
           element={<Cart isOpen={true} setIsOpen={setIsCartOpen} />}
         />
         <Route path="/checkout" element={<Checkout />} />
+        <Route path="/orderconfirmation" element={<OrderConfirmation />} />
         <Route
           path="/admin/*"
           element={

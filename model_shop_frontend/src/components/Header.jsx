@@ -36,27 +36,42 @@ const Header = ({
     setIsDropdownOpen(!isDropdownOpen);
   };
 
-  const handleLogout = async () => {
-    try {
-      await api.post("/user.php");
-      setUser(null);
-      localStorage.removeItem("user");
-      sessionStorage.removeItem("guest_session_key");
-      setIsNavOpen(false);
-      setIsDropdownOpen(false);
-      document.body.style.overflow = "auto";
-      navigate("/");
-    } catch (err) {
-      console.error("Logout error:", err);
-      setUser(null);
-      localStorage.removeItem("user");
-      sessionStorage.removeItem("guest_session_key");
-      setIsNavOpen(false);
-      setIsDropdownOpen(false);
-      document.body.style.overflow = "auto";
-      navigate("/");
-    }
-  };
+const handleLogout = async () => {
+  try {
+    await api.post("/user.php");
+    
+    setUser(null);
+    sessionStorage.removeItem("user");
+    sessionStorage.removeItem("guest_session_key");
+    
+    setCartCount(0); 
+    const event = new CustomEvent("cartUpdated"); 
+    window.dispatchEvent(event);
+    
+    setIsNavOpen(false);
+    setIsDropdownOpen(false);
+    document.body.style.overflow = "auto";
+    
+    navigate("/");
+  } catch (err) {
+    console.error("Logout error:", err);
+    
+    setUser(null);
+    sessionStorage.removeItem("user");
+    sessionStorage.removeItem("guest_session_key");
+    
+    setCartCount(0); // Reset cart count to 0
+    const event = new CustomEvent("cartUpdated");
+    window.dispatchEvent(event);
+    
+
+    setIsNavOpen(false);
+    setIsDropdownOpen(false);
+    document.body.style.overflow = "auto";
+    
+    navigate("/");
+  }
+};
 
   const fetchCounts = async () => {
     try {
