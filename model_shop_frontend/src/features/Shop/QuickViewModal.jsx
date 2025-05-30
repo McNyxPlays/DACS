@@ -245,17 +245,31 @@ function QuickViewModal({ productId, isOpen, toggleModal }) {
                     )}
                   </div>
                   <div className="mb-4">
-                    <span className="text-2xl font-bold text-gray-900">
-                      {(product.price * exchangeRate).toLocaleString("vi-VN")}{" "}
-                      VND
-                    </span>
-                    {product.discount > 0 && (
-                      <span className="text-sm text-gray-500 ml-2">
-                        (Save{" "}
-                        {(product.discount * exchangeRate).toLocaleString(
-                          "vi-VN"
-                        )}{" "}
-                        VND)
+                    {product.discount > 0 ? (
+                      <>
+                        <span className="text-xl font-bold text-gray-900">
+                          {(product.discounted_price * exchangeRate).toLocaleString(
+                            "vi-VN"
+                          )}{" "}
+                          VND
+                        </span>
+                        <span className="text-sm text-gray-500 line-through ml-2">
+                          {(product.price * exchangeRate).toLocaleString("vi-VN")}{" "}
+                          VND
+                        </span>
+                        <span className="text-sm text-green-500 ml-2">
+                          (Save{" "}
+                          {(
+                            (product.price - product.discounted_price) *
+                            exchangeRate
+                          ).toLocaleString("vi-VN")}{" "}
+                          VND)
+                        </span>
+                      </>
+                    ) : (
+                      <span className="text-xl font-bold text-gray-900">
+                        {(product.price * exchangeRate).toLocaleString("vi-VN")}{" "}
+                        VND
                       </span>
                     )}
                   </div>

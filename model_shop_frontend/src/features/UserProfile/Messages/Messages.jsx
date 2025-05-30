@@ -1,64 +1,63 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import MessagesSidebar from "./MessagesSidebar";
 import ConversationView from "./ConversationView";
+import api from "../../../api/index";
 
 function Messages() {
   const [messages, setMessages] = useState([]);
   const [selectedConversation, setSelectedConversation] = useState(null);
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   useEffect(() => {
-    const mockMessages = [
-      {
-        id: 1,
-        sender: "RentCar - Car Rental Service",
-        time: "1 hour ago",
-        content: "Hi there, how can I help you?",
-      },
-      {
-        id: 2,
-        sender: "Robert Fox",
-        time: "1 hour ago",
-        content:
-          "I keep getting 'error while creating a new popup' for the first time setup.",
-      },
-      {
-        id: 3,
-        sender: "Rebel Automotive",
-        time: "1 hour ago",
-        content:
-          "I keep getting 'error while creating a new popup' for the first time setup.",
-      },
-      {
-        id: 4,
-        sender: "Floyd Miles",
-        time: "1 hour ago",
-        content:
-          "I keep getting 'error while creating a new popup' for the first time setup.",
-      },
-      {
-        id: 5,
-        sender: "Cameron Williamson",
-        time: "1 hour ago",
-        content:
-          "I keep getting 'error while creating a new popup' for the first time setup.",
-      },
-      {
-        id: 6,
-        sender: "Jane Cooper",
-        time: "1 hour ago",
-        content:
-          "I keep getting 'error while creating a new popup' for the first time setup.",
-      },
-      {
-        id: 7,
-        sender: "Courtney Henry",
-        time: "1 hour ago",
-        content:
-          "I keep getting 'error while creating a new popup' for the first time setup.",
-      },
-    ];
-    setMessages(mockMessages);
-  }, []);
+    const fetchUserAndConversations = async () => {
+      setLoading(true);
+      try {
+        const userResponse = await api.get("/user.php");
+        if (userResponse.data.status === "success" && userResponse.data.user) {
+          setUser(userResponse.data.user);
+        } else {
+          console.error("Failed to fetch user:", userResponse.data.message || "No user data");
+          navigate("/login");
+          setLoading(false);
+          return;
+        }
+
+        const messagesResponse = await api.get("/messages.php");
+        console.log("Messages API response:", messagesResponse);
+        if (messagesResponse.data && typeof messagesResponse.data.success !== "undefined") {
+          if (messagesResponse.data.success) {
+            setMessages(messagesResponse.data.data || []);
+          } else {
+            console.error("Failed to fetch conversations:", messagesResponse.data.message || "No message provided");
+          }
+        } else {
+          console.error("Invalid API response structure:", messagesResponse.data);
+        }
+      } catch (err) {
+        console.error("Failed to fetch data:", err.message, err.response?.data, err.response?.status);
+        if (err.response?.status === 401) {
+          navigate("/login");
+        }
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUserAndConversations();
+  }, [navigate]);
+
+  if (loading) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <div className="flex justify-center items-center h-64">
+          <p className="text-gray-500">Loading conversations...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -68,11 +67,11 @@ function Messages() {
           selectedConversation={selectedConversation}
           setSelectedConversation={setSelectedConversation}
         />
-        <div className="w-full lg:w-2/3">
-          {selectedConversation ? (
+        <div className="w-full lg:w-3/4">
+          {selectedConversation && user ? (
             <ConversationView
-              messages={messages}
               selectedConversation={selectedConversation}
+              user={user}
             />
           ) : (
             <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
@@ -80,7 +79,7 @@ function Messages() {
                 No Conversation Selected
               </h3>
               <p className="text-gray-500">
-                Select a conversation from the sidebar to view messages.
+                {user ? "Select a conversation from the sidebar to view messages." : "Please log in to view conversations."}
               </p>
             </div>
           )}

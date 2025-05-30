@@ -17,6 +17,12 @@ api.interceptors.response.use(
     return Promise.reject(error);
   }
 );
+
+export const getConversations = () => api.get("/messages.php");
+export const getConversationMessages = (conversationId) =>
+  api.get(`/messages.php?conversation_id=${conversationId}`);
+export const sendMessage = (messageData) => api.post("/messages.php", messageData);
+
 /*
 // Endpoints cho notifications
 export const getNotifications = (params) =>

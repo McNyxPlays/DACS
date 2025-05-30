@@ -7,7 +7,10 @@ const AddUser = () => {
     email: "",
     password: "",
     full_name: "",
+    phone_number: "",
+    address: "",
     role: "user",
+    gender: "",
     is_active: true,
   });
   const [error, setError] = useState("");
@@ -24,11 +27,26 @@ const AddUser = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await api.post("/Usersmana.php", formData);
-      navigate("/admin/users");
+      const data = new FormData();
+      Object.keys(formData).forEach((key) => {
+        if (key === "is_active") {
+          data.append(key, formData[key] ? "1" : "0");
+        } else {
+          data.append(key, formData[key]);
+        }
+      });
+
+      const response = await api.post("/Usersmana.php", data, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+      if (response.data.success) {
+        navigate("/admin/users");
+      } else {
+        setError(response.data.message || "Failed to add user");
+      }
     } catch (err) {
-      if (err.response && err.response.data.error) {
-        setError(err.response.data.error);
+      if (err.response && err.response.data.message) {
+        setError(err.response.data.message);
       } else {
         setError("Failed to add user");
       }
@@ -40,80 +58,124 @@ const AddUser = () => {
     <div className="container mx-auto px-4 py-8">
       <h1 className="text-2xl font-bold mb-6">Add New User</h1>
       {error && <p className="text-red-500 mb-4">{error}</p>}
-      <form onSubmit={handleSubmit} className="max-w-lg">
-        <div className="mb-4">
-          <label className="block text-gray-700 mb-2">Email</label>
-          <input
-            type="email"
-            name="email"
-            value={formData.email}
-            onChange={handleChange}
-            required
-            className="w-full px-4 py-2 rounded-lg border focus:outline-none focus:ring-2 focus:ring-primary"
-          />
-        </div>
-        <div className="mb-4">
-          <label className="block text-gray-700 mb-2">Password</label>
-          <input
-            type="password"
-            name="password"
-            value={formData.password}
-            onChange={handleChange}
-            required
-            className="w-full px-4 py-2 rounded-lg border focus:outline-none focus:ring-2 focus:ring-primary"
-          />
-        </div>
-        <div className="mb-4">
-          <label className="block text-gray-700 mb-2">Full Name</label>
-          <input
-            type="text"
-            name="full_name"
-            value={formData.full_name}
-            onChange={handleChange}
-            className="w-full px-4 py-2 rounded-lg border focus:outline-none focus:ring-2 focus:ring-primary"
-          />
-        </div>
-        <div className="mb-4">
-          <label className="block text-gray-700 mb-2">Role</label>
-          <select
-            name="role"
-            value={formData.role}
-            onChange={handleChange}
-            className="w-full px-4 py-2 rounded-lg border focus:outline-none focus:ring-2 focus:ring-primary"
-          >
-            <option value="user">User</option>
-            <option value="support">Support</option>
-            <option value="admin">Admin</option>
-            <option value="customizer">Customizer</option>
-          </select>
-        </div>
-        <div className="mb-4">
-          <label className="flex items-center">
-            <input
-              type="checkbox"
-              name="is_active"
-              checked={formData.is_active}
+      <div className="max-w-4xl overflow-y-auto" style={{ maxHeight: "70vh" }}>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <label className="block text-gray-700 mb-2">Email *</label>
+              <input
+                type="email"
+                name="email"
+                value={formData.email}
+                onChange={handleChange}
+                required
+                className="w-full px-3 py-2 rounded-lg border focus:outline-none focus:ring-2 focus:ring-primary"
+                placeholder="Enter user email"
+              />
+            </div>
+            <div>
+              <label className="block text-gray-700 mb-2">Password *</label>
+              <input
+                type="password"
+                name="password"
+                value={formData.password}
+                onChange={handleChange}
+                required
+                className="w-full px-3 py-2 rounded-lg border focus:outline-none focus:ring-2 focus:ring-primary"
+                placeholder="Enter password"
+              />
+            </div>
+            ?, <div>
+              <label className="block text-gray-700 mb-2">Full Name</label>
+              <input
+                type="text"
+                name="full_name"
+                value={formData.full_name}
+                onChange={handleChange}
+                className="w-full px-3 py-2 rounded-lg border focus:outline-none focus:ring-2 focus:ring-primary"
+                placeholder="Full name"
+              />
+            </div>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <label className="block text-gray-700 mb-2">Phone Number</label>
+              <input
+                type="text"
+                name="phone_number"
+                value={formData.phone_number}
+                onChange={handleChange}
+                className="w-full px-3 py-2 rounded-lg border focus:outline-none focus:ring-2 focus:ring-primary"
+                placeholder="Phone number"
+              />
+            </div>
+            <div>
+              <label className="block text-gray-700 mb-2">Gender</label>
+              <select
+                name="gender"
+                value={formData.gender}
+                onChange={handleChange}
+                className="w-full px-3 py-2 rounded-lg border focus:outline-none focus:ring-2 focus:ring-primary"
+              >
+                <option value="">Select Gender</option>
+                <option value="male">Male</option>
+                <option value="female">Female</option>
+                <option value="other">Other</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-gray-700 mb-2">Role</label>
+              <select
+                name="role"
+                value={formData.role}
+                onChange={handleChange}
+                className="w-full px-3 py-2 rounded-lg border focus:outline-none focus:ring-2 focus:ring-primary"
+              >
+                <option value="user">User</option>
+                <option value="support">Support</option>
+                <option value="admin">Admin</option>
+                <option value="customizer">Customizer</option>
+              </select>
+            </div>
+          </div>
+          <div>
+            <label className="block text-gray-700 mb-2">Address</label>
+            <textarea
+              name="address"
+              value={formData.address}
               onChange={handleChange}
-              className="mr-2"
+              className="w-full px-3 py-2 rounded-lg border focus:outline-none focus:ring-2 focus:ring-primary h-24"
+              placeholder="Enter address"
             />
-            Active
-          </label>
-        </div>
-        <div className="flex gap-4">
-          <button
-            type="submit"
-            className="bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary-dark"
-          >
-            Add User
-          </button>
-          <Link
-            to="/admin/users"
-            className="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600"
-          >
-            Back
-          </Link>
-        </div>
-      </form>
+          </div>
+          <div>
+            <label className="flex items-center">
+              <input
+                type="checkbox"
+                name="is_active"
+                checked={formData.is_active}
+                onChange={handleChange}
+                className="mr-2 h-5 w-5 text-primary focus:ring-primary border-gray-300 rounded"
+              />
+              <span className="text-gray-700">Active</span>
+            </label>
+          </div>
+          <div className="flex gap-4">
+            <button
+              type="submit"
+              className="bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary-dark"
+            >
+              Add User
+            </button>
+            <Link
+              to="/admin/users"
+              className="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600"
+            >
+              Back
+            </Link>
+          </div>
+        </form>
+      </div>
     </div>
   );
 };

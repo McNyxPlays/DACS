@@ -48,7 +48,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         try {
             $stmt = $conn->prepare("
                 SELECT p.product_id, p.name, p.category_id, c.name as category_name, p.brand_id, b.name as brand_name, 
-                       p.price, p.description, p.status
+                       p.price, p.discount, p.description, p.status, p.stock_quantity
                 FROM products p
                 LEFT JOIN categories c ON p.category_id = c.category_id
                 LEFT JOIN brands b ON p.brand_id = b.brand_id
@@ -57,7 +57,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
             $stmt->execute([$id]);
             $product = $stmt->fetch(PDO::FETCH_ASSOC);
             if ($product) {
-                // Fetch images with is_main status
                 $stmt = $conn->prepare("
                     SELECT image_id, image_url, is_main
                     FROM product_images
@@ -85,7 +84,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         try {
             $query = "
                 SELECT p.product_id, p.name, p.category_id, c.name as category_name, p.brand_id, b.name as brand_name, 
-                       p.price, p.description, p.status
+                       p.price, p.discount, p.description, p.status, p.stock_quantity
                 FROM products p
                 LEFT JOIN categories c ON p.category_id = c.category_id
                 LEFT JOIN brands b ON p.brand_id = b.brand_id
@@ -118,103 +117,220 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $name = $_POST['name'] ?? '';
-    $category_id = isset($_POST['category_id']) ? intval($_POST['category_id']) : 0;
-    $brand_id = isset($_POST['brand_id']) ? intval($_POST['brand_id']) : 0;
-    $price = $_POST['price'] ?? '';
-    $description = $_POST['description'] ?? '';
-    $status = $_POST['status'] ?? 'new';
-    $images = isset($_FILES['images']) ? $_FILES['images'] : null;
-    $primary_image_index = isset($_POST['primary_image_index']) ? intval($_POST['primary_image_index']) : -1;
+    // Check if this is a PUT request masquerading as POST
+    $method = isset($_POST['_method']) ? strtoupper($_POST['_method']) : 'POST';
 
-    if (empty($name) || $category_id <= 0 || $brand_id <= 0 || empty($price)) {
-        http_response_code(400);
-        echo json_encode(['success' => false, 'error' => 'Name, category, brand, and price are required']);
-        $conn = null;
-        exit;
-    }
+    if ($method === 'PUT') {
+        $id = isset($_GET['id']) ? intval($_GET['id']) : 0;
+        $name = $_POST['name'] ?? '';
+        $category_id = isset($_POST['category_id']) ? intval($_POST['category_id']) : 0;
+        $brand_id = isset($_POST['brand_id']) ? intval($_POST['brand_id']) : 0;
+        $price = $_POST['price'] ?? '';
+        $discount = isset($_POST['discount']) ? floatval($_POST['discount']) : 0;
+        $stock_quantity = isset($_POST['stock_quantity']) ? intval($_POST['stock_quantity']) : 0;
+        $description = $_POST['description'] ?? '';
+        $status = $_POST['status'] ?? 'new';
+        $images = isset($_FILES['images']) ? $_FILES['images'] : null;
+        $primary_image_index = isset($_POST['primary_image_index']) ? intval($_POST['primary_image_index']) : -1;
 
-    if (!in_array($status, ['new', 'used', 'custom', 'hot', 'available', 'sale'])) {
-        http_response_code(400);
-        echo json_encode(['success' => false, 'error' => 'Invalid status']);
-        $conn = null;
-        exit;
-    }
-
-    try {
-        // Verify category exists
-        $stmt = $conn->prepare("SELECT category_id FROM categories WHERE category_id = ?");
-        $stmt->execute([$category_id]);
-        if ($stmt->rowCount() === 0) {
+        if ($id <= 0 || empty($name) || $category_id <= 0 || $brand_id <= 0 || empty($price)) {
             http_response_code(400);
-            echo json_encode(['success' => false, 'error' => 'Invalid category']);
+            echo json_encode(['success' => false, 'error' => 'Invalid input']);
             $conn = null;
             exit;
         }
 
-        // Verify brand exists
-        $stmt = $conn->prepare("SELECT brand_id FROM brands WHERE brand_id = ?");
-        $stmt->execute([$brand_id]);
-        if ($stmt->rowCount() === 0) {
+        if (!in_array($status, ['new', 'used', 'custom', 'hot', 'available', 'sale'])) {
             http_response_code(400);
-            echo json_encode(['success' => false, 'error' => 'Invalid brand']);
+            echo json_encode(['success' => false, 'error' => 'Invalid status']);
             $conn = null;
             exit;
         }
 
-        // Insert product
-        $stmt = $conn->prepare("
-            INSERT INTO products (name, category_id, brand_id, price, description, status)
-            VALUES (?, ?, ?, ?, ?, ?)
-        ");
-        $stmt->execute([$name, $category_id, $brand_id, $price, $description, $status]);
-        $product_id = $conn->lastInsertId();
+        if ($discount < 0 || $discount > 100) {
+            http_response_code(400);
+            echo json_encode(['success' => false, 'error' => 'Discount must be between 0 and 100']);
+            $conn = null;
+            exit;
+        }
 
-        // Handle image uploads
-        if ($images && $images['name'][0] !== '') {
-            $upload_dir = '../Uploads/products/';
-            if (!is_dir($upload_dir)) {
-                mkdir($upload_dir, 0777, true);
+        try {
+            $stmt = $conn->prepare("SELECT product_id FROM products WHERE product_id = ?");
+            $stmt->execute([$id]);
+            if ($stmt->rowCount() === 0) {
+                http_response_code(404);
+                echo json_encode(['success' => false, 'error' => 'Product not found']);
+                $conn = null;
+                exit;
             }
 
-            foreach ($images['name'] as $key => $image_name) {
-                if ($images['error'][$key] === UPLOAD_ERR_OK) {
-                    $ext = strtolower(pathinfo($image_name, PATHINFO_EXTENSION));
-                    if (!in_array($ext, ['jpg', 'jpeg', 'png', 'gif'])) {
-                        continue; // Skip invalid extensions
-                    }
+            $stmt = $conn->prepare("SELECT category_id FROM categories WHERE category_id = ?");
+            $stmt->execute([$category_id]);
+            if ($stmt->rowCount() === 0) {
+                http_response_code(400);
+                echo json_encode(['success' => false, 'error' => 'Invalid category']);
+                $conn = null;
+                exit;
+            }
 
-                    $new_filename = uniqid() . '.' . $ext;
-                    $destination = $upload_dir . $new_filename;
-                    if (move_uploaded_file($images['tmp_name'][$key], $destination)) {
-                        $is_main = ($key === $primary_image_index) ? 1 : 0;
-                        $stmt = $conn->prepare("
-                            INSERT INTO product_images (product_id, image_url, is_main)
-                            VALUES (?, ?, ?)
-                        ");
-                        $stmt->execute([$product_id, $new_filename, $is_main]);
+            $stmt = $conn->prepare("SELECT brand_id FROM brands WHERE brand_id = ?");
+            $stmt->execute([$brand_id]);
+            if ($stmt->rowCount() === 0) {
+                http_response_code(400);
+                echo json_encode(['success' => false, 'error' => 'Invalid brand']);
+                $conn = null;
+                exit;
+            }
+
+            $stmt = $conn->prepare("
+                UPDATE products
+                SET name = ?, category_id = ?, brand_id = ?, price = ?, discount = ?, stock_quantity = ?, description = ?, status = ?
+                WHERE product_id = ?
+            ");
+            $stmt->execute([$name, $category_id, $brand_id, $price, $discount, $stock_quantity, $description, $status, $id]);
+
+            if ($images && $images['name'][0] !== '') {
+                $upload_dir = '../Uploads/products/';
+                if (!is_dir($upload_dir)) {
+                    mkdir($upload_dir, 0777, true);
+                }
+
+                $stmt = $conn->prepare("UPDATE product_images SET is_main = 0 WHERE product_id = ?");
+                $stmt->execute([$id]);
+
+                foreach ($images['name'] as $key => $image_name) {
+                    if ($images['error'][$key] === UPLOAD_ERR_OK) {
+                        $ext = strtolower(pathinfo($image_name, PATHINFO_EXTENSION));
+                        if (!in_array($ext, ['jpg', 'jpeg', 'png', 'gif'])) {
+                            continue;
+                        }
+
+                        $new_filename = uniqid() . '.' . $ext;
+                        $destination = $upload_dir . $new_filename;
+                        if (move_uploaded_file($images['tmp_name'][$key], $destination)) {
+                            $is_main = ($key === $primary_image_index) ? 1 : 0;
+                            $stmt = $conn->prepare("
+                                INSERT INTO product_images (product_id, image_url, is_main)
+                                VALUES (?, ?, ?)
+                            ");
+                            $stmt->execute([$id, $new_filename, $is_main]);
+                        }
                     }
                 }
             }
+
+            echo json_encode(['success' => true, 'message' => 'Product updated']);
+        } catch (PDOException $e) {
+            http_response_code(500);
+            echo json_encode(['success' => false, 'error' => 'Failed to update product: ' . $e->getMessage()]);
+        }
+    } else {
+        // Regular POST for adding a new product
+        $name = $_POST['name'] ?? '';
+        $category_id = isset($_POST['category_id']) ? intval($_POST['category_id']) : 0;
+        $brand_id = isset($_POST['brand_id']) ? intval($_POST['brand_id']) : 0;
+        $price = $_POST['price'] ?? '';
+        $discount = isset($_POST['discount']) ? floatval($_POST['discount']) : 0;
+        $stock_quantity = isset($_POST['stock_quantity']) ? intval($_POST['stock_quantity']) : 0;
+        $description = $_POST['description'] ?? '';
+        $status = $_POST['status'] ?? 'new';
+        $images = isset($_FILES['images']) ? $_FILES['images'] : null;
+        $primary_image_index = isset($_POST['primary_image_index']) ? intval($_POST['primary_image_index']) : -1;
+
+        if (empty($name) || $category_id <= 0 || $brand_id <= 0 || empty($price)) {
+            http_response_code(400);
+            echo json_encode(['success' => false, 'error' => 'Name, category, brand, and price are required']);
+            $conn = null;
+            exit;
         }
 
-        echo json_encode(['success' => true, 'message' => 'Product added', 'product_id' => $product_id]);
-    } catch (PDOException $e) {
-        http_response_code(500);
-        echo json_encode(['success' => false, 'error' => 'Failed to add product: ' . $e->getMessage()]);
+        if (!in_array($status, ['new', 'used', 'custom', 'hot', 'available', 'sale'])) {
+            http_response_code(400);
+            echo json_encode(['success' => false, 'error' => 'Invalid status']);
+            $conn = null;
+            exit;
+        }
+
+        if ($discount < 0 || $discount > 100) {
+            http_response_code(400);
+            echo json_encode(['success' => false, 'error' => 'Discount must be between 0 and 100']);
+            $conn = null;
+            exit;
+        }
+
+        try {
+            $stmt = $conn->prepare("SELECT category_id FROM categories WHERE category_id = ?");
+            $stmt->execute([$category_id]);
+            if ($stmt->rowCount() === 0) {
+                http_response_code(400);
+                echo json_encode(['success' => false, 'error' => 'Invalid category']);
+                $conn = null;
+                exit;
+            }
+
+            $stmt = $conn->prepare("SELECT brand_id FROM brands WHERE brand_id = ?");
+            $stmt->execute([$brand_id]);
+            if ($stmt->rowCount() === 0) {
+                http_response_code(400);
+                echo json_encode(['success' => false, 'error' => 'Invalid brand']);
+                $conn = null;
+                exit;
+            }
+
+            $stmt = $conn->prepare("
+                INSERT INTO products (name, category_id, brand_id, price, discount, stock_quantity, description, status)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            ");
+            $stmt->execute([$name, $category_id, $brand_id, $price, $discount, $stock_quantity, $description, $status]);
+            $product_id = $conn->lastInsertId();
+
+            if ($images && $images['name'][0] !== '') {
+                $upload_dir = '../Uploads/products/';
+                if (!is_dir($upload_dir)) {
+                    mkdir($upload_dir, 0777, true);
+                }
+
+                foreach ($images['name'] as $key => $image_name) {
+                    if ($images['error'][$key] === UPLOAD_ERR_OK) {
+                        $ext = strtolower(pathinfo($image_name, PATHINFO_EXTENSION));
+                        if (!in_array($ext, ['jpg', 'jpeg', 'png', 'gif'])) {
+                            continue;
+                        }
+
+                        $new_filename = uniqid() . '.' . $ext;
+                        $destination = $upload_dir . $new_filename;
+                        if (move_uploaded_file($images['tmp_name'][$key], $destination)) {
+                            $is_main = ($key === $primary_image_index) ? 1 : 0;
+                            $stmt = $conn->prepare("
+                                INSERT INTO product_images (product_id, image_url, is_main)
+                                VALUES (?, ?, ?)
+                            ");
+                            $stmt->execute([$product_id, $new_filename, $is_main]);
+                        }
+                    }
+                }
+            }
+
+            echo json_encode(['success' => true, 'message' => 'Product added', 'product_id' => $product_id]);
+        } catch (PDOException $e) {
+            http_response_code(500);
+            echo json_encode(['success' => false, 'error' => 'Failed to add product: ' . $e->getMessage()]);
+        }
     }
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'PUT') {
-    parse_str(file_get_contents("php://input"), $put_data);
+    // Handle JSON input for pure PUT requests
+    $put_data = json_decode(file_get_contents("php://input"), true);
     $id = isset($_GET['id']) ? intval($_GET['id']) : 0;
     $name = $put_data['name'] ?? '';
     $category_id = isset($put_data['category_id']) ? intval($put_data['category_id']) : 0;
     $brand_id = isset($put_data['brand_id']) ? intval($put_data['brand_id']) : 0;
     $price = $put_data['price'] ?? '';
+    $discount = isset($put_data['discount']) ? floatval($put_data['discount']) : 0;
+    $stock_quantity = isset($put_data['stock_quantity']) ? intval($put_data['stock_quantity']) : 0;
     $description = $put_data['description'] ?? '';
     $status = $put_data['status'] ?? 'new';
-    $images = isset($_FILES['images']) ? $_FILES['images'] : null;
     $primary_image_index = isset($put_data['primary_image_index']) ? intval($put_data['primary_image_index']) : -1;
 
     if ($id <= 0 || empty($name) || $category_id <= 0 || $brand_id <= 0 || empty($price)) {
@@ -231,8 +347,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'PUT') {
         exit;
     }
 
+    if ($discount < 0 || $discount > 100) {
+        http_response_code(400);
+        echo json_encode(['success' => false, 'error' => 'Discount must be between 0 and 100']);
+        $conn = null;
+        exit;
+    }
+
     try {
-        // Verify product exists
         $stmt = $conn->prepare("SELECT product_id FROM products WHERE product_id = ?");
         $stmt->execute([$id]);
         if ($stmt->rowCount() === 0) {
@@ -242,7 +364,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'PUT') {
             exit;
         }
 
-        // Verify category exists
         $stmt = $conn->prepare("SELECT category_id FROM categories WHERE category_id = ?");
         $stmt->execute([$category_id]);
         if ($stmt->rowCount() === 0) {
@@ -252,7 +373,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'PUT') {
             exit;
         }
 
-        // Verify brand exists
         $stmt = $conn->prepare("SELECT brand_id FROM brands WHERE brand_id = ?");
         $stmt->execute([$brand_id]);
         if ($stmt->rowCount() === 0) {
@@ -262,45 +382,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'PUT') {
             exit;
         }
 
-        // Update product
         $stmt = $conn->prepare("
             UPDATE products
-            SET name = ?, category_id = ?, brand_id = ?, price = ?, description = ?, status = ?
+            SET name = ?, category_id = ?, brand_id = ?, price = ?, discount = ?, stock_quantity = ?, description = ?, status = ?
             WHERE product_id = ?
         ");
-        $stmt->execute([$name, $category_id, $brand_id, $price, $description, $status, $id]);
+        $stmt->execute([$name, $category_id, $brand_id, $price, $discount, $stock_quantity, $description, $status, $id]);
 
-        // Handle image uploads
-        if ($images && $images['name'][0] !== '') {
-            $upload_dir = '../Uploads/products/';
-            if (!is_dir($upload_dir)) {
-                mkdir($upload_dir, 0777, true);
-            }
-
-            // Reset is_main for existing images
-            $stmt = $conn->prepare("UPDATE product_images SET is_main = 0 WHERE product_id = ?");
-            $stmt->execute([$id]);
-
-            foreach ($images['name'] as $key => $image_name) {
-                if ($images['error'][$key] === UPLOAD_ERR_OK) {
-                    $ext = strtolower(pathinfo($image_name, PATHINFO_EXTENSION));
-                    if (!in_array($ext, ['jpg', 'jpeg', 'png', 'gif'])) {
-                        continue; // Skip invalid extensions
-                    }
-
-                    $new_filename = uniqid() . '.' . $ext;
-                    $destination = $upload_dir . $new_filename;
-                    if (move_uploaded_file($images['tmp_name'][$key], $destination)) {
-                        $is_main = ($key === $primary_image_index) ? 1 : 0;
-                        $stmt = $conn->prepare("
-                            INSERT INTO product_images (product_id, image_url, is_main)
-                            VALUES (?, ?, ?)
-                        ");
-                        $stmt->execute([$id, $new_filename, $is_main]);
-                    }
-                }
-            }
-        }
+        // Note: File uploads are not handled in pure PUT requests in this case
+        // If you need to handle file uploads, use the POST with _method=PUT approach
 
         echo json_encode(['success' => true, 'message' => 'Product updated']);
     } catch (PDOException $e) {
@@ -319,22 +409,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'DELETE') {
     }
 
     try {
-        $stmt = $conn->prepare("SELECT image_url FROM product_images WHERE product_id = ?");
-        $stmt->execute([$id]);
-        $images = $stmt->fetchAll(PDO::FETCH_ASSOC);
-        foreach ($images as $image) {
-            $file_path = '../Uploads/products/' . $image['image_url'];
-            if (file_exists($file_path)) {
-                unlink($file_path);
-            }
-        }
-
-        $stmt = $conn->prepare("DELETE FROM product_images WHERE product_id = ?");
-        $stmt->execute([$id]);
-
         $stmt = $conn->prepare("DELETE FROM products WHERE product_id = ?");
         $stmt->execute([$id]);
-
         if ($stmt->rowCount() > 0) {
             echo json_encode(['success' => true, 'message' => 'Product deleted']);
         } else {

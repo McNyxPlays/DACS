@@ -8,6 +8,8 @@ const AddProduct = () => {
     category_id: 0,
     brand_id: 0,
     price: "",
+    discount: 0,
+    stock_quantity: 0,
     description: "",
     status: "new",
     primary_image_index: -1,
@@ -55,7 +57,7 @@ const AddProduct = () => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
+    setFormData({ ...formData, [name]: name === "stock_quantity" || name === "primary_image_index" ? parseInt(value) : value });
   };
 
   const handleImageChange = (e) => {
@@ -99,6 +101,10 @@ const AddProduct = () => {
       setError("Please select a primary image");
       return;
     }
+    if (formData.discount < 0 || formData.discount > 100) {
+      setError("Discount must be between 0 and 100");
+      return;
+    }
     if (error) return;
 
     const data = new FormData();
@@ -106,6 +112,8 @@ const AddProduct = () => {
     data.append("category_id", formData.category_id);
     data.append("brand_id", formData.brand_id);
     data.append("price", formData.price);
+    data.append("discount", formData.discount);
+    data.append("stock_quantity", formData.stock_quantity);
     data.append("description", formData.description);
     data.append("status", formData.status);
     data.append("primary_image_index", formData.primary_image_index);
@@ -181,7 +189,7 @@ const AddProduct = () => {
               </select>
             </div>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
               <label className="block text-gray-700 mb-2">Price</label>
               <input
@@ -195,6 +203,33 @@ const AddProduct = () => {
                 className="w-full px-3 py-2 rounded-lg border focus:outline-none focus:ring-2 focus:ring-primary"
               />
             </div>
+            <div>
+              <label className="block text-gray-700 mb-2">Discount (%)</label>
+              <input
+                type="number"
+                name="discount"
+                value={formData.discount}
+                onChange={handleChange}
+                min="0"
+                max="100"
+                step="0.01"
+                className="w-full px-3 py-2 rounded-lg border focus:outline-none focus:ring-2 focus:ring-primary"
+              />
+            </div>
+            <div>
+              <label className="block text-gray-700 mb-2">Stock Quantity</label>
+              <input
+                type="number"
+                name="stock_quantity"
+                value={formData.stock_quantity}
+                onChange={handleChange}
+                required
+                min="0"
+                className="w-full px-3 py-2 rounded-lg border focus:outline-none focus:ring-2 focus:ring-primary"
+              />
+            </div>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
               <label className="block text-gray-700 mb-2">Status</label>
               <select

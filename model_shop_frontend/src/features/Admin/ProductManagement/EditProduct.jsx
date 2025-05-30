@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useParams, Link } from "react-router-dom";
 import api from "../../../api/index";
+import { Toastify } from "../../../components/Toastify";
 
 const EditProduct = () => {
   const { id } = useParams();
@@ -9,6 +10,8 @@ const EditProduct = () => {
     category_id: 0,
     brand_id: 0,
     price: "",
+    discount: 0,
+    stock_quantity: 0,
     description: "",
     status: "new",
     primary_image_index: -1,
@@ -31,6 +34,8 @@ const EditProduct = () => {
             category_id: product.category_id || 0,
             brand_id: product.brand_id || 0,
             price: product.price || "",
+            discount: product.discount || 0,
+            stock_quantity: product.stock_quantity || 0,
             description: product.description || "",
             status: product.status || "new",
             primary_image_index: -1,
@@ -70,7 +75,7 @@ const EditProduct = () => {
           setError("Invalid brands response format");
         }
       } catch (err) {
-        setError("Failed to fetch brands: " + (err.message || "Unknown error"));
+        setError("Failed to fetch brands: " + (err.message || "Unknown error") + err);
         console.error(err);
       }
     };
@@ -82,13 +87,16 @@ const EditProduct = () => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
+    setFormData({ 
+      ...formData, 
+      [name]: name === "stock_quantity" || name === "discount" || name === "primary_image_index" ? parseFloat(value) : value 
+    });
   };
 
   const handleImageChange = (e) => {
     const files = e.target.files;
     const validImageTypes = ["image/jpeg", "image/png", "image/gif"];
-    const maxSize = 5 * 1024 * 1024;
+    const maxSize = 5 * 1024 * 1024; // 5MB
     let errorMsg = "";
 
     for (let i = 0; i < files.length; i++) {
@@ -107,7 +115,7 @@ const EditProduct = () => {
       setImages([]);
     } else {
       setError("");
-      setImages(files);
+      setImages(Array.from(files)); // Convert FileList to array
       setFormData((prev) => ({ ...prev, primary_image_index: files.length > 0 ? 0 : -1 }));
     }
   };
@@ -122,6 +130,7 @@ const EditProduct = () => {
       const response = await api.delete(`/product_images.php?id=${imageId}`);
       if (response.data.success) {
         setExistingImages((prev) => prev.filter((img) => img.image_id !== imageId));
+        Toastify.success("Image deleted successfully");
         setError("");
       } else {
         setError(response.data.error || "Failed to delete image");
@@ -135,30 +144,42 @@ const EditProduct = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (images.length > 0 && error) return;
+    if (formData.discount < 0 || formData.discount > 100) {
+      setError("Discount must be between 0 and 100");
+      return;
+    }
 
     const data = new FormData();
     data.append("name", formData.name);
     data.append("category_id", formData.category_id);
     data.append("brand_id", formData.brand_id);
     data.append("price", formData.price);
+    data.append("discount", formData.discount);
+    data.append("stock_quantity", formData.stock_quantity);
     data.append("description", formData.description);
     data.append("status", formData.status);
     data.append("primary_image_index", formData.primary_image_index);
+    data.append("_method", "PUT");
     for (let i = 0; i < images.length; i++) {
       data.append("images[]", images[i]);
     }
 
     try {
-      const response = await api.put(`/productsmana.php?id=${id}`, data, {
+      const response = await api.post(`/productsmana.php?id=${id}`, data, {
         headers: { "Content-Type": "multipart/form-data" },
       });
       if (response.data.success) {
+        Toastify.success("Product updated successfully");
         navigate("/admin/products");
       } else {
         setError(response.data.error || "Failed to update product");
       }
     } catch (err) {
-      setError("Failed to update product: " + (err.message || "Unknown error"));
+      if (err.response && err.response.data.error) {
+        setError(err.response.data.error);
+      } else {
+        setError("Failed to update product: " + (err.message || "Unknown error"));
+      }
       console.error(err);
     }
   };
@@ -216,7 +237,7 @@ const EditProduct = () => {
               </select>
             </div>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
               <label className="block text-gray-700 mb-2">Price</label>
               <input
@@ -230,6 +251,33 @@ const EditProduct = () => {
                 className="w-full px-3 py-2 rounded-lg border focus:outline-none focus:ring-2 focus:ring-primary"
               />
             </div>
+            <div>
+              <label className="block text-gray-700 mb-2">Discount (%)</label>
+              <input
+                type="number"
+                name="discount"
+                value={formData.discount}
+                onChange={handleChange}
+                min="0"
+                max="100"
+                step="0.01"
+                className="w-full px-3 py-2 rounded-lg border focus:outline-none focus:ring-2 focus:ring-primary"
+              />
+            </div>
+            <div>
+              <label className="block text-gray-700 mb-2">Stock Quantity</label>
+              <input
+                type="number"
+                name="stock_quantity"
+                value={formData.stock_quantity}
+                onChange={handleChange}
+                required
+                min="0"
+                className="w-full px-3 py-2 rounded-lg border focus:outline-none focus:ring-2 focus:ring-primary"
+              />
+            </div>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
               <label className="block text-gray-700 mb-2">Status</label>
               <select
@@ -267,22 +315,20 @@ const EditProduct = () => {
             />
             {images.length > 0 && (
               <div className="mt-2 overflow-x-auto flex gap-2">
-                {Array.from(images)
-                  .slice(0, 4)
-                  .map((img, index) => (
-                    <div key={index} className="relative">
-                      <img
-                        src={URL.createObjectURL(img)}
-                        alt={`Preview ${index}`}
-                        className={`w-20 h-20 object-cover rounded-lg border-2 ${
-                          formData.primary_image_index === index
-                            ? "border-primary"
-                            : "border-gray-200"
-                        }`}
-                        onClick={() => handlePrimaryImageSelect(index)}
-                      />
-                    </div>
-                  ))}
+                {images.slice(0, 4).map((img, index) => (
+                  <div key={index} className="relative">
+                    <img
+                      src={URL.createObjectURL(img)}
+                      alt={`Preview ${index}`}
+                      className={`w-20 h-20 object-cover rounded-lg border-2 ${
+                        formData.primary_image_index === index
+                          ? "border-primary"
+                          : "border-gray-200"
+                      }`}
+                      onClick={() => handlePrimaryImageSelect(index)}
+                    />
+                  </div>
+                ))}
                 {images.length > 4 && (
                   <span className="text-gray-500">+{images.length - 4} more</span>
                 )}

@@ -115,6 +115,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
                         }
                         $product['images'] = $images;
 
+                        // Validate and calculate discounted price
+                        $product['discount'] = max(0, min(100, floatval($product['discount'])));
+                        $product['discounted_price'] = $product['discount'] > 0
+                            ? round($product['price'] - ($product['price'] * $product['discount'] / 100), 2)
+                            : $product['price'];
+
                         if ($product['stock_quantity'] <= 0) {
                             $product['badge'] = 'Out of Stock';
                             $product['badgeColor'] = 'bg-red-500';
@@ -155,13 +161,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         $status_new = isset($_GET['status_new']) ? filter_var($_GET['status_new'], FILTER_VALIDATE_BOOLEAN) : false;
         $status_available = isset($_GET['status_available']) ? filter_var($_GET['status_available'], FILTER_VALIDATE_BOOLEAN) : false;
         $status_sale = isset($_GET['status_sale']) ? filter_var($_GET['status_sale'], FILTER_VALIDATE_BOOLEAN) : false;
+        $discount_min = isset($_GET['discount_min']) ? floatval($_GET['discount_min']) : 0;
+        $discount_max = isset($_GET['discount_max']) ? floatval($_GET['discount_max']) : 100;
         $sort = isset($_GET['sort']) ? $_GET['sort'] : 'popularity';
         $page = isset($_GET['page']) ? max(1, intval($_GET['page'])) : 1;
         $limit = 12;
         $offset = ($page - 1) * $limit;
 
-        $validSorts = ['price_low', 'price_high', 'newest', 'popularity'];
+        $validSorts = ['price_low', 'price_high', 'newest', 'popularity', 'discount_high'];
         $sort = in_array($sort, $validSorts) ? $sort : 'popularity';
+
+        // Validate discount range
+        $discount_min = max(0, min(100, $discount_min));
+        $discount_max = max($discount_min, min(100, $discount_max));
 
         try {
             // Precompute popularity scores
@@ -219,6 +231,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
                 $query .= " AND (" . implode(" OR ", $statusConditions) . ")";
             }
 
+            // Filter by discount range
+            if ($discount_min > 0 || $discount_max < 100) {
+                $query .= " AND p.discount BETWEEN ? AND ?";
+                $params[] = $discount_min;
+                $params[] = $discount_max;
+            }
+
             // Apply sorting
             switch ($sort) {
                 case 'price_low':
@@ -229,6 +248,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
                     break;
                 case 'newest':
                     $query .= " ORDER BY p.created_at DESC";
+                    break;
+                case 'discount_high':
+                    $query .= " ORDER BY p.discount DESC";
                     break;
                 case 'popularity':
                 default:
@@ -261,6 +283,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
 
             if (!empty($statusConditions)) {
                 $count_query .= " AND (" . implode(" OR ", $statusConditions) . ")";
+            }
+
+            if ($discount_min > 0 || $discount_max < 100) {
+                $count_query .= " AND p.discount BETWEEN ? AND ?";
+                $count_params[] = $discount_min;
+                $count_params[] = $discount_max;
             }
 
             $stmt = $conn->prepare($count_query);
@@ -302,6 +330,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
                 $product['popularity_score'] = isset($popularityMap[$product['product_id']])
                     ? $popularityMap[$product['product_id']]
                     : 0;
+
+                // Validate and calculate discounted price
+                $product['discount'] = max(0, min(100, floatval($product['discount'])));
+                $product['discounted_price'] = $product['discount'] > 0
+                    ? round($product['price'] - ($product['price'] * $product['discount'] / 100), 2)
+                    : $product['price'];
 
                 if ($product['stock_quantity'] <= 0) {
                     $product['badge'] = 'Out of Stock';

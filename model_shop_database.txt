@@ -32,7 +32,7 @@ CREATE TABLE IF NOT EXISTS user_images (
     UNIQUE KEY uniq_user_image_type (user_id, image_type)
 );
 
--- Bảng 2: categories
+-- Bảng 3: categories
 CREATE TABLE IF NOT EXISTS categories (
     category_id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
@@ -41,7 +41,7 @@ CREATE TABLE IF NOT EXISTS categories (
     INDEX idx_name (name)
 );
 
--- Bảng 3: brands
+-- Bảng 4: brands
 CREATE TABLE IF NOT EXISTS brands (
     brand_id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(255) NOT NULL UNIQUE,
@@ -50,7 +50,7 @@ CREATE TABLE IF NOT EXISTS brands (
     INDEX idx_name (name)
 );
 
--- Bảng 4: products
+-- Bảng 5: products
 CREATE TABLE IF NOT EXISTS products (
     product_id INT AUTO_INCREMENT PRIMARY KEY,
     category_id INT,
@@ -71,7 +71,7 @@ CREATE TABLE IF NOT EXISTS products (
     FULLTEXT idx_name_fulltext (name)
 );
 
--- Bảng 5: product_images
+-- Bảng 6: product_images
 CREATE TABLE IF NOT EXISTS product_images (
     image_id INT AUTO_INCREMENT PRIMARY KEY,
     product_id INT NOT NULL,
@@ -81,7 +81,7 @@ CREATE TABLE IF NOT EXISTS product_images (
     INDEX idx_product_id (product_id)
 );
 
--- Bảng 6: carts
+-- Bảng 7: carts
 CREATE TABLE IF NOT EXISTS carts (
     cart_id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT NOT NULL,
@@ -94,7 +94,19 @@ CREATE TABLE IF NOT EXISTS carts (
     INDEX idx_product_id (product_id)
 );
 
--- Bảng 7: orders
+-- Bảng 8: cửa hang(stores)
+CREATE TABLE IF NOT EXISTS stores (
+    store_id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    address TEXT NOT NULL,
+    phone VARCHAR(20),
+    is_active BOOLEAN DEFAULT TRUE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_name (name),
+    INDEX idx_is_active (is_active)
+);
+
+-- Bảng 9: đơn hang(orders)
 CREATE TABLE IF NOT EXISTS orders (
     order_id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT,
@@ -105,21 +117,41 @@ CREATE TABLE IF NOT EXISTS orders (
     status ENUM('pending', 'processing', 'shipped', 'delivered', 'cancelled') DEFAULT 'pending',
     order_code VARCHAR(50) UNIQUE,
     shipping_address TEXT,
-    payment_method ENUM('cod', 'bank_transfer', 'paypal') DEFAULT 'cod',
+    shipping_method ENUM('standard', 'fast', 'express', 'store_pickup') DEFAULT 'standard',
+    shipping_cost DECIMAL(10, 2) DEFAULT 0.00,
+    store_id INT NULL,
+    payment_method ENUM('cod', 'bank_transfer', 'momo', 'vnpay', 'zalopay') DEFAULT 'cod',
     is_paid BOOLEAN DEFAULT FALSE,
     paid_at TIMESTAMP NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE SET NULL,
+    FOREIGN KEY (store_id) REFERENCES stores(store_id) ON DELETE SET NULL,
     CONSTRAINT chk_order_identity CHECK (
         user_id IS NOT NULL OR guest_email IS NOT NULL OR guest_phone IS NOT NULL
     ),
     INDEX idx_user_id (user_id),
     INDEX idx_status (status),
     INDEX idx_order_code (order_code),
-    INDEX idx_created_at (created_at)
+    INDEX idx_created_at (created_at),
+    INDEX idx_shipping_method (shipping_method),
+    INDEX idx_payment_method (payment_method)
 );
 
--- Bảng 8: order_details
+-- Bảng 10: loại giao dịch(transactions)
+CREATE TABLE IF NOT EXISTS transactions (
+    transaction_id INT AUTO_INCREMENT PRIMARY KEY,
+    order_id INT NOT NULL,
+    amount DECIMAL(10, 2) NOT NULL,
+    payment_method ENUM('cod', 'bank_transfer', 'momo', 'vnpay', 'zalopay') NOT NULL,
+    transaction_status ENUM('pending', 'completed', 'failed') DEFAULT 'pending',
+    transaction_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (order_id) REFERENCES orders(order_id) ON DELETE CASCADE,
+    INDEX idx_order_id (order_id),
+    INDEX idx_transaction_status (transaction_status),
+    INDEX idx_payment_method (payment_method)
+);
+
+-- Bảng 11: order_details
 CREATE TABLE IF NOT EXISTS order_details (
     detail_id INT AUTO_INCREMENT PRIMARY KEY,
     order_id INT NOT NULL,
@@ -132,6 +164,7 @@ CREATE TABLE IF NOT EXISTS order_details (
     INDEX idx_product_id (product_id)
 );
 
+-- Bảng 12: posts
 CREATE TABLE IF NOT EXISTS posts (
     post_id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT NOT NULL,
@@ -143,7 +176,7 @@ CREATE TABLE IF NOT EXISTS posts (
     INDEX idx_user_id (user_id)
 );
 
--- Bảng 10: post_images
+-- Bảng 13: post_images
 CREATE TABLE IF NOT EXISTS post_images (
     image_id INT AUTO_INCREMENT PRIMARY KEY,
     post_id INT NOT NULL,
@@ -152,7 +185,7 @@ CREATE TABLE IF NOT EXISTS post_images (
     INDEX idx_post_id (post_id)
 );
 
--- Bảng 11: comments
+-- Bảng 14: comments
 CREATE TABLE IF NOT EXISTS comments (
     comment_id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT NOT NULL,
@@ -168,7 +201,7 @@ CREATE TABLE IF NOT EXISTS comments (
     INDEX idx_product_id (product_id)
 );
 
--- Bảng 12: favorites/wishlists
+-- Bảng 15: favorites/wishlists
 CREATE TABLE IF NOT EXISTS user_saved_items (
     saved_id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT NOT NULL,
@@ -186,7 +219,7 @@ CREATE TABLE IF NOT EXISTS user_saved_items (
     INDEX idx_save_type (save_type)
 );
 
--- Bảng 13: guest_carts
+-- Bảng 16: guest_carts
 CREATE TABLE IF NOT EXISTS guest_carts (
     guest_cart_id INT AUTO_INCREMENT PRIMARY KEY,
     session_key VARCHAR(255) NOT NULL,
@@ -198,7 +231,7 @@ CREATE TABLE IF NOT EXISTS guest_carts (
     INDEX idx_product_id (product_id)
 );
 
--- Bảng 14: order_status_history
+-- Bảng 17: order_status_history
 CREATE TABLE IF NOT EXISTS order_status_history (
     history_id INT AUTO_INCREMENT PRIMARY KEY,
     order_id INT NOT NULL,
@@ -209,7 +242,7 @@ CREATE TABLE IF NOT EXISTS order_status_history (
     INDEX idx_order_id (order_id)
 );
 
--- Bảng 15: notifications
+-- Bảng 18: notifications
 CREATE TABLE IF NOT EXISTS notifications (
     notification_id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT NOT NULL,
@@ -223,7 +256,8 @@ CREATE TABLE IF NOT EXISTS notifications (
     INDEX idx_created_at (created_at),
     INDEX idx_user_id_is_read_type_created_at (user_id, is_read, type, created_at)
 );
--- Bảng 16: messages
+
+-- Bảng 19: messages
 CREATE TABLE IF NOT EXISTS messages (
     message_id INT AUTO_INCREMENT PRIMARY KEY,
     sender_id INT NOT NULL,
@@ -234,10 +268,23 @@ CREATE TABLE IF NOT EXISTS messages (
     FOREIGN KEY (sender_id) REFERENCES users(user_id) ON DELETE CASCADE,
     FOREIGN KEY (receiver_id) REFERENCES users(user_id) ON DELETE CASCADE,
     INDEX idx_sender_id (sender_id),
-    INDEX idx_receiver_id (receiver_id)
+    INDEX idx_receiver_id (receiver_id),
+    INDEX idx_sender_receiver_sent_at (sender_id, receiver_id, sent_at) -- Added index for optimization
 );
 
--- Bảng 17: reports
+-- Bảng 20: messages_imagevid
+CREATE TABLE IF NOT EXISTS messages_imagevid (
+    media_id INT AUTO_INCREMENT PRIMARY KEY,
+    message_id INT NOT NULL,
+    media_url VARCHAR(255) NOT NULL,
+    media_type ENUM('image', 'video') NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (message_id) REFERENCES messages(message_id) ON DELETE CASCADE,
+    INDEX idx_message_id (message_id),
+    INDEX idx_media_type (media_type)
+);
+
+-- Bảng 21: reports
 CREATE TABLE IF NOT EXISTS reports (
     report_id INT AUTO_INCREMENT PRIMARY KEY,
     reporter_id INT NOT NULL,
@@ -256,29 +303,25 @@ CREATE TABLE IF NOT EXISTS reports (
     INDEX idx_target_product_id (target_product_id)
 );
 
-
--- Bảng 19: promotions
+-- Bảng 22: promotions
 CREATE TABLE IF NOT EXISTS promotions (
     promotion_id INT AUTO_INCREMENT PRIMARY KEY,
-    code VARCHAR(50) NOT NULL UNIQUE,
+    name VARCHAR(50) NOT NULL UNIQUE,
     description TEXT,
-    discount_type ENUM('percentage', 'fixed') NOT NULL,
-    discount_value DECIMAL(10, 2) NOT NULL,
-    min_order_value DECIMAL(10, 2) DEFAULT 0.00,
-    max_discount_value DECIMAL(10, 2),
+    discount_percentage DECIMAL(10, 2) NOT NULL DEFAULT 0.00,
     start_date TIMESTAMP NULL,
     end_date TIMESTAMP NULL,
-    is_active BOOLEAN DEFAULT TRUE,
+    status ENUM('active', 'inactive', 'expired') DEFAULT 'active',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT chk_date_validity CHECK (
         (start_date IS NULL AND end_date IS NULL) OR
         (start_date IS NOT NULL AND end_date IS NOT NULL AND end_date > start_date)
     ),
-    INDEX idx_code (code),
-    INDEX idx_is_active (is_active)
+    INDEX idx_name (name),
+    INDEX idx_status (status)
 );
 
--- Bảng 20: order_promotions
+-- Bảng 23: order_promotions
 CREATE TABLE IF NOT EXISTS order_promotions (
     order_promotion_id INT AUTO_INCREMENT PRIMARY KEY,
     order_id INT NOT NULL,
@@ -291,7 +334,7 @@ CREATE TABLE IF NOT EXISTS order_promotions (
     INDEX idx_promotion_id (promotion_id)
 );
 
--- Bảng 21: follows
+-- Bảng 24: follows
 CREATE TABLE IF NOT EXISTS follows (
     follow_id INT AUTO_INCREMENT PRIMARY KEY,
     follower_id INT NOT NULL,
@@ -303,38 +346,6 @@ CREATE TABLE IF NOT EXISTS follows (
     INDEX idx_follower_id (follower_id),
     INDEX idx_following_id (following_id)
 );
-
--- Bảng 22: reviews
-CREATE TABLE IF NOT EXISTS reviews (
-    review_id INT AUTO_INCREMENT PRIMARY KEY,
-    user_id INT NOT NULL,
-    product_id INT,
-    post_id INT,
-    rating INT NOT NULL CHECK (rating >= 1 AND rating <= 5),
-    comment TEXT,
-    is_approved BOOLEAN DEFAULT FALSE,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE,
-    FOREIGN KEY (product_id) REFERENCES products(product_id) ON DELETE CASCADE,
-    FOREIGN KEY (post_id) REFERENCES posts(post_id) ON DELETE CASCADE,
-    INDEX idx_user_id (user_id),
-    INDEX idx_product_id (product_id),
-    INDEX idx_post_id (post_id)
-);
-
--- Bảng 23: transactions
-CREATE TABLE IF NOT EXISTS transactions (
-    transaction_id INT AUTO_INCREMENT PRIMARY KEY,
-    order_id INT NOT NULL,
-    amount DECIMAL(10, 2) NOT NULL,
-    payment_method ENUM('cod', 'bank_transfer', 'paypal') NOT NULL,
-    transaction_status ENUM('pending', 'completed', 'failed') DEFAULT 'pending',
-    transaction_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (order_id) REFERENCES orders(order_id) ON DELETE CASCADE,
-    INDEX idx_order_id (order_id),
-    INDEX idx_transaction_status (transaction_status)
-);
-
 
 -- Bảng 25: likes
 CREATE TABLE IF NOT EXISTS likes (

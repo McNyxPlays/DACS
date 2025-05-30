@@ -308,9 +308,23 @@ function ProductsGrid({ viewMode, filters, setFilters, categories, brands }) {
                 {product.description}
               </p>
               <div className="flex items-center justify-between">
-                <span className="font-bold text-gray-900 text-lg">
-                  {(product.price * exchangeRate).toLocaleString("vi-VN")} VND
-                </span>
+                {product.discount > 0 ? (
+                  <>
+                    <span className="text-sm text-gray-900 line-through mr-2">
+                      {(product.price * exchangeRate).toLocaleString("vi-VN")} VND
+                    </span>
+                    <span className="font-bold text-gray-900 text-lg">
+                      {(product.discounted_price * exchangeRate).toLocaleString(
+                        "vi-VN"
+                      )}{" "}
+                      VND
+                    </span>
+                  </>
+                ) : (
+                  <span className="font-bold text-gray-900 text-lg">
+                    {(product.price * exchangeRate).toLocaleString("vi-VN")} VND
+                  </span>
+                )}
                 <button
                   onClick={() => handleAddToCart(product.product_id)}
                   className="w-10 h-10 flex items-center justify-center bg-gray-100 text-gray-700 rounded-full hover:bg-primary hover:text-white transition rounded-button"

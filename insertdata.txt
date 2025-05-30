@@ -1,3 +1,12 @@
+-- Chèn user thứ 2
+INSERT INTO users (user_id, email, password, full_name, created_at) VALUES
+(2, 'user2@example.com', 'hashedpassword2', 'Jane Smith', '2025-05-20 09:00:00');
+(3, 'user3@example.com', 'hashedpassword2', 'lycon', '2025-04-20 05:00:00');
+
+-- Chèn bài post của user 2
+INSERT INTO posts (user_id, content, post_time_status, created_at) VALUES
+(2, 'Excited to share my latest Gundam build! Check out the details in the photos.', 'new', '2025-05-30 10:00:00');
+
 -- Chèn 5 danh mục (Categories)
 INSERT INTO categories (name, description) VALUES
 ('Gundam Kits', 'Model kits for Gundam enthusiasts to assemble and customize.'),
@@ -5,6 +14,7 @@ INSERT INTO categories (name, description) VALUES
 ('Game Figures', 'Collectible figures from popular video games.'),
 ('Anime Figures', 'Figures based on characters from anime series.'),
 ('Tools & Paints', 'Tools and paints for assembling and customizing model kits.');
+('Accessories & Stands', 'Bases, action stands, display cases, and diorama accessories for model kits.'),
 
 -- Chèn 5 thương hiệu (Brands)
 INSERT INTO brands (name, description) VALUES
@@ -49,3 +59,8 @@ INSERT INTO notifications (user_id, message, type, created_at) VALUES
 (1, 'Welcome to Model Shop! Start exploring our collections.', 'system', '2025-05-19 11:10:00'),
 (1, 'Your account has been successfully created.', 'system', '2025-05-19 11:11:00'),
 (1, 'Check out our new Gundam Kits collection!', 'custom', '2025-05-19 11:12:00');
+
+-- Gửi tin nhắn từ user 1 đến user 2 và user 3
+INSERT INTO messages (sender_id, receiver_id, content)
+VALUES (1, 2, 'Chào bạn, mình quan tâm đến mô hình bạn đang bán.');
+VALUES (1, 3, 'Bạn có thể cho mình thêm thông tin về sản phẩm không?');

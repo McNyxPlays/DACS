@@ -13,6 +13,9 @@ import EditCategories from "./CategoriesManagement/EditCategories";
 import BrandsManagement from "./BrandsManagement/BrandsManagement";
 import AddBrand from "./BrandsManagement/AddBrand";
 import EditBrand from "./BrandsManagement/EditBrand";
+import PromotionsManagement from "./PromotionsManagement/PromotionsManagement";
+import AddPromotions from "./PromotionsManagement/AddPromotions";
+import EditPromotions from "./PromotionsManagement/EditPromotions";
 import ErrorBoundary from "./ErrorBoundary";
 
 const Admin = () => {
@@ -22,6 +25,7 @@ const Admin = () => {
     products: 0,
     categories: 0,
     brands: 0,
+    promotions: 0,
   });
   const [error, setError] = useState("");
 
@@ -35,6 +39,7 @@ const Admin = () => {
             products: response.data.data.products || 0,
             categories: response.data.data.categories || 0,
             brands: response.data.data.brands || 0,
+            promotions: response.data.data.promotions || 0,
           });
         } else {
           throw new Error(response.data.message || "Failed to fetch stats");
@@ -114,6 +119,18 @@ const Admin = () => {
         >
           Brands Management
         </NavLink>
+        <NavLink
+          to="/admin/promotions"
+          className={({ isActive }) =>
+            `px-4 py-2 rounded-lg ${
+              isActive
+                ? "bg-primary text-white"
+                : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+            }`
+          }
+        >
+          Promotions Management
+        </NavLink>
       </div>
       <Routes>
         <Route
@@ -122,7 +139,7 @@ const Admin = () => {
             <div className="bg-white p-6 rounded-lg shadow-md">
               <h2 className="text-xl font-semibold mb-4">Dashboard Overview</h2>
               {error && <p className="text-red-500 mb-4">{error}</p>}
-              <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-5 gap-4">
                 <div className="p-4 bg-gray-100 rounded-lg">
                   <p className="text-lg font-medium">Total Users</p>
                   <p className="text-2xl">{stats.users}</p>
@@ -138,6 +155,10 @@ const Admin = () => {
                 <div className="p-4 bg-gray-100 rounded-lg">
                   <p className="text-lg font-medium">Total Brands</p>
                   <p className="text-2xl">{stats.brands}</p>
+                </div>
+                <div className="p-4 bg-gray-100 rounded-lg">
+                  <p className="text-lg font-medium">Total Promotions</p>
+                  <p className="text-2xl">{stats.promotions}</p>
                 </div>
               </div>
             </div>
@@ -162,6 +183,9 @@ const Admin = () => {
         <Route path="/brands" element={<BrandsManagement />} />
         <Route path="/brands/add" element={<AddBrand />} />
         <Route path="/brands/edit/:id" element={<EditBrand />} />
+        <Route path="/promotions" element={<PromotionsManagement />} />
+        <Route path="/promotions/add" element={<AddPromotions />} />
+        <Route path="/promotions/edit/:id" element={<EditPromotions />} />
       </Routes>
     </div>
   );

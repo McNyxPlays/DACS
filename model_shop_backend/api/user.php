@@ -115,6 +115,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     $user_id = $_SESSION['user_id'];
 
     try {
+        // Validate user_id
+        if (!is_numeric($user_id) || $user_id <= 0) {
+            throw new Exception("Invalid user_id: $user_id");
+        }
+
         $stmt = $conn->prepare("SELECT user_id, email, full_name, phone_number, gender, address, role, is_active, created_at FROM users WHERE user_id = ? AND is_active = TRUE");
         $stmt->execute([$user_id]);
         $user = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -127,13 +132,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
             $stmt_image = $conn->prepare("SELECT image_url FROM user_images WHERE user_id = ? AND image_type = 'profile' AND is_active = TRUE LIMIT 1");
             $stmt_image->execute([$user_id]);
             $profile_image = $stmt_image->fetchColumn();
-            $user['profile_image'] = $profile_image ?? "";
+            $user['profile_image'] = $profile_image ?: ""; // Đảm bảo không trả về null
 
             http_response_code(200);
             echo json_encode(['status' => 'success', 'user' => $user]);
         } else {
             http_response_code(404);
-            echo json_encode(['status' => 'error', 'message' => 'User not found']);
+            $errorMsg = 'User not found or inactive';
+            log_error($errorMsg);
+            echo json_encode(['status' => 'error', 'message' => $errorMsg]);
         }
     } catch (Exception $e) {
         http_response_code(500);
@@ -187,8 +194,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         $phone_number = sanitize_input($formData['phone_number'] ?? null);
         $gender = sanitize_input($formData['gender'] ?? null);
         $address = sanitize_input($formData['address'] ?? null);
-        $role = $current_user['role'];
-        $is_active = $current_user['is_active'];
+        $role = $current_user['role']; // Role remains unchanged for user.php
+        $is_active = isset($formData['is_active']) ? (($formData['is_active'] === '1' || $formData['is_active'] === 'true') ? 1 : 0) : $current_user['is_active'];
         $current_password = $formData['current_password'] ?? '';
         $new_password = $formData['new_password'] ?? '';
         $remove_profile_image = isset($formData['remove_profile_image']) && $formData['remove_profile_image'] === 'true';
@@ -326,7 +333,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
             $stmt_image = $conn->prepare("SELECT image_url FROM user_images WHERE user_id = ? AND image_type = 'profile' AND is_active = TRUE LIMIT 1");
             $stmt_image->execute([$user_id]);
             $profile_image = $stmt_image->fetchColumn();
-            $updated_user['profile_image'] = $profile_image ?? "";
+            $updated_user['profile_image'] = $profile_image ?: "";
 
             $conn->commit();
             http_response_code(200);
@@ -345,7 +352,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         http_response_code($errorMsg === 'Failed to upload image: Unable to move file to destination' ? 500 : 400);
         echo json_encode(['status' => 'error', 'message' => $errorMsg]);
     }
-
 } elseif ($_SERVER['REQUEST_METHOD'] === 'DELETE') {
     if (!isset($_SESSION['user_id'])) {
         http_response_code(401);
