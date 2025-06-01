@@ -35,7 +35,7 @@ const SidebarLeft = ({ userData, isEditing, setUserData, className }) => {
         bio: bioInput,
       })
       .then((response) => {
-        if (response.data.status === "success") {
+        if (response.data.status === "enter code hereuccess") {
           setUserData((prev) => ({ ...prev, bio: bioInput }));
           Toastify.success("Bio updated successfully!");
         }
@@ -48,7 +48,7 @@ const SidebarLeft = ({ userData, isEditing, setUserData, className }) => {
 
   return (
     <div className={`w-full ${className}`}>
-      <div className="bg-white rounded-lg shadow-md p-4 mb-6 border border-gray-200">
+      <div className="bg-white rounded-lg shadow-sm p-4 mb-4 border border-gray-200 ml-2">
         <h2 className="font-semibold text-lg mb-4 text-gray-900">About</h2>
         {isEditing ? (
           <textarea
@@ -59,36 +59,40 @@ const SidebarLeft = ({ userData, isEditing, setUserData, className }) => {
             onBlur={handleBioUpdate}
           />
         ) : (
-          <p className="text-base text-gray-700 mb-4">{userData.bio || "Chưa có thông tin"}</p>
+          <p className="text-base text-gray-700 mb-4">{userData.bio || "No bio available."}</p>
         )}
       </div>
 
-      <div className="bg-white rounded-lg shadow-md p-4 border border-gray-200">
+      <div className="bg-white rounded-lg shadow-sm p-4 border border-gray-200 ml-2">
         <h2 className="font-semibold text-lg mb-4 text-gray-900">Social Links</h2>
         <div className="space-y-3">
-          {socialLinks.map((link) => (
-            <div key={link.link_id} className="flex items-center">
-              <i
-                className={`fab fa-${link.platform} text-${
-                  link.platform === "instagram"
-                    ? "pink"
-                    : link.platform === "youtube"
-                    ? "red"
-                    : link.platform === "twitter"
-                    ? "blue"
-                    : "blue"
-                }-600 w-8 text-lg mr-2`}
-              />
-              <a
-                href={link.link_url}
-                className="text-sm text-blue-600 hover:underline"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                {link.display_name}
-              </a>
-            </div>
-          ))}
+          {socialLinks.length > 0 ? (
+            socialLinks.map((link) => (
+              <div key={link.link_id} className="flex items-center">
+                <i
+                  className={`fab fa-${link.platform} text-${
+                    link.platform === "instagram"
+                      ? "pink"
+                      : link.platform === "youtube"
+                      ? "red"
+                      : link.platform === "twitter"
+                      ? "blue"
+                      : "blue"
+                  }-600 w-8 text-lg mr-2`}
+                />
+                <a
+                  href={link.link_url}
+                  className="text-sm text-blue-600 hover:underline"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  {link.display_name}
+                </a>
+              </div>
+            ))
+          ) : (
+            <p className="text-gray-500 text-sm">No social links available.</p>
+          )}
         </div>
       </div>
     </div>

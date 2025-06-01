@@ -1,15 +1,22 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { format, parse } from "date-fns";
 import api from "../../../api/index";
+import { Toastify } from "../../../components/Toastify";
 
 const EditPromotions = () => {
   const { id } = useParams();
   const [formData, setFormData] = useState({
     name: "",
+    code: "",
     discount_percentage: 0,
     start_date: "",
     end_date: "",
     status: "active",
+    min_order_value: 0,
+    max_discount_value: 0,
+    usage_count: 0,
+    is_active: true,
   });
   const [error, setError] = useState("");
   const navigate = useNavigate();
@@ -22,10 +29,15 @@ const EditPromotions = () => {
           const promotion = response.data.data[0];
           setFormData({
             name: promotion.name || "",
+            code: promotion.code || "",
             discount_percentage: promotion.discount_percentage || 0,
-            start_date: promotion.start_date || "",
-            end_date: promotion.end_date || "",
+            start_date: promotion.start_date ? format(new Date(promotion.start_date), "dd/MM/yyyy") : "",
+            end_date: promotion.end_date ? format(new Date(promotion.end_date), "dd/MM/yyyy") : "",
             status: promotion.status || "active",
+            min_order_value: promotion.min_order_value || 0,
+            max_discount_value: promotion.max_discount_value || 0,
+            usage_count: promotion.usage_count || 0,
+            is_active: promotion.is_active !== undefined ? promotion.is_active : true,
           });
         } else {
           setError(response.data.message || "Promotion not found");
@@ -39,27 +51,67 @@ const EditPromotions = () => {
   }, [id]);
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
+    const { name, value, type, checked } = e.target;
+    setFormData({
+      ...formData,
+      [name]: type === "checkbox" ? checked : value,
+    });
+  };
+
+  const parseDateInput = (value) => {
+    if (!value) return "";
+    try {
+      const parsed = parse(value, "dd/MM/yyyy", new Date());
+      return format(parsed, "yyyy-MM-dd");
+    } catch {
+      return value;
+    }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!formData.code) {
+      setError("Promo code is required");
+      return;
+    }
     if (formData.discount_percentage < 0 || formData.discount_percentage > 100) {
       setError("Discount percentage must be between 0 and 100");
       return;
     }
+    if (formData.min_order_value < 0) {
+      setError("Minimum order value cannot be negative");
+      return;
+    }
+    if (formData.max_discount_value < 0) {
+      setError("Maximum discount value cannot be negative");
+      return;
+    }
+    if (formData.usage_count < 0) {
+      setError("Usage count cannot be negative");
+      return;
+    }
+    if (new Date(parseDateInput(formData.end_date)) <= new Date(parseDateInput(formData.start_date))) {
+      setError("End date must be after start date");
+      return;
+    }
 
-    const requestData = { ...formData };
+    const requestData = {
+      ...formData,
+      start_date: parseDateInput(formData.start_date),
+      end_date: parseDateInput(formData.end_date),
+      usage_count: parseInt(formData.usage_count),
+      is_active: formData.is_active,
+    };
     try {
       const response = await api.put(`/promotionsmana.php?id=${id}`, requestData);
       if (response.data.status === "success") {
+        Toastify.success("Promotion updated successfully");
         navigate("/admin/promotions");
       } else {
         setError(response.data.message || "Failed to update promotion");
       }
     } catch (err) {
-      setError("Failed to update promotion: " + (err.message || "Unknown error"));
+      setError(err.response?.data?.message || "Failed to update promotion");
       console.error(err);
     }
   };
@@ -82,6 +134,17 @@ const EditPromotions = () => {
             />
           </div>
           <div className="mb-4">
+            <label className="block text-gray-700 mb-2">Promo Code</label>
+            <input
+              type="text"
+              name="code"
+              value={formData.code}
+              onChange={handleChange}
+              required
+              className="w-full px-3 py-2 rounded-lg border focus:outline-none focus:ring-2 focus:ring-primary"
+            />
+          </div>
+          <div className="mb-4">
             <label className="block text-gray-700 mb-2">Discount (%)</label>
             <input
               type="number"
@@ -96,24 +159,65 @@ const EditPromotions = () => {
             />
           </div>
           <div className="mb-4">
+            <label className="block text-gray-700 mb-2">Minimum Order Value</label>
+            <input
+              type="number"
+              name="min_order_value"
+              value={formData.min_order_value}
+              onChange={handleChange}
+              required
+              min="0"
+              step="0.01"
+              className="w-full px-3 py-2 rounded-lg border focus:outline-none focus:ring-2 focus:ring-primary"
+            />
+          </div>
+          <div className="mb-4">
+            <label className="block text-gray-700 mb-2">Maximum Discount Value</label>
+            <input
+              type="number"
+              name="max_discount_value"
+              value={formData.max_discount_value}
+              onChange={handleChange}
+              required
+              min="0"
+              step="0.01"
+              className="w-full px-3 py-2 rounded-lg border focus:outline-none focus:ring-2 focus:ring-primary"
+            />
+          </div>
+          <div className="mb-4">
+            <label className="block text-gray-700 mb-2">Usage Count</label>
+            <input
+              type="number"
+              name="usage_count"
+              value={formData.usage_count}
+              onChange={handleChange}
+              required
+              min="0"
+              step="1"
+              className="w-full px-3 py-2 rounded-lg border focus:outline-none focus:ring-2 focus:ring-primary"
+            />
+          </div>
+          <div className="mb-4">
             <label className="block text-gray-700 mb-2">Start Date</label>
             <input
-              type="date"
+              type="text"
               name="start_date"
               value={formData.start_date}
               onChange={handleChange}
               required
+              placeholder="DD/MM/YYYY"
               className="w-full px-3 py-2 rounded-lg border focus:outline-none focus:ring-2 focus:ring-primary"
             />
           </div>
           <div className="mb-4">
             <label className="block text-gray-700 mb-2">End Date</label>
             <input
-              type="date"
+              type="text"
               name="end_date"
               value={formData.end_date}
               onChange={handleChange}
               required
+              placeholder="DD/MM/YYYY"
               className="w-full px-3 py-2 rounded-lg border focus:outline-none focus:ring-2 focus:ring-primary"
             />
           </div>
@@ -129,6 +233,18 @@ const EditPromotions = () => {
               <option value="inactive">Inactive</option>
               <option value="expired">Expired</option>
             </select>
+          </div>
+          <div className="mb-4">
+            <label className="flex items-center text-gray-700 mb-2">
+              <input
+                type="checkbox"
+                name="is_active"
+                checked={formData.is_active}
+                onChange={handleChange}
+                className="mr-2"
+              />
+              Active
+            </label>
           </div>
           <div className="flex gap-4">
             <button

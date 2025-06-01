@@ -88,10 +88,12 @@ export default function Checkout() {
 
   const handleApplyPromo = async () => {
     try {
-      const response = await api.post("/promotions.php", { code: promoCode });
+      const response = await api.post("/promotions_validate.php", { 
+        code: promoCode,
+        total_amount: subtotal / exchangeRate
+      });
       if (response.data.status === "success") {
-        const discountValue = response.data.discount || 0;
-        setDiscount(discountValue);
+        setDiscount(response.data.discount * exchangeRate);
         setError("");
         Toastify.success("Promo code applied successfully!");
       } else {
@@ -113,7 +115,6 @@ export default function Checkout() {
   const validateFields = () => {
     let isValid = true;
     const errors = [];
-    // Reset error states
     setFullNameError(false);
     setAddressError(false);
     setGuestEmailError(false);
@@ -148,7 +149,6 @@ export default function Checkout() {
         errors.push("Please enter your phone number");
         isValid = false;
       } else {
-        // Validate phone number: must be exactly 10 digits
         const phoneRegex = /^\d{10}$/;
         if (!phoneRegex.test(guestPhone)) {
           setGuestPhoneError(true);
@@ -158,7 +158,6 @@ export default function Checkout() {
       }
     }
 
-    // Show Toastify messages based on the number of errors
     if (errors.length > 1) {
       Toastify.error("Please fill in the required information");
     } else if (errors.length === 1) {
@@ -190,87 +189,89 @@ export default function Checkout() {
     setActiveStep(step + 1);
   };
 
-const handlePlaceOrder = async (e) => {
-  e.preventDefault();
-  if (!validateFields()) return;
-  if (!shippingMethod) {
-    setError("Please select a shipping method.");
-    Toastify.error("Please select a shipping method.");
-    return;
-  }
-  if (shippingMethod === "store_pickup" && !storeId) {
-    setError("Please select a store for pickup.");
-    Toastify.error("Please select a store for pickup.");
-    return;
-  }
-  if (!paymentMethod) {
-    setError("Please select a payment method.");
-    Toastify.error("Please select a payment method.");
-    return;
-  }
-
-  if (!cartItems.length) {
-    setError("Your cart is empty.");
-    Toastify.error("Your cart is empty.");
-    return;
-  }
-
-  const shippingAddress = shippingMethod === "store_pickup" ? null : address;
-  const totalAmount = subtotal - discount + shippingCost;
-
-  try {
-    const orderData = {
-      user_id: user ? user.user_id : null,
-      guest_email: user ? null : guestEmail.trim() || null,
-      guest_phone: user ? null : guestPhone.trim() || null,
-      total_amount: totalAmount / exchangeRate,
-      discount_amount: discount / exchangeRate,
-      shipping_address: shippingAddress,
-      shipping_method: shippingMethod,
-      shipping_cost: shippingCost / exchangeRate,
-      store_id: shippingMethod === "store_pickup" ? parseInt(storeId) : null,
-      payment_method: paymentMethod,
-      order_details: cartItems.map((item) => ({
-        product_id: parseInt(item.product_id),
-        quantity: parseInt(item.quantity),
-        price_at_purchase: parseFloat(item.price),
-      })),
-      promo_code: promoCode || null,
-    };
-
-    console.log("Order Data Sent:", orderData); // Debug log
-    const response = await api.post("/orders.php", orderData);
-    if (response.data.status === "success") {
-      const endpoint = user ? "/carts.php" : "/guest_carts.php";
-      const payload = user
-        ? { user_id: user.user_id }
-        : { session_key: sessionKey };
-      await api.delete(endpoint, { data: payload });
-
-      Toastify.success("Order placed successfully!");
-      navigate("/ordersuccess", {
-        state: {
-          order: {
-            ...response.data.data,
-            items: cartItems,
-            shipping_method: shippingMethod,
-            payment_method: paymentMethod,
-            shipping_cost: shippingCost / exchangeRate,
-            store_id: storeId,
-          },
-        },
-      });
-    } else {
-      setError(`Failed to place order: ${response.data.message || "Unknown error"}`);
-      Toastify.error(`Failed to place order: ${response.data.message || "Unknown error"}`);
+  const handlePlaceOrder = async (e) => {
+    e.preventDefault();
+    if (!validateFields()) return;
+    if (!shippingMethod) {
+      setError("Please select a shipping method.");
+      Toastify.error("Please select a shipping method.");
+      return;
     }
-  } catch (err) {
-    const errorMsg = err.response?.data?.message || err.message || "Network or server error";
-    setError(`Failed to place order: ${errorMsg}`);
-    Toastify.error(`Failed to place order: ${errorMsg}`);
-    console.error("Order Placement Error:", err); // Detailed error log
-  }
-};
+    if (shippingMethod === "store_pickup" && !storeId) {
+      setError("Please select a store for pickup.");
+      Toastify.error("Please select a store for pickup.");
+      return;
+    }
+    if (!paymentMethod) {
+      setError("Please select a payment method.");
+      Toastify.error("Please select a payment method.");
+      return;
+    }
+
+    if (!cartItems.length) {
+      setError("Your cart is empty.");
+      Toastify.error("Your cart is empty.");
+      return;
+    }
+
+    const shippingAddress = shippingMethod === "store_pickup" ? null : address;
+    const totalAmount = subtotal - discount + shippingCost;
+
+    try {
+      const orderData = {
+        user_id: user ? user.user_id : null,
+        guest_email: user ? null : guestEmail.trim() || null,
+        guest_phone: user ? null : guestPhone.trim() || null,
+        total_amount: totalAmount / exchangeRate,
+        discount_amount: discount / exchangeRate,
+        shipping_address: shippingAddress,
+        shipping_method: shippingMethod,
+        shipping_cost: shippingCost / exchangeRate,
+        store_id: shippingMethod === "store_pickup" ? parseInt(storeId) : null,
+        payment_method: paymentMethod,
+        order_details: cartItems.map((item) => ({
+          product_id: parseInt(item.product_id),
+          quantity: parseInt(item.quantity),
+          price_at_purchase: parseFloat(item.price),
+        })),
+        promo_code: promoCode || null,
+      };
+
+      console.log("Order Data Sent:", orderData);
+      const response = await api.post("/orders.php", orderData);
+      if (response.data.status === "success") {
+        const endpoint = user ? "/carts.php" : "/guest_carts.php";
+        const payload = user
+          ? { user_id: user.user_id }
+          : { session_key: sessionKey };
+        await api.delete(endpoint, { data: payload });
+
+        Toastify.success("Order placed successfully!");
+        navigate("/ordersuccess", {
+          state: {
+            order: {
+              ...response.data.data,
+              items: cartItems,
+              shipping_method: shippingMethod,
+              payment_method: paymentMethod,
+              shipping_cost: shippingCost / exchangeRate,
+              store_id: storeId,
+              promo_code: promoCode,
+              discount_amount: discount / exchangeRate,
+            },
+          },
+        });
+      } else {
+        setError(`Failed to place order: ${response.data.message || "Unknown error"}`);
+        Toastify.error(`Failed to place order: ${response.data.message || "Unknown error"}`);
+      }
+    } catch (err) {
+      const errorMsg = err.response?.data?.message || err.message || "Network or server error";
+      setError(`Failed to place order: ${errorMsg}`);
+      Toastify.error(`Failed to place order: ${errorMsg}`);
+      console.error("Order Placement Error:", err);
+    }
+  };
 
   if (loading) return <div className="text-center py-4">Loading...</div>;
   if (cartItems.length === 0)
@@ -300,14 +301,12 @@ const handlePlaceOrder = async (e) => {
   return (
     <div className="bg-gray-100 min-h-screen p-6">
       <div className="max-w-7xl mx-auto flex flex-col lg:flex-row gap-8">
-        {/* Left Section */}
         <div className="flex-1">
           <h1 className="text-3xl font-bold mb-6">Checkout</h1>
           <p className="text-right text-sm font-semibold">
             Order subtotal ({cartItems.length} items): {formatCurrency(subtotal)}
           </p>
           <div className="mt-6 space-y-6">
-            {/* Step 1: Shipping Address */}
             <div className="bg-white p-6 rounded shadow">
               <div className="flex items-center gap-2 mb-4">
                 <div
@@ -321,17 +320,6 @@ const handlePlaceOrder = async (e) => {
               </div>
               {activeStep === 1 && (
                 <>
-                  <p className="text-sm text-gray-500 mb-4">
-                    Address lookup powered by Google, view{" "}
-                    <a className="underline" href="#">
-                      Privacy policy
-                    </a>
-                    . To opt out, change cookie{" "}
-                    <a className="underline" href="#">
-                      preferences
-                    </a>
-                    .
-                  </p>
                   <div className="space-y-4">
                     <div className="grid grid-cols-1 gap-4">
                       <input
@@ -384,7 +372,7 @@ const handlePlaceOrder = async (e) => {
                           placeholder="Phone *"
                           value={guestPhone}
                           onChange={(e) => {
-                            const numericValue = e.target.value.replace(/\D/g, ''); // Allow only digits
+                            const numericValue = e.target.value.replace(/\D/g, '');
                             setGuestPhone(numericValue);
                             setGuestPhoneError(false);
                           }}
@@ -407,8 +395,6 @@ const handlePlaceOrder = async (e) => {
                 </>
               )}
             </div>
-
-            {/* Step 2: Shipping Method */}
             <div className="bg-white p-6 rounded shadow">
               <div className="flex items-center gap-2 mb-4">
                 <div
@@ -464,8 +450,6 @@ const handlePlaceOrder = async (e) => {
                 </div>
               )}
             </div>
-
-            {/* Step 3: Payment */}
             <div className="bg-white p-6 rounded shadow">
               <div className="flex items-center gap-2 mb-4">
                 <div
@@ -503,8 +487,6 @@ const handlePlaceOrder = async (e) => {
             </div>
           </div>
         </div>
-
-        {/* Right Section */}
         <div className="w-full lg:w-1/3 space-y-6">
           <div className="bg-white p-6 rounded shadow">
             <h2 className="text-lg font-bold mb-2">Summary</h2>
@@ -544,8 +526,8 @@ const handlePlaceOrder = async (e) => {
               </div>
               {discount > 0 && (
                 <div className="flex justify-between">
-                  <span>Discount</span>
-                  <span>{formatCurrency(discount)}</span>
+                  <span>Discount ({promoCode})</span>
+                  <span>-{formatCurrency(discount)}</span>
                 </div>
               )}
               <hr />
@@ -555,7 +537,6 @@ const handlePlaceOrder = async (e) => {
               </div>
             </div>
           </div>
-
           <div className="bg-white p-6 rounded shadow">
             <h2 className="text-lg font-bold mb-4">
               🛒 Cart ({cartItems.length} Items)
@@ -578,29 +559,6 @@ const handlePlaceOrder = async (e) => {
                 <p className="text-sm text-gray-600">Quantity: {item.quantity}</p>
               </div>
             ))}
-          </div>
-
-          <div className="bg-white p-6 rounded shadow text-sm text-gray-600">
-            <p className="mb-2">
-              <strong>Need help?</strong>
-            </p>
-            <a href="#" className="underline block mb-1">
-              Visit our Help Center
-            </a>
-            <p>
-              Call us
-              <br />
-              855-427-6657
-              <br />
-              Mon-Fri 6am-5pm PST
-            </p>
-            <div className="mt-4">
-              <img
-                src="https://seal.digicert.com/seals/cascade/?tag=W7fM0mSm&format=png"
-                alt="Digicert"
-                className="h-10"
-              />
-            </div>
           </div>
         </div>
       </div>

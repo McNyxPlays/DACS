@@ -36,42 +36,33 @@ const Header = ({
     setIsDropdownOpen(!isDropdownOpen);
   };
 
-const handleLogout = async () => {
-  try {
-    await api.post("/user.php");
-    
-    setUser(null);
-    sessionStorage.removeItem("user");
-    sessionStorage.removeItem("guest_session_key");
-    
-    setCartCount(0); 
-    const event = new CustomEvent("cartUpdated"); 
-    window.dispatchEvent(event);
-    
-    setIsNavOpen(false);
-    setIsDropdownOpen(false);
-    document.body.style.overflow = "auto";
-    
-    navigate("/");
-  } catch (err) {
-    console.error("Logout error:", err);
-    
-    setUser(null);
-    sessionStorage.removeItem("user");
-    sessionStorage.removeItem("guest_session_key");
-    
-    setCartCount(0); // Reset cart count to 0
-    const event = new CustomEvent("cartUpdated");
-    window.dispatchEvent(event);
-    
-
-    setIsNavOpen(false);
-    setIsDropdownOpen(false);
-    document.body.style.overflow = "auto";
-    
-    navigate("/");
-  }
-};
+  const handleLogout = async () => {
+    try {
+      await api.post("/user.php");
+      setUser(null);
+      sessionStorage.removeItem("user");
+      sessionStorage.removeItem("guest_session_key");
+      setCartCount(0);
+      const event = new CustomEvent("cartUpdated");
+      window.dispatchEvent(event);
+      setIsNavOpen(false);
+      setIsDropdownOpen(false);
+      document.body.style.overflow = "auto";
+      navigate("/");
+    } catch (err) {
+      console.error("Logout error:", err);
+      setUser(null);
+      sessionStorage.removeItem("user");
+      sessionStorage.removeItem("guest_session_key");
+      setCartCount(0);
+      const event = new CustomEvent("cartUpdated");
+      window.dispatchEvent(event);
+      setIsNavOpen(false);
+      setIsDropdownOpen(false);
+      document.body.style.overflow = "auto";
+      navigate("/");
+    }
+  };
 
   const fetchCounts = async () => {
     try {
@@ -110,7 +101,6 @@ const handleLogout = async () => {
 
     window.addEventListener("cartUpdated", handleCartUpdate);
 
-    // Set up SSE for real-time notification updates
     if (user) {
       const eventSource = new EventSource("/api/notifications_sse.php", {
         withCredentials: true,
@@ -256,9 +246,7 @@ const handleLogout = async () => {
                     {user.full_name || user.email || "User"}
                   </span>
                   <i
-                    className={`ri-arrow-${
-                      isDropdownOpen ? "up" : "down"
-                    }-s-line`}
+                    className={`ri-arrow-${isDropdownOpen ? "up" : "down"}-s-line`}
                   ></i>
                 </button>
 
@@ -274,12 +262,20 @@ const handleLogout = async () => {
                         <span>My Profile</span>
                       </NavLink>
                       <NavLink
-                        to="/store"
+                        to="/mystore"
                         className="flex items-center gap-2 px-4 py-2 text-gray-700 hover:bg-gray-100"
                         onClick={() => setIsDropdownOpen(false)}
                       >
                         <i className="ri-store-line"></i>
                         <span>My Store</span>
+                      </NavLink>
+                      <NavLink
+                        to="/orderhistory"
+                        className="flex items-center gap-2 px-4 py-2 text-gray-700 hover:bg-gray-100"
+                        onClick={() => setIsDropdownOpen(false)}
+                      >
+                        <i className="ri-store-line"></i>
+                        <span>Order History</span>
                       </NavLink>
                       <NavLink
                         to="/settings"
@@ -461,12 +457,20 @@ const handleLogout = async () => {
                 <span>My Profile</span>
               </NavLink>
               <NavLink
-                to="/store"
+                to="/mystore"
                 className="flex items-center gap-2 py-2 text-gray-600 hover:text-primary"
                 onClick={toggleNav}
               >
                 <i className="ri-store-line"></i>
                 <span>My Store</span>
+              </NavLink>
+              <NavLink
+                to="/orderhistory"
+                className="flex items-center gap-2 py-2 text-gray-600 hover:text-primary"
+                onClick={toggleNav}
+              >
+                <i className="ri-store-line"></i>
+                <span>Order History</span>
               </NavLink>
               <NavLink
                 to="/settings"

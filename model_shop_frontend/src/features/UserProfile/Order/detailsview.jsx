@@ -1,6 +1,6 @@
 import React from "react";
 
-function OrderDetailsView({ orders, selectedOrder }) {
+function StoreOrderDetailsView({ orders, selectedOrder }) {
   const order = orders.find((o) => o.id === selectedOrder);
 
   if (!order) {
@@ -61,4 +61,4 @@ function OrderDetailsView({ orders, selectedOrder }) {
   );
 }
 
-export default OrderDetailsView;
+export default StoreOrderDetailsView;

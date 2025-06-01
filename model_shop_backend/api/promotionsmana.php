@@ -47,7 +47,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         $id = intval($_GET['id']);
         try {
             $stmt = $conn->prepare("
-                SELECT p.promotion_id, p.name, p.discount_percentage, p.start_date, p.end_date, p.status
+                SELECT p.promotion_id, p.name, p.code, p.discount_percentage, p.start_date, p.end_date, p.status,
+                       p.min_order_value, p.max_discount_value, p.usage_count, p.is_active
                 FROM promotions p
                 WHERE p.promotion_id = ?
             ");
@@ -68,11 +69,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         $status = isset($_GET['status']) ? $_GET['status'] : '';
         try {
             $query = "
-                SELECT p.promotion_id, p.name, p.discount_percentage, p.start_date, p.end_date, p.status
+                SELECT p.promotion_id, p.name, p.code, p.discount_percentage, p.start_date, p.end_date, p.status,
+                       p.min_order_value, p.max_discount_value, p.usage_count, p.is_active
                 FROM promotions p
-                WHERE p.name LIKE ?
+                WHERE (p.name LIKE ? OR p.code LIKE ?)
             ";
-            $params = [$search];
+            $params = [$search, $search];
 
             if (!empty($status)) {
                 $query .= " AND p.status = ?";
@@ -93,14 +95,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $data = json_decode(file_get_contents("php://input"), true);
     $name = $data['name'] ?? '';
+    $code = $data['code'] ?? '';
     $discount_percentage = isset($data['discount_percentage']) ? floatval($data['discount_percentage']) : 0;
     $start_date = $data['start_date'] ?? '';
     $end_date = $data['end_date'] ?? '';
     $status = $data['status'] ?? 'active';
+    $min_order_value = isset($data['min_order_value']) ? floatval($data['min_order_value']) : 0.00;
+    $max_discount_value = isset($data['max_discount_value']) ? floatval($data['max_discount_value']) : 0.00;
+    $usage_count = isset($data['usage_count']) ? intval($data['usage_count']) : 0;
+    $is_active = isset($data['is_active']) ? boolval($data['is_active']) : true;
 
-    if (empty($name) || empty($start_date) || empty($end_date)) {
+    if (empty($name) || empty($code) || empty($start_date) || empty($end_date)) {
         http_response_code(400);
-        echo json_encode(['status' => 'error', 'message' => 'Name, start date, and end date are required']);
+        echo json_encode(['status' => 'error', 'message' => 'Name, code, start date, and end date are required']);
         $conn = null;
         exit;
     }
@@ -108,6 +115,34 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($discount_percentage < 0 || $discount_percentage > 100) {
         http_response_code(400);
         echo json_encode(['status' => 'error', 'message' => 'Discount percentage must be between 0 and 100']);
+        $conn = null;
+        exit;
+    }
+
+    if ($min_order_value < 0) {
+        http_response_code(400);
+        echo json_encode(['status' => 'error', 'message' => 'Minimum order value cannot be negative']);
+        $conn = null;
+        exit;
+    }
+
+    if ($max_discount_value < 0) {
+        http_response_code(400);
+        echo json_encode(['status' => 'error', 'message' => 'Maximum discount value cannot be negative']);
+        $conn = null;
+        exit;
+    }
+
+    if ($usage_count < 0) {
+        http_response_code(400);
+        echo json_encode(['status' => 'error', 'message' => 'Usage count cannot be negative']);
+        $conn = null;
+        exit;
+    }
+
+    if (strtotime($end_date) <= strtotime($start_date)) {
+        http_response_code(400);
+        echo json_encode(['status' => 'error', 'message' => 'End date must be after start date']);
         $conn = null;
         exit;
     }
@@ -121,15 +156,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     try {
         $stmt = $conn->prepare("
-            INSERT INTO promotions (name, discount_percentage, start_date, end_date, status)
-            VALUES (?, ?, ?, ?, ?)
+            INSERT INTO promotions (name, code, discount_percentage, start_date, end_date, status, min_order_value, max_discount_value, usage_count, is_active)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         ");
-        $stmt->execute([$name, $discount_percentage, $start_date, $end_date, $status]);
+        $stmt->execute([$name, $code, $discount_percentage, $start_date, $end_date, $status, $min_order_value, $max_discount_value, $usage_count, $is_active]);
         $promotion_id = $conn->lastInsertId();
         echo json_encode(['status' => 'success', 'message' => 'Promotion added', 'promotion_id' => $promotion_id]);
     } catch (PDOException $e) {
         http_response_code(500);
         echo json_encode(['status' => 'error', 'message' => 'Failed to add promotion: ' . $e->getMessage()]);
+        exit;
     }
 }
 
@@ -137,12 +173,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'PUT') {
     $data = json_decode(file_get_contents("php://input"), true);
     $id = isset($_GET['id']) ? intval($_GET['id']) : 0;
     $name = $data['name'] ?? '';
+    $code = $data['code'] ?? '';
     $discount_percentage = isset($data['discount_percentage']) ? floatval($data['discount_percentage']) : 0;
     $start_date = $data['start_date'] ?? '';
     $end_date = $data['end_date'] ?? '';
     $status = $data['status'] ?? 'active';
+    $min_order_value = isset($data['min_order_value']) ? floatval($data['min_order_value']) : 0.00;
+    $max_discount_value = isset($data['max_discount_value']) ? floatval($data['max_discount_value']) : 0.00;
+    $usage_count = isset($data['usage_count']) ? intval($data['usage_count']) : 0;
+    $is_active = isset($data['is_active']) ? boolval($data['is_active']) : true;
 
-    if ($id <= 0 || empty($name) || empty($start_date) || empty($end_date)) {
+    if ($id <= 0 || empty($name) || empty($code) || empty($start_date) || empty($end_date)) {
         http_response_code(400);
         echo json_encode(['status' => 'error', 'message' => 'Invalid input']);
         $conn = null;
@@ -152,6 +193,34 @@ if ($_SERVER['REQUEST_METHOD'] === 'PUT') {
     if ($discount_percentage < 0 || $discount_percentage > 100) {
         http_response_code(400);
         echo json_encode(['status' => 'error', 'message' => 'Discount percentage must be between 0 and 100']);
+        $conn = null;
+        exit;
+    }
+
+    if ($min_order_value < 0) {
+        http_response_code(400);
+        echo json_encode(['status' => 'error', 'message' => 'Minimum order value cannot be negative']);
+        $conn = null;
+        exit;
+    }
+
+    if ($max_discount_value < 0) {
+        http_response_code(400);
+        echo json_encode(['status' => 'error', 'message' => 'Maximum discount value cannot be negative']);
+        $conn = null;
+        exit;
+    }
+
+    if ($usage_count < 0) {
+        http_response_code(400);
+        echo json_encode(['status' => 'error', 'message' => 'Usage count cannot be negative']);
+        $conn = null;
+        exit;
+    }
+
+    if (strtotime($end_date) <= strtotime($start_date)) {
+        http_response_code(400);
+        echo json_encode(['status' => 'error', 'message' => 'End date must be after start date']);
         $conn = null;
         exit;
     }
@@ -175,14 +244,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'PUT') {
 
         $stmt = $conn->prepare("
             UPDATE promotions
-            SET name = ?, discount_percentage = ?, start_date = ?, end_date = ?, status = ?
+            SET name = ?, code = ?, discount_percentage = ?, start_date = ?, end_date = ?, status = ?,
+                min_order_value = ?, max_discount_value = ?, usage_count = ?, is_active = ?
             WHERE promotion_id = ?
         ");
-        $stmt->execute([$name, $discount_percentage, $start_date, $end_date, $status, $id]);
+        $stmt->execute([$name, $code, $discount_percentage, $start_date, $end_date, $status, $min_order_value, $max_discount_value, $usage_count, $is_active, $id]);
         echo json_encode(['status' => 'success', 'message' => 'Promotion updated']);
     } catch (PDOException $e) {
         http_response_code(500);
         echo json_encode(['status' => 'error', 'message' => 'Failed to update promotion: ' . $e->getMessage()]);
+        exit;
     }
 }
 
@@ -207,6 +278,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'DELETE') {
     } catch (PDOException $e) {
         http_response_code(500);
         echo json_encode(['status' => 'error', 'message' => 'Failed to delete promotion: ' . $e->getMessage()]);
+        exit;
     }
 }
 

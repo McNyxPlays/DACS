@@ -66,7 +66,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
             }
 
-            // Check if directory is writable
             if (!is_writable($upload_dir)) {
                 throw new Exception("Upload directory is not writable: $upload_dir");
             }
@@ -75,13 +74,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 if ($images['error'][$index] === UPLOAD_ERR_OK) {
                     $file_extension = pathinfo($name, PATHINFO_EXTENSION);
                     $file_base = pathinfo($name, PATHINFO_FILENAME);
-                    // Clean filename: remove 'download_' prefix and any special characters
                     $file_base = preg_replace('/^download_/', '', $file_base);
                     $file_base = preg_replace('/[^a-zA-Z0-9_-]/', '_', $file_base);
                     $file_name = uniqid() . '_' . $file_base . '.' . $file_extension;
                     $target_file = $upload_dir . $file_name;
 
-                    // Debug: Log the file paths
                     error_log("Uploading file: {$images['tmp_name'][$index]} to $target_file");
 
                     if (move_uploaded_file($images['tmp_name'][$index], $target_file)) {
@@ -92,7 +89,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $stmt->execute([$post_id, $image_url]);
                         $image_urls[] = $image_url;
 
-                        // Debug: Confirm file exists after move
                         if (!file_exists($target_file)) {
                             error_log("File not found after move: $target_file");
                         } else {
@@ -248,26 +244,40 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 } elseif ($_SERVER['REQUEST_METHOD'] === 'GET') {
     $limit = filter_var($_GET['limit'] ?? 10, FILTER_VALIDATE_INT) ?: 10;
     $offset = filter_var($_GET['offset'] ?? 0, FILTER_VALIDATE_INT) ?: 0;
+    $user_id_param = $_GET['user_id'] ?? '';
 
     $limit = (int)$limit;
     $offset = (int)$offset;
 
-    error_log("Limit: $limit, Offset: $offset");
+    error_log("Limit: $limit, Offset: $offset, User ID Param: $user_id_param");
 
     try {
-        $stmt = $pdo->prepare(
-            "SELECT p.post_id, p.user_id, p.content, p.post_time_status, p.created_at, 
-                    u.full_name,
-                    (SELECT image_url FROM user_images WHERE user_id = p.user_id AND image_type = 'profile' AND is_active = TRUE LIMIT 1) as profile_image,
-                    (SELECT COUNT(*) FROM likes w WHERE w.post_id = p.post_id) as like_count,
-                    (SELECT COUNT(*) FROM comments c WHERE c.post_id = p.post_id) as comment_count
-             FROM posts p 
-             JOIN users u ON p.user_id = u.user_id 
-             WHERE p.is_approved = TRUE 
-             ORDER BY p.created_at DESC 
-             LIMIT ? OFFSET ?"
-        );
-        $stmt->execute([$limit, $offset]);
+        $query = "
+            SELECT p.post_id, p.user_id, p.content, p.post_time_status, p.created_at, 
+                   u.full_name,
+                   (SELECT image_url FROM user_images WHERE user_id = p.user_id AND image_type = 'profile' AND is_active = TRUE LIMIT 1) as profile_image,
+                   (SELECT COUNT(*) FROM likes w WHERE w.post_id = p.post_id) as like_count,
+                   (SELECT COUNT(*) FROM comments c WHERE c.post_id = p.post_id) as comment_count
+            FROM posts p 
+            JOIN users u ON p.user_id = u.user_id 
+            WHERE p.is_approved = TRUE
+        ";
+        $params = [];
+
+        if ($user_id_param === 'current' && isset($_SESSION['user_id'])) {
+            $query .= " AND p.user_id = ?";
+            $params[] = $_SESSION['user_id'];
+        } elseif ($user_id_param && is_numeric($user_id_param)) {
+            $query .= " AND p.user_id = ?";
+            $params[] = (int)$user_id_param;
+        }
+
+        $query .= " ORDER BY p.created_at DESC LIMIT ? OFFSET ?";
+        $params[] = $limit;
+        $params[] = $offset;
+
+        $stmt = $pdo->prepare($query);
+        $stmt->execute($params);
         $posts = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
         foreach ($posts as &$post) {

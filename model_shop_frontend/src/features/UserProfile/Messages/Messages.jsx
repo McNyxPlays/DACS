@@ -34,7 +34,7 @@ function Messages() {
             console.error("Failed to fetch conversations:", messagesResponse.data.message || "No message provided");
           }
         } else {
-          console.error("Invalid API response structure:", messagesResponse.data);
+          console.error("Invalid API response structure:", messagesResponse1, messagesResponse.data);
         }
       } catch (err) {
         console.error("Failed to fetch data:", err.message, err.response?.data, err.response?.status);

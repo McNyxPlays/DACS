@@ -2,10 +2,8 @@ import React, { useState, useEffect } from "react";
 import api from "../../../api/index";
 import { Toastify } from "../../../components/Toastify";
 import ProfileBanner from "./ProfileBanner";
-import ProfileStats from "./ProfileStats";
 import SidebarLeft from "./SidebarLeft";
 import MainContent from "./MainContent";
-import SidebarRight from "./SidebarRight";
 
 const UserProfileOverview = ({ user }) => {
   const [activeTab, setActiveTab] = useState("posts");
@@ -24,11 +22,38 @@ const UserProfileOverview = ({ user }) => {
     followers: 0,
     posts: 0,
     comments: 0,
+    profile_image: "",
+    banner_image: "",
     profile_completion: user ? 85 : 50,
   });
 
-  // Fetch user stats
   useEffect(() => {
+    api
+      .get("/user.php")
+      .then((response) => {
+        if (response.data.status === "success") {
+          const fetchedUser = response.data.user;
+          setUserData((prev) => ({
+            ...prev,
+            name: fetchedUser.full_name,
+            handle: fetchedUser.email ? `@${fetchedUser.email.split("@")[0]}` : "@user",
+            location: fetchedUser.address || "Not specified",
+            created_at: fetchedUser.created_at
+              ? new Date(fetchedUser.created_at).toLocaleDateString("en-US", {
+                  month: "long",
+                  year: "numeric",
+                })
+              : "Unknown",
+            profile_image: fetchedUser.profile_image || "",
+            banner_image: fetchedUser.banner_image || "",
+          }));
+        }
+      })
+      .catch((error) => {
+        console.error("Error fetching user data:", error);
+        Toastify.error("Failed to load user data.");
+      });
+
     api
       .get("/user_stats.php")
       .then((response) => {
@@ -48,23 +73,54 @@ const UserProfileOverview = ({ user }) => {
   }, []);
 
   return (
-    <>
+    <div className="bg-gray-100 text-gray-900 min-h-screen">
       <ProfileBanner
         userData={userData}
         isEditing={isEditing}
         setIsEditing={setIsEditing}
       />
-      <ProfileStats userData={userData} />
-      <main className="container mx-auto px-4 py-6 flex flex-col md:flex-row">
-        <SidebarLeft
-          userData={userData}
-          isEditing={isEditing}
-          setUserData={setUserData}
-        />
-        <MainContent activeTab={activeTab} setActiveTab={setActiveTab} />
-        <SidebarRight userData={userData} />
+      <main className="container mx-auto px-2 py-6 flex flex-col md:flex-row gap-6">
+        <div className="w-full md:w-1/4 flex flex-col gap-6">
+          <SidebarLeft
+            userData={userData}
+            isEditing={isEditing}
+            setUserData={setUserData}
+          />
+        </div>
+        <div className="w-full md:w-2/4">
+          <div className="bg-white rounded-lg shadow-md p-2 mb-4 flex justify-around text-sm font-medium">
+            <button
+              className={`px-4 py-2 rounded ${activeTab === "posts" ? "bg-blue-600 text-white" : "text-gray-600 hover:bg-gray-200"}`}
+              onClick={() => setActiveTab("posts")}
+            >
+              My Posts
+            </button>
+            <button
+              className={`px-4 py-2 rounded ${activeTab === "collections" ? "bg-blue-600 text-white" : "text-gray-600 hover:bg-gray-200"}`}
+              onClick={() => setActiveTab("collections")}
+            >
+              Collections
+            </button>
+            <button
+              className={`px-4 py-2 rounded ${activeTab === "likes" ? "bg-blue-600 text-white" : "text-gray-600 hover:bg-gray-200"}`}
+              onClick={() => setActiveTab("likes")}
+            >
+              Likes
+            </button>
+            <button
+              className={`px-4 py-2 rounded ${activeTab === "comments" ? "bg-blue-600 text-white" : "text-gray-600 hover:bg-gray-200"}`}
+              onClick={() => setActiveTab("comments")}
+            >
+              Comments
+            </button>
+          </div>
+          <MainContent
+            activeTab={activeTab}
+            setActiveTab={setActiveTab}
+          />
+        </div>
       </main>
-    </>
+    </div>
   );
 };
 

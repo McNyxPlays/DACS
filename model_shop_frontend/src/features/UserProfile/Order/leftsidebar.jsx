@@ -1,6 +1,6 @@
 import React from "react";
 
-function OrdersSidebar({ orders, selectedOrder, setSelectedOrder }) {
+function StoreSidebar({ orders, selectedOrder, setSelectedOrder }) {
   return (
     <div className="w-full lg:w-1/3 bg-white rounded-xl shadow-sm border border-gray-200 p-6">
       <h2 className="text-xl font-semibold text-gray-900 mb-4">Đơn hàng</h2>
@@ -33,4 +33,4 @@ function OrdersSidebar({ orders, selectedOrder, setSelectedOrder }) {
   );
 }
 
-export default OrdersSidebar;
+export default StoreSidebar;

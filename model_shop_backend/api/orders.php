@@ -20,187 +20,183 @@ try {
     $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
     switch ($method) {
-case 'POST':
-    $data = json_decode(file_get_contents('php://input'), true);
-    if (!$data) {
-        throw new Exception('Invalid JSON data', 400);
-    }
+        case 'POST':
+            $data = json_decode(file_get_contents('php://input'), true);
+            if (!$data) {
+                throw new Exception('Invalid JSON data', 400);
+            }
 
-    $required_fields = ['total_amount', 'shipping_address', 'payment_method', 'order_details'];
-    foreach ($required_fields as $field) {
-        if (!isset($data[$field]) && $field !== 'shipping_address') {
-            throw new Exception("Missing required field: $field", 400);
-        }
-    }
+            $required_fields = ['total_amount', 'payment_method', 'order_details'];
+            foreach ($required_fields as $field) {
+                if (!isset($data[$field])) {
+                    throw new Exception("Missing required field: $field", 400);
+                }
+            }
 
-    $user_id = isset($data['user_id']) && $data['user_id'] ? (int)$data['user_id'] : null;
-    $guest_email = isset($data['guest_email']) ? trim($data['guest_email']) : null;
-    $guest_phone = isset($data['guest_phone']) ? trim($data['guest_phone']) : null;
-    $total_amount = (float)$data['total_amount'];
-    $discount_amount = isset($data['discount_amount']) ? (float)$data['discount_amount'] : 0.00;
-    $shipping_address = isset($data['shipping_address']) ? trim($data['shipping_address']) : null;
-    $shipping_method = isset($data['shipping_method']) ? $data['shipping_method'] : 'standard';
-    $shipping_cost = isset($data['shipping_cost']) ? (float)$data['shipping_cost'] : 0.00;
-    $store_id = isset($data['store_id']) && $data['store_id'] ? (int)$data['store_id'] : null;
-    $payment_method = $data['payment_method'];
-    $order_details = $data['order_details'];
+            $user_id = isset($data['user_id']) && $data['user_id'] ? (int)$data['user_id'] : null;
+            $guest_email = isset($data['guest_email']) ? trim($data['guest_email']) : null;
+            $guest_phone = isset($data['guest_phone']) ? trim($data['guest_phone']) : null;
+            $total_amount = (float)$data['total_amount'];
+            $discount_amount = isset($data['discount_amount']) ? (float)$data['discount_amount'] : 0.00;
+            $shipping_address = isset($data['shipping_address']) ? trim($data['shipping_address']) : null;
+            $shipping_method = isset($data['shipping_method']) ? $data['shipping_method'] : 'standard';
+            $shipping_cost = isset($data['shipping_cost']) ? (float)$data['shipping_cost'] : 0.00;
+            $store_id = isset($data['store_id']) && $data['store_id'] ? (int)$data['store_id'] : null;
+            $payment_method = $data['payment_method'];
+            $order_details = $data['order_details'];
+            $promo_code = isset($data['promo_code']) ? trim($data['promo_code']) : null;
 
-    $valid_shipping_methods = ['standard', 'fast', 'express', 'store_pickup'];
-    if (!in_array($shipping_method, $valid_shipping_methods)) {
-        throw new Exception('Invalid shipping method', 400);
-    }
+            $valid_shipping_methods = ['standard', 'fast', 'express', 'store_pickup'];
+            if (!in_array($shipping_method, $valid_shipping_methods)) {
+                throw new Exception('Invalid shipping method', 400);
+            }
 
-    $valid_payment_methods = ['cod', 'bank_transfer', 'momo', 'vnpay', 'zalopay'];
-    if (!in_array($payment_method, $valid_payment_methods)) {
-        throw new Exception('Invalid payment method', 400);
-    }
+            $valid_payment_methods = ['cod', 'bank_transfer', 'momo', 'vnpay', 'zalopay'];
+            if (!in_array($payment_method, $valid_payment_methods)) {
+                throw new Exception('Invalid payment method', 400);
+            }
 
-    if ($shipping_method === 'store_pickup' && !$store_id) {
-        throw new Exception('Store ID is required for store pickup', 400);
-    }
+            if ($shipping_method === 'store_pickup' && !$store_id) {
+                throw new Exception('Store ID is required for store pickup', 400);
+            }
 
-    if ($shipping_method !== 'store_pickup' && !$shipping_address) {
-        throw new Exception('Shipping address is required for non-store pickup methods', 400);
-    }
+            if ($shipping_method !== 'store_pickup' && !$shipping_address) {
+                throw new Exception('Shipping address is required for non-store pickup methods', 400);
+            }
 
-    if (!is_array($order_details) || empty($order_details)) {
-        throw new Exception('Order details must be a non-empty array', 400);
-    }
+            if (!is_array($order_details) || empty($order_details)) {
+                throw new Exception('Order details must be a non-empty array', 400);
+            }
 
-    foreach ($order_details as $detail) {
-        if (!isset($detail['product_id'], $detail['quantity'], $detail['price_at_purchase'])) {
-            throw new Exception('Each order detail must have product_id, quantity, and price_at_purchase', 400);
-        }
-        if ((int)$detail['quantity'] <= 0) {
-            throw new Exception('Quantity must be greater than 0', 400);
-        }
-        $stmt = $conn->prepare("SELECT stock_quantity FROM products WHERE product_id = ?");
-        $stmt->execute([(int)$detail['product_id']]);
-        $product = $stmt->fetch(PDO::FETCH_ASSOC);
-        if (!$product || $product['stock_quantity'] < (int)$detail['quantity']) {
-            throw new Exception("Insufficient stock for product ID " . (int)$detail['product_id'], 400);
-        }
-    }
+            foreach ($order_details as $detail) {
+                if (!isset($detail['product_id'], $detail['quantity'], $detail['price_at_purchase'])) {
+                    throw new Exception('Each order detail must have product_id, quantity, and price_at_purchase', 400);
+                }
+                if ((int)$detail['quantity'] <= 0) {
+                    throw new Exception('Quantity must be greater than 0', 400);
+                }
+                $stmt = $conn->prepare("SELECT stock_quantity FROM products WHERE product_id = ?");
+                $stmt->execute([(int)$detail['product_id']]);
+                $product = $stmt->fetch(PDO::FETCH_ASSOC);
+                if (!$product || $product['stock_quantity'] < (int)$detail['quantity']) {
+                    throw new Exception("Insufficient stock for product ID " . (int)$detail['product_id'], 400);
+                }
+            }
 
-    if (!$user_id && !$guest_email && !$guest_phone) {
-        throw new Exception('Either user_id, guest_email, or guest_phone must be provided', 400);
-    }
+            if (!$user_id && !$guest_email && !$guest_phone) {
+                throw new Exception('Either user_id, guest_email, or guest_phone must be provided', 400);
+            }
 
-    $order_code = 'ORD-' . strtoupper(uniqid());
-    
-    $conn->beginTransaction();
+            $order_code = 'ORD-' . strtoupper(uniqid());
+            
+            $conn->beginTransaction();
 
-    $stmt = $conn->prepare("
-        INSERT INTO orders (
-            user_id, guest_email, guest_phone, total_amount, discount_amount,
-            status, order_code, shipping_address, shipping_method, shipping_cost,
-            store_id, payment_method, created_at
-        ) VALUES (?, ?, ?, ?, ?, 'pending', ?, ?, ?, ?, ?, ?, NOW())
-    ");
-    $stmt->execute([
-        $user_id,
-        $guest_email,
-        $guest_phone,
-        $total_amount,
-        $discount_amount,
-        $order_code,
-        $shipping_address,
-        $shipping_method,
-        $shipping_cost,
-        $store_id,
-        $payment_method
-    ]);
-    $order_id = $conn->lastInsertId();
-
-    $stmt = $conn->prepare("
-        INSERT INTO order_details (order_id, product_id, quantity, price_at_purchase)
-        VALUES (?, ?, ?, ?)
-    ");
-    foreach ($order_details as $detail) {
-        $stmt->execute([
-            $order_id,
-            (int)$detail['product_id'],
-            (int)$detail['quantity'],
-            (float)$detail['price_at_purchase']
-        ]);
-
-        $stmt = $conn->prepare("
-            UPDATE products
-            SET stock_quantity = stock_quantity - ?
-            WHERE product_id = ? AND stock_quantity >= ?
-        ");
-        $stmt->execute([(int)$detail['quantity'], (int)$detail['product_id'], (int)$detail['quantity']]);
-        if ($stmt->rowCount() === 0) {
-            throw new Exception("Failed to update stock for product ID " . (int)$detail['product_id'], 400);
-        }
-    }
-
-    $stmt = $conn->prepare("
-        INSERT INTO order_status_history (order_id, old_status, new_status, changed_at)
-        VALUES (?, NULL, 'pending', NOW())
-    ");
-    $stmt->execute([$order_id]);
-
-    if ($payment_method !== 'cod') {
-        $stmt = $conn->prepare("
-            INSERT INTO transactions (
-                order_id, amount, payment_method, transaction_status, transaction_date
-            ) VALUES (?, ?, ?, 'pending', NOW())
-        ");
-        $stmt->execute([$order_id, $total_amount, $payment_method]);
-    }
-
-    if (isset($data['promo_code']) && $data['promo_code']) {
-        $stmt = $conn->prepare("
-            SELECT promotion_id, discount_type, discount_value, max_discount_value
-            FROM promotions
-            WHERE code = ? AND is_active = 1
-            AND (start_date <= NOW() OR start_date IS NULL)
-            AND (end_date >= NOW() OR end_date IS NULL)
-            AND min_order_value <= ?
-        ");
-        $stmt->execute([$data['promo_code'], $total_amount]);
-        $promo = $stmt->fetch(PDO::FETCH_ASSOC);
-
-        if ($promo) {
-            $applied_discount = $discount_amount;
             $stmt = $conn->prepare("
-                INSERT INTO order_promotions (order_id, promotion_id, applied_discount, applied_at)
-                VALUES (?, ?, ?, NOW())
+                INSERT INTO orders (
+                    user_id, guest_email, guest_phone, total_amount, discount_amount,
+                    status, order_code, shipping_address, shipping_method, shipping_cost,
+                    store_id, payment_method, created_at
+                ) VALUES (?, ?, ?, ?, ?, 'pending', ?, ?, ?, ?, ?, ?, NOW())
             ");
-            $stmt->execute([$order_id, $promo['promotion_id'], $applied_discount]);
-        }
-    }
+            $stmt->execute([
+                $user_id,
+                $guest_email,
+                $guest_phone,
+                $total_amount,
+                $discount_amount,
+                $order_code,
+                $shipping_address,
+                $shipping_method,
+                $shipping_cost,
+                $store_id,
+                $payment_method
+            ]);
+            $order_id = $conn->lastInsertId();
 
-    if ($user_id) {
-        $stmt = $conn->prepare("
-            INSERT INTO notifications (user_id, message, type, is_read, created_at)
-            VALUES (?, ?, 'order', 0, NOW())
-        ");
-        $message = "Your order $order_code has been placed successfully!";
-        $stmt->execute([$user_id, $message]);
-    }
+            $stmt = $conn->prepare("
+                INSERT INTO order_details (order_id, product_id, quantity, price_at_purchase)
+                VALUES (?, ?, ?, ?)
+            ");
+            foreach ($order_details as $detail) {
+                $stmt->execute([
+                    $order_id,
+                    (int)$detail['product_id'],
+                    (int)$detail['quantity'],
+                    (float)$detail['price_at_purchase']
+                ]);
 
-    $conn->commit();
+                $stmt = $conn->prepare("
+                    UPDATE products
+                    SET stock_quantity = stock_quantity - ?
+                    WHERE product_id = ? AND stock_quantity >= ?
+                ");
+                $stmt->execute([(int)$detail['quantity'], (int)$detail['product_id'], (int)$detail['quantity']]);
+                if ($stmt->rowCount() === 0) {
+                    throw new Exception("Failed to update stock for product ID " . (int)$detail['product_id'], 400);
+                }
+            }
 
-    $response = [
-        'status' => 'success',
-        'data' => [
-            'order_id' => $order_id,
-            'order_code' => $order_code,
-            'total_amount' => $total_amount,
-            'discount_amount' => $discount_amount,
-            'shipping_address' => $shipping_address,
-            'shipping_method' => $shipping_method,
-            'shipping_cost' => $shipping_cost,
-            'store_id' => $store_id,
-            'payment_method' => $payment_method,
-            'created_at' => date('c')
-        ]
-    ];
-    http_response_code(201);
-    echo json_encode($response);
-    break;
+            $stmt = $conn->prepare("
+                INSERT INTO order_status_history (order_id, old_status, new_status, changed_at)
+                VALUES (?, NULL, 'pending', NOW())
+            ");
+            $stmt->execute([$order_id]);
+
+            if ($payment_method !== 'cod') {
+                $stmt = $conn->prepare("
+                    INSERT INTO transactions (
+                        order_id, amount, payment_method, transaction_status, transaction_date
+                    ) VALUES (?, ?, ?, 'pending', NOW())
+                ");
+                $stmt->execute([$order_id, $total_amount, $payment_method]);
+            }
+
+            if ($promo_code && $discount_amount > 0) {
+                $stmt = $conn->prepare("
+                    SELECT promotion_id, discount_percentage, max_discount_value
+                    FROM promotions
+                    WHERE code = ? AND is_active = TRUE
+                    AND start_date <= NOW() AND end_date >= NOW()
+                    AND min_order_value <= ?
+                ");
+                $stmt->execute([$promo_code, $total_amount]);
+                $promo = $stmt->fetch(PDO::FETCH_ASSOC);
+
+                if ($promo) {
+                    $promotion_id = $promo['promotion_id'];
+                    $calculated_discount = min(
+                        $total_amount * ($promo['discount_percentage'] / 100),
+                        $promo['max_discount_value']
+                    );
+                    if (abs($calculated_discount - $discount_amount) > 0.01) {
+                        throw new Exception('Invalid discount amount for the given promo code', 400);
+                    }
+
+                    $stmt = $conn->prepare("
+                        INSERT INTO order_promotions (order_id, promotion_id, promo_code, applied_discount, applied_at)
+                        VALUES (?, ?, ?, ?, NOW())
+                    ");
+                    $stmt->execute([$order_id, $promotion_id, $promo_code, $discount_amount]);
+
+                    $stmt = $conn->prepare("
+                        UPDATE promotions
+                        SET usage_count = usage_count + 1
+                        WHERE promotion_id = ?
+                    ");
+                    $stmt->execute([$promotion_id]);
+                } else {
+                    throw new Exception('Invalid or inactive promo code', 400);
+                }
+            }
+
+            if ($user_id) {
+                $stmt = $conn->prepare("
+                    INSERT INTO notifications (user_id, message, type, is_read, created_at)
+                    VALUES (?, ?, 'order', 0, NOW())
+                ");
+                $message = "Your order $order_code has been placed successfully!";
+                $stmt->execute([$user_id, $message]);
+            }
 
             $conn->commit();
 
@@ -216,6 +212,7 @@ case 'POST':
                     'shipping_cost' => $shipping_cost,
                     'store_id' => $store_id,
                     'payment_method' => $payment_method,
+                    'promo_code' => $promo_code,
                     'created_at' => date('c')
                 ]
             ];
@@ -292,7 +289,6 @@ case 'POST':
                 $stmt->execute([$order['order_id']]);
                 $order['promotions'] = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-                // Fetch transaction status
                 $stmt = $conn->prepare("
                     SELECT transaction_id, amount, payment_method, transaction_status, transaction_date
                     FROM transactions
@@ -352,7 +348,6 @@ case 'POST':
             ");
             $stmt->execute([$order_id, $old_status, $new_status]);
 
-            // Update is_paid and paid_at for delivered COD orders
             if ($new_status === 'delivered' && $order['payment_method'] === 'cod') {
                 $stmt = $conn->prepare("
                     UPDATE orders SET is_paid = TRUE, paid_at = NOW() WHERE order_id = ?

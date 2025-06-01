@@ -55,6 +55,7 @@ CREATE TABLE IF NOT EXISTS products (
     product_id INT AUTO_INCREMENT PRIMARY KEY,
     category_id INT,
     brand_id INT,
+    user_id INT,
     name VARCHAR(255) NOT NULL,
     price DECIMAL(10, 2) NOT NULL,
     stock_quantity INT NOT NULL DEFAULT 0,
@@ -64,13 +65,14 @@ CREATE TABLE IF NOT EXISTS products (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (category_id) REFERENCES categories(category_id) ON DELETE SET NULL,
     FOREIGN KEY (brand_id) REFERENCES brands(brand_id) ON DELETE SET NULL,
+    FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE SET NULL,
     INDEX idx_category_id (category_id),
     INDEX idx_brand_id (brand_id),
+    INDEX idx_user_id (user_id),
     INDEX idx_status (status),
     INDEX idx_name (name),
     FULLTEXT idx_name_fulltext (name)
 );
-
 -- Bảng 6: product_images
 CREATE TABLE IF NOT EXISTS product_images (
     image_id INT AUTO_INCREMENT PRIMARY KEY,
@@ -94,7 +96,7 @@ CREATE TABLE IF NOT EXISTS carts (
     INDEX idx_product_id (product_id)
 );
 
--- Bảng 8: cửa hang(stores)
+-- Bảng 8: stores
 CREATE TABLE IF NOT EXISTS stores (
     store_id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
@@ -106,7 +108,7 @@ CREATE TABLE IF NOT EXISTS stores (
     INDEX idx_is_active (is_active)
 );
 
--- Bảng 9: đơn hang(orders)
+-- Bảng 9: orders
 CREATE TABLE IF NOT EXISTS orders (
     order_id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT,
@@ -137,7 +139,7 @@ CREATE TABLE IF NOT EXISTS orders (
     INDEX idx_payment_method (payment_method)
 );
 
--- Bảng 10: loại giao dịch(transactions)
+-- Bảng 10: transactions
 CREATE TABLE IF NOT EXISTS transactions (
     transaction_id INT AUTO_INCREMENT PRIMARY KEY,
     order_id INT NOT NULL,
@@ -201,7 +203,7 @@ CREATE TABLE IF NOT EXISTS comments (
     INDEX idx_product_id (product_id)
 );
 
--- Bảng 15: favorites/wishlists
+-- Bảng 15: user_saved_items
 CREATE TABLE IF NOT EXISTS user_saved_items (
     saved_id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT NOT NULL,
@@ -262,14 +264,20 @@ CREATE TABLE IF NOT EXISTS messages (
     message_id INT AUTO_INCREMENT PRIMARY KEY,
     sender_id INT NOT NULL,
     receiver_id INT NOT NULL,
+    conversation_id INT NOT NULL,
     content TEXT NOT NULL,
     is_read BOOLEAN DEFAULT FALSE,
     sent_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    deleted_by INT DEFAULT NULL,
     FOREIGN KEY (sender_id) REFERENCES users(user_id) ON DELETE CASCADE,
     FOREIGN KEY (receiver_id) REFERENCES users(user_id) ON DELETE CASCADE,
+    FOREIGN KEY (conversation_id) REFERENCES conversations(conversation_id) ON DELETE CASCADE,
+    FOREIGN KEY (deleted_by) REFERENCES users(user_id) ON DELETE SET NULL,
     INDEX idx_sender_id (sender_id),
     INDEX idx_receiver_id (receiver_id),
-    INDEX idx_sender_receiver_sent_at (sender_id, receiver_id, sent_at) -- Added index for optimization
+    INDEX idx_conversation_id (conversation_id),
+    INDEX idx_deleted_by (deleted_by),
+    INDEX idx_sender_receiver_sent_at (sender_id, receiver_id, sent_at)
 );
 
 -- Bảng 20: messages_imagevid
@@ -284,7 +292,23 @@ CREATE TABLE IF NOT EXISTS messages_imagevid (
     INDEX idx_media_type (media_type)
 );
 
--- Bảng 21: reports
+-- Bảng 21: conversations
+CREATE TABLE IF NOT EXISTS conversations (
+    conversation_id INT AUTO_INCREMENT PRIMARY KEY,
+    user1_id INT NOT NULL,
+    user2_id INT NOT NULL,
+    last_message_id INT DEFAULT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user1_id) REFERENCES users(user_id) ON DELETE CASCADE,
+    FOREIGN KEY (user2_id) REFERENCES users(user_id) ON DELETE CASCADE,
+    FOREIGN KEY (last_message_id) REFERENCES messages(message_id) ON DELETE SET NULL,
+    UNIQUE KEY uniq_conversation (user1_id, user2_id),
+    INDEX idx_user1_id (user1_id),
+    INDEX idx_user2_id (user2_id),
+    INDEX idx_last_message_id (last_message_id)
+);
+
+-- Bảng 22: reports
 CREATE TABLE IF NOT EXISTS reports (
     report_id INT AUTO_INCREMENT PRIMARY KEY,
     reporter_id INT NOT NULL,
@@ -303,25 +327,30 @@ CREATE TABLE IF NOT EXISTS reports (
     INDEX idx_target_product_id (target_product_id)
 );
 
--- Bảng 22: promotions
+-- Bảng 23: promotions
 CREATE TABLE IF NOT EXISTS promotions (
     promotion_id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(50) NOT NULL UNIQUE,
-    description TEXT,
+    code VARCHAR(50) NOT NULL UNIQUE,
     discount_percentage DECIMAL(10, 2) NOT NULL DEFAULT 0.00,
     start_date TIMESTAMP NULL,
     end_date TIMESTAMP NULL,
     status ENUM('active', 'inactive', 'expired') DEFAULT 'active',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    min_order_value DECIMAL(10, 2) DEFAULT 0.00,
+    max_discount_value DECIMAL(10, 2) DEFAULT 0.00,
+    usage_count INT NOT NULL DEFAULT 0,
+    is_active BOOLEAN DEFAULT TRUE,
     CONSTRAINT chk_date_validity CHECK (
         (start_date IS NULL AND end_date IS NULL) OR
         (start_date IS NOT NULL AND end_date IS NOT NULL AND end_date > start_date)
     ),
     INDEX idx_name (name),
+    INDEX idx_code (code),
     INDEX idx_status (status)
 );
 
--- Bảng 23: order_promotions
+-- Bảng 24: order_promotions
 CREATE TABLE IF NOT EXISTS order_promotions (
     order_promotion_id INT AUTO_INCREMENT PRIMARY KEY,
     order_id INT NOT NULL,
@@ -334,7 +363,7 @@ CREATE TABLE IF NOT EXISTS order_promotions (
     INDEX idx_promotion_id (promotion_id)
 );
 
--- Bảng 24: follows
+-- Bảng 25: follows
 CREATE TABLE IF NOT EXISTS follows (
     follow_id INT AUTO_INCREMENT PRIMARY KEY,
     follower_id INT NOT NULL,
@@ -347,7 +376,7 @@ CREATE TABLE IF NOT EXISTS follows (
     INDEX idx_following_id (following_id)
 );
 
--- Bảng 25: likes
+-- Bảng 26: likes
 CREATE TABLE IF NOT EXISTS likes (
     like_id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT NOT NULL,
@@ -360,7 +389,7 @@ CREATE TABLE IF NOT EXISTS likes (
     INDEX idx_post_id (post_id)
 );
 
--- Bảng 26: user_social_links
+-- Bảng 27: user_social_links
 CREATE TABLE IF NOT EXISTS user_social_links (
     link_id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT NOT NULL,
@@ -372,15 +401,4 @@ CREATE TABLE IF NOT EXISTS user_social_links (
     FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE,
     INDEX idx_user_id (user_id),
     INDEX idx_platform (platform)
-);
-
--- Bảng 27: user_skills
-CREATE TABLE IF NOT EXISTS user_skills (
-    skill_id INT AUTO_INCREMENT PRIMARY KEY,
-    user_id INT NOT NULL,
-    skill_name VARCHAR(255) NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE,
-    INDEX idx_user_id (user_id),
-    UNIQUE KEY uniq_user_skill (user_id, skill_name)
 );

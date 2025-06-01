@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useParams, Link } from "react-router-dom";
 import api from "../../../api/index";
-import { FaUser } from "react-icons/fa";
+import { FaUser, FaTrash } from "react-icons/fa";
 
 const EditUser = () => {
   const { id } = useParams();
@@ -14,7 +14,6 @@ const EditUser = () => {
     gender: "",
     is_active: true,
   });
-  const [profileImage, setProfileImage] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
   const [error, setError] = useState("");
   const navigate = useNavigate();
@@ -26,27 +25,38 @@ const EditUser = () => {
         if (response.data.success && response.data.data.length > 0) {
           const user = response.data.data[0];
           setFormData({
-            email: user.email,
+            email: user.email || "",
             full_name: user.full_name || "",
             phone_number: user.phone_number || "",
             address: user.address || "",
-            role: user.role,
+            role: user.role || "user",
             gender: user.gender || "",
             is_active: Boolean(user.is_active),
           });
-          if (user.profile_image) {
-            setImagePreview(`/Uploads/${user.profile_image}`);
-          }
+          setImagePreview(user.profile_image ? `/Uploads/${user.profile_image}` : null);
         } else {
           setError("User not found");
         }
       } catch (err) {
-        setError("Failed to fetch user");
+        setError("Failed to fetch user: " + (err.response?.data?.message || err.message));
         console.error(err);
       }
     };
+    const checkAuth = async () => {
+      try {
+        const response = await api.get("/user.php");
+        if (!response.data.success || response.data.user.role !== "admin") {
+          setError("Unauthorized: Admin access required");
+          navigate("/admin/users");
+        }
+      } catch (err) {
+        setError("Failed to verify user: " + (err.response?.data?.message || err.message));
+        navigate("/admin/users");
+      }
+    };
     fetchUser();
-  }, [id]);
+    checkAuth();
+  }, [id, navigate]);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -56,40 +66,34 @@ const EditUser = () => {
     });
   };
 
-  const handleImageChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      const validImageTypes = ["image/jpeg", "image/png", "image/gif"];
-      const maxSize = 5 * 1024 * 1024;
-      if (!validImageTypes.includes(file.type)) {
-        setError("Only JPEG, PNG, and GIF images are allowed");
-        return;
+  const handleRemoveImage = async () => {
+    if (!window.confirm("Are you sure you want to remove the profile image?")) return;
+    try {
+      const data = new FormData();
+      data.append("remove_image", "true");
+      const response = await api.put(`/Usersmana.php?id=${id}`, data, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+      if (response.data.success) {
+        setImagePreview(null);
+      } else {
+        setError(response.data.message || "Failed to remove image");
       }
-      if (file.size > maxSize) {
-        setError("Image must be less than 5MB");
-        return;
-      }
-      setError("");
-      setProfileImage(file);
-      setImagePreview(URL.createObjectURL(file));
+    } catch (err) {
+      setError("Failed to remove image: " + (err.response?.data?.message || err.message));
+      console.error("Error:", err.response?.data || err);
     }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (profileImage && error) return;
+
     try {
       const data = new FormData();
       Object.keys(formData).forEach((key) => {
-        if (key === "is_active") {
-          data.append(key, formData[key] ? "1" : "0");
-        } else {
-          data.append(key, formData[key]);
-        }
+        data.append(key, key === "is_active" ? (formData[key] ? "1" : "0") : formData[key]);
       });
-      if (profileImage) {
-        data.append("image", profileImage);
-      }
+      console.log("Sending data:", Object.fromEntries(data));
 
       const response = await api.put(`/Usersmana.php?id=${id}`, data, {
         headers: { "Content-Type": "multipart/form-data" },
@@ -100,12 +104,8 @@ const EditUser = () => {
         setError(response.data.message || "Failed to update user");
       }
     } catch (err) {
-      if (err.response && err.response.data.message) {
-        setError(err.response.data.message);
-      } else {
-        setError("Failed to update user");
-      }
-      console.error(err);
+      setError("Failed to update user: " + (err.response?.data?.message || err.message));
+      console.error("Error:", err.response?.data || err);
     }
   };
 
@@ -202,20 +202,21 @@ const EditUser = () => {
           </div>
           <div>
             <label className="block text-gray-700 mb-2">Profile Image</label>
-            <input
-              type="file"
-              accept="image/jpeg,image/png,image/gif"
-              name="image"
-              onChange={handleImageChange}
-              className="w-full px-3 py-2 rounded-lg border focus:outline-none focus:ring-2 focus:ring-primary"
-            />
-            <div className="mt-2">
+            <div className="mt-2 flex items-center">
               {imagePreview ? (
-                <img
-                  src={imagePreview}
-                  alt="Profile Preview"
-                  className="w-20 h-20 object-cover rounded-lg border-2 border-gray-200"
-                />
+                <>
+                  <img
+                    src={imagePreview}
+                    alt="Profile Preview"
+                    className="w-20 h-20 object-cover rounded-lg border-2 border-gray-200 mr-4"
+                  />
+                  <button
+                    onClick={handleRemoveImage}
+                    className="bg-red-500 text-white px-3 py-1 rounded-lg hover:bg-red-600 flex items-center"
+                  >
+                    <FaTrash className="mr-1" /> Remove
+                  </button>
+                </>
               ) : (
                 <div className="w-20 h-20 bg-white border-2 border-gray-200 rounded-lg flex items-center justify-center">
                   <FaUser className="text-gray-600" size={32} />

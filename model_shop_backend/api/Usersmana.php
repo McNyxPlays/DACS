@@ -42,7 +42,6 @@ if (!$user || $user['role'] !== 'admin') {
     exit;
 }
 
-// Function to handle file upload
 function handleFileUpload($file, $user_id) {
     if (!isset($file) || $file['error'] === UPLOAD_ERR_NO_FILE) {
         return null;
@@ -133,9 +132,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $role = $_POST['role'] ?? 'user';
     $full_name = $_POST['full_name'] ?? null;
     $gender = $_POST['gender'] ?? null;
-    $is_active = isset($_POST['is_active']) ? (($_POST['is_active'] === '1' || $_POST['is_active'] === 'true') ? 1 : 0) : 1; // Default to 1 if not provided
-
-    error_log("POST request - is_active received: " . $_POST['is_active'] . ", processed as: " . $is_active);
+    $is_active = isset($_POST['is_active']) ? (($_POST['is_active'] === '1' || $_POST['is_active'] === 'true') ? 1 : 0) : 1;
 
     if (empty($email) || empty($_POST['password'])) {
         http_response_code(400);
@@ -161,11 +158,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt->execute([$email, $password, $phone_number, $address, $role, $full_name, $gender, $is_active]);
         $user_id = $conn->lastInsertId();
 
-        error_log("POST request - User added with user_id: $user_id, is_active: $is_active");
-
         echo json_encode(['success' => true, 'message' => 'User added', 'data' => ['user_id' => $user_id]]);
     } catch (PDOException $e) {
-        error_log("POST request - Failed to add user: " . $e->getMessage());
         http_response_code(500);
         echo json_encode(['success' => false, 'message' => 'Failed to add user: ' . $e->getMessage(), 'data' => []]);
     }
@@ -173,28 +167,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 if ($_SERVER['REQUEST_METHOD'] === 'PUT') {
     $id = isset($_GET['id']) ? intval($_GET['id']) : 0;
-    $email = $_POST['email'] ?? '';
-    $phone_number = $_POST['phone_number'] ?? null;
-    $address = $_POST['address'] ?? null;
-    $role = $_POST['role'] ?? 'user';
-    $full_name = $_POST['full_name'] ?? null;
-    $gender = $_POST['gender'] ?? null;
-    $is_active = isset($_POST['is_active']) ? (($_POST['is_active'] === '1' || $_POST['is_active'] === 'true') ? 1 : 0) : 1;
 
-    // Fallback to parse raw input if $_POST is empty (for multipart/form-data)
-    if (empty($_POST) && !empty(file_get_contents('php://input'))) {
-        $rawData = [];
+    $rawData = [];
+    if (!empty(file_get_contents('php://input'))) {
         parse_str(file_get_contents('php://input'), $rawData);
-        $email = $rawData['email'] ?? $email;
-        $phone_number = $rawData['phone_number'] ?? $phone_number;
-        $address = $rawData['address'] ?? $address;
-        $role = $rawData['role'] ?? $role;
-        $full_name = $rawData['full_name'] ?? $full_name;
-        $gender = $rawData['gender'] ?? $gender;
-        $is_active = isset($rawData['is_active']) ? (($rawData['is_active'] === '1' || $rawData['is_active'] === 'true') ? 1 : 0) : $is_active;
     }
+    $formData = array_merge($_POST, $rawData);
 
-    error_log("PUT request - Received data: " . json_encode($_POST) . ", Raw data: " . json_encode($rawData ?? []) . ", is_active: $is_active");
+    $email = $formData['email'] ?? '';
+    $phone_number = $formData['phone_number'] ?? null;
+    $address = $formData['address'] ?? null;
+    $role = $formData['role'] ?? 'user';
+    $full_name = $formData['full_name'] ?? null;
+    $gender = $formData['gender'] ?? null;
+    $is_active = isset($formData['is_active']) ? (($formData['is_active'] === '1' || $formData['is_active'] === 'true') ? 1 : 0) : 1;
+    $remove_image = isset($formData['remove_image']) && $formData['remove_image'] === 'true';
 
     if (empty($email) || $id <= 0) {
         http_response_code(400);
@@ -204,11 +191,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'PUT') {
     }
 
     try {
+        $conn->beginTransaction();
+
         $stmt = $conn->prepare("SELECT user_id FROM users WHERE email = ? AND user_id != ?");
         $stmt->execute([$email, $id]);
         if ($stmt->rowCount() > 0) {
             http_response_code(400);
             echo json_encode(['success' => false, 'message' => 'Email already exists', 'data' => []]);
+            $conn->rollBack();
             $conn = null;
             exit;
         }
@@ -220,25 +210,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'PUT') {
         ");
         $stmt->execute([$email, $phone_number, $address, $role, $full_name, $gender, $is_active, $id]);
 
-        error_log("PUT request - Updated user_id: $id, is_active set to: $is_active");
-
-        // Handle profile image update if provided
-        if (isset($_FILES['image'])) {
-            $image_url = handleFileUpload($_FILES['image'], $id);
-            if ($image_url) {
-                $stmt = $conn->prepare("
-                    INSERT INTO user_images (user_id, image_url, image_type, is_active)
-                    VALUES (?, ?, 'profile', TRUE)
-                    ON DUPLICATE KEY UPDATE image_url = ?, is_active = TRUE
-                ");
-                $stmt->execute([$id, $image_url, $image_url]);
-                error_log("PUT request - Updated profile image for user_id: $id, image_url: $image_url");
+        if ($remove_image) {
+            $stmt = $conn->prepare("SELECT image_url FROM user_images WHERE user_id = ? AND image_type = 'profile' AND is_active = TRUE");
+            $stmt->execute([$id]);
+            $existing_image = $stmt->fetch(PDO::FETCH_ASSOC);
+            if ($existing_image) {
+                $file_path = realpath(__DIR__ . '/../' . $existing_image['image_url']);
+                if (file_exists($file_path)) {
+                    unlink($file_path);
+                }
+                $stmt = $conn->prepare("UPDATE user_images SET is_active = FALSE WHERE user_id = ? AND image_type = 'profile'");
+                $stmt->execute([$id]);
             }
         }
 
+        $conn->commit();
         echo json_encode(['success' => true, 'message' => 'User updated', 'data' => []]);
     } catch (Exception $e) {
-        error_log("PUT request - Failed to update user: " . $e->getMessage());
+        $conn->rollBack();
         http_response_code(500);
         echo json_encode(['success' => false, 'message' => 'Failed to update user: ' . $e->getMessage(), 'data' => []]);
     }
@@ -263,7 +252,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'DELETE') {
             echo json_encode(['success' => false, 'message' => 'User not found', 'data' => []]);
         }
     } catch (PDOException $e) {
-        error_log("DELETE request - Failed to delete user: " . $e->getMessage());
         http_response_code(500);
         echo json_encode(['success' => false, 'message' => 'Failed to delete user: ' . $e->getMessage(), 'data' => []]);
     }

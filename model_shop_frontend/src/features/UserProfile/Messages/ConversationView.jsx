@@ -59,19 +59,30 @@ function ConversationView({ selectedConversation, user }) {
 
     try {
       const formData = new FormData();
-      formData.append("conversation_id", selectedConversation);
+      // Use other_user_id from the conversation to determine receiver_id
+      const response = await api.get(`/messages.php?conversation_id=${selectedConversation}`);
+      if (!response.data.success) {
+        throw new Error("Failed to fetch conversation details");
+      }
+      const receiver_id = response.data.data[0]?.sender_id === user.user_id 
+        ? response.data.data[0]?.receiver_name === response.data.other_user_name 
+          ? response.data.data[0]?.sender_id 
+          : user.user_id 
+        : response.data.data[0]?.sender_id;
+
+      formData.append("receiver_id", receiver_id);
       formData.append("sender_id", user.user_id);
       formData.append("content", newMessage);
       if (mediaFile) {
         formData.append("media", mediaFile);
       }
 
-      const response = await api.post("/messages.php", formData, {
+      const sendResponse = await api.post("/messages.php", formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
 
-      if (response.data.success) {
-        setConversationMessages([...conversationMessages, response.data.message]);
+      if (sendResponse.data.success) {
+        setConversationMessages([...conversationMessages, sendResponse.data.data]);
         setNewMessage("");
         setMediaFile(null);
         setMediaPreview(null);

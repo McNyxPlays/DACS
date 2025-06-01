@@ -8,16 +8,19 @@ import BackToTop from "./components/BackToTop";
 import Home from "./features/Home/Home";
 import Shop from "./features/Shop/Shop";
 import Community from "./features/Community/Community";
+import OrderHistory from "./features/UserProfile/Order/orderhistory";
+import MyStore from "./features/UserProfile/MyStore/mystore";
 import UserProfileOverview from "./features/UserProfile/UserProfileOverview/UserProfileOverview";
+import OtherUserProfile from "./features/UserProfile/OtherUserProfile/OtherUserProfile";
 import AccountSettings from "./features/UserProfile/AccountSettings/AccountSettings";
 import Admin from "./features/Admin/Admin";
 import Favorites from "./features/Favorites/Favorites";
 import Cart from "./features/Cart/Cart";
 import Messages from "./features/UserProfile/Messages/Messages";
 import Checkout from "./features/Checkout/Checkout";
-import OrderSuccess from "./features/Checkout/OrderSuccess"; // Updated import
+import OrderSuccess from "./features/Checkout/OrderSuccess";
 import Notifications from "./features/UserProfile/Notifications/Notifications";
-import api from "./api/index"; // Adjust the path as necessary
+import api from "./api/index";
 
 const Layout = ({
   isLoginModalOpen,
@@ -87,17 +90,14 @@ const App = () => {
           } else {
             sessionStorage.removeItem("user");
             setUser(null);
-            // Removed setIsLoginModalOpen(true)
           }
         } catch (err) {
           console.error("User validation error:", err);
           sessionStorage.removeItem("user");
           setUser(null);
-          // Removed setIsLoginModalOpen(true)
         }
       } else {
         setUser(null);
-        // Removed setIsLoginModalOpen(true)
       }
     };
     validateUser();
@@ -126,6 +126,22 @@ const App = () => {
         <Route path="/shop" element={<Shop />} />
         <Route path="/community" element={<Community />} />
         <Route
+          path="/orderhistory"
+          element={
+            <ProtectedRoute user={user}>
+              <OrderHistory />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/mystore"
+          element={
+            <ProtectedRoute user={user}>
+              <MyStore />
+            </ProtectedRoute>
+          }
+        />
+        <Route
           path="/profile"
           element={
             <ProtectedRoute user={user}>
@@ -133,6 +149,7 @@ const App = () => {
             </ProtectedRoute>
           }
         />
+        <Route path="/profile/:userId" element={<OtherUserProfile />} />
         <Route
           path="/settings"
           element={
@@ -154,7 +171,7 @@ const App = () => {
           element={<Cart isOpen={true} setIsOpen={setIsCartOpen} />}
         />
         <Route path="/checkout" element={<Checkout />} />
-        <Route path="/ordersuccess" element={<OrderSuccess />} /> {/* Updated route */}
+        <Route path="/ordersuccess" element={<OrderSuccess />} />
         <Route
           path="/admin/*"
           element={
@@ -165,6 +182,14 @@ const App = () => {
         />
         <Route
           path="/messages"
+          element={
+            <ProtectedRoute user={user}>
+              <Messages />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/messages/:userId"
           element={
             <ProtectedRoute user={user}>
               <Messages />

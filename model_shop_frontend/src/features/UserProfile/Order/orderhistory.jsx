@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
-import OrdersSidebar from "./OrdersSidebar";
-import OrderDetailsView from "./OrderDetailsView";
+import OrderHistorySidebar from "./leftsidebar";
+import OrderHistoryDetailsView from "./detailsview";
 
-function Orders() {
+function OrderHistory() {
   const [orders, setOrders] = useState([]);
   const [selectedOrder, setSelectedOrder] = useState(null);
 
@@ -36,14 +36,14 @@ function Orders() {
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="flex flex-col lg:flex-row gap-6">
-        <OrdersSidebar
+        <OrderHistorySidebar
           orders={orders}
           selectedOrder={selectedOrder}
           setSelectedOrder={setSelectedOrder}
         />
         <div className="w-full lg:w-2/3">
           {selectedOrder ? (
-            <OrderDetailsView orders={orders} selectedOrder={selectedOrder} />
+            <OrderHistoryDetailsView orders={orders} selectedOrder={selectedOrder} />
           ) : (
             <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
               <h3 className="text-xl font-semibold text-gray-900 mb-4">
@@ -60,4 +60,4 @@ function Orders() {
   );
 }
 
-export default Orders;
+export default OrderHistory;

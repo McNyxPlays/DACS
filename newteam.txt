@@ -1,5 +1,7 @@
 Clone project về máy:
 git clone https://github.com/McNyxPlays/DACS.git
+npm install 
+npm run dev
 ====================================================
 git checkout -b ten_branch_moi
 git add .
