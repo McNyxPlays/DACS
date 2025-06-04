@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import api from "../../../api/index";
+import api, { getUsers, addUser, updateUserById, deleteUser } from "../../../api/index";
 import { FaSearch, FaUser, FaTrash } from "react-icons/fa";
 import { Toastify } from "../../../components/Toastify";
 
@@ -21,7 +21,6 @@ const UserManagement = ({ user }) => {
     gender: "",
     is_active: true,
   });
-  const [imagePreview, setImagePreview] = useState(null);
   const [editUserId, setEditUserId] = useState(null);
 
   useEffect(() => {
@@ -34,8 +33,7 @@ const UserManagement = ({ user }) => {
       setError("");
       const params = { search };
       if (isActive >= 0) params.is_active = isActive;
-      const response = await api.get("/Usersmana.php", { params });
-
+      const response = await getUsers(params);
       if (response.data && response.data.success && Array.isArray(response.data.data)) {
         setUsers(response.data.data);
         setError("");
@@ -74,7 +72,6 @@ const UserManagement = ({ user }) => {
       gender: "",
       is_active: true,
     });
-    setImagePreview(null);
     setShowModal(true);
     setError("");
   };
@@ -91,7 +88,6 @@ const UserManagement = ({ user }) => {
       gender: user.gender || "",
       is_active: Boolean(user.is_active),
     });
-    setImagePreview(user.profile_image ? `/Uploads/${user.profile_image}` : null);
     setShowModal(true);
     setError("");
   };
@@ -99,7 +95,6 @@ const UserManagement = ({ user }) => {
   const closeModal = () => {
     setShowModal(false);
     setEditUserId(null);
-    setImagePreview(null);
     setError("");
   };
 
@@ -111,28 +106,8 @@ const UserManagement = ({ user }) => {
     });
   };
 
-  const handleRemoveImage = async () => {
-    if (!window.confirm("Are you sure you want to remove the profile image?")) return;
-    try {
-      const data = new FormData();
-      data.append("remove_image", "true");
-      const response = await api.put(`/Usersmana.php?id=${editUserId}`, data, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
-      if (response.data.success) {
-        setImagePreview(null);
-      } else {
-        setError(response.data.message || "Failed to remove image");
-      }
-    } catch (err) {
-      setError("Failed to remove image: " + (err.response?.data?.message || err.message));
-      console.error("Error:", err.response?.data || err);
-    }
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     try {
       const data = new FormData();
       Object.keys(formData).forEach((key) => {
@@ -142,12 +117,9 @@ const UserManagement = ({ user }) => {
           data.append(key, formData[key] || "");
         }
       });
-      console.log("Sending data:", Object.fromEntries(data));
 
       if (modalMode === "add") {
-        const response = await api.post("/Usersmana.php", data, {
-          headers: { "Content-Type": "multipart/form-data" },
-        });
+        const response = await addUser(data);
         if (response.data.success) {
           Toastify.success("User added successfully");
           fetchUsers();
@@ -156,9 +128,7 @@ const UserManagement = ({ user }) => {
           setError(response.data.message || "Failed to add user");
         }
       } else {
-        const response = await api.put(`/Usersmana.php?id=${editUserId}`, data, {
-          headers: { "Content-Type": "multipart/form-data" },
-        });
+        const response = await updateUserById(editUserId, data);
         if (response.data.success) {
           Toastify.success("User updated successfully");
           fetchUsers();
@@ -170,8 +140,8 @@ const UserManagement = ({ user }) => {
     } catch (err) {
       setError(
         modalMode === "add"
-          ? "Failed to add user: " + (err.message || "Unknown error")
-          : "Failed to update user: " + (err.message || "Unknown error")
+          ? "Failed to add user: " + (err.response?.data?.message || err.message)
+          : "Failed to update user: " + (err.response?.data?.message || err.message)
       );
       console.error(err);
     }
@@ -180,7 +150,7 @@ const UserManagement = ({ user }) => {
   const handleDelete = async (userId) => {
     if (!window.confirm("Are you sure you want to delete this user?")) return;
     try {
-      const response = await api.delete(`/Usersmana.php?id=${userId}`);
+      const response = await deleteUser(userId);
       if (response.data.success) {
         setUsers(users.filter((user) => user.user_id !== userId));
         setError("");
@@ -191,7 +161,7 @@ const UserManagement = ({ user }) => {
       if (err.response && err.response.status === 403) {
         setError("You do not have permission to perform this action.");
       } else {
-        setError("Failed to delete user: " + (err.message || "Unknown error"));
+        setError("Failed to delete user: " + (err.response?.data?.message || err.message));
       }
       console.error("Delete user error:", err);
     }
@@ -228,9 +198,7 @@ const UserManagement = ({ user }) => {
             <FaUser className="mr-2" /> Add User
           </button>
         </div>
-        {error && (
-          <p className="text-red-500 mb-4 bg-red-100 p-3 rounded">{error}</p>
-        )}
+        {error && <p className="text-red-500 mb-4 bg-red-100 p-3 rounded">{error}</p>}
         {loading ? (
           <p className="text-gray-500 mb-4">Loading users...</p>
         ) : (
@@ -394,32 +362,6 @@ const UserManagement = ({ user }) => {
                   className="w-full px-3 py-2 rounded-lg border focus:outline-none focus:ring-2 focus:ring-primary h-24"
                 />
               </div>
-              {modalMode === "edit" && (
-                <div className="mb-4">
-                  <label className="block text-gray-700 mb-2">Profile Image</label>
-                  <div className="mt-2 flex items-center">
-                    {imagePreview ? (
-                      <>
-                        <img
-                          src={imagePreview}
-                          alt="Profile Preview"
-                          className="w-20 h-20 object-cover rounded-lg border-2 border-gray-200 mr-4"
-                        />
-                        <button
-                          onClick={handleRemoveImage}
-                          className="bg-red-500 text-white px-3 py-1 rounded-lg hover:bg-red-600 flex items-center"
-                        >
-                          <FaTrash className="mr-1" /> Remove
-                        </button>
-                      </>
-                    ) : (
-                      <div className="w-20 h-20 bg-white border-2 border-gray-200 rounded-lg flex items-center justify-center">
-                        <FaUser className="text-gray-600" size={32} />
-                      </div>
-                    )}
-                  </div>
-                </div>
-              )}
               <div className="mb-4">
                 <label className="flex items-center">
                   <input

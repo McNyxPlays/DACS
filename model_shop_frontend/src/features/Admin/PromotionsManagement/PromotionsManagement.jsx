@@ -40,7 +40,7 @@ const PromotionsManagement = () => {
         setError("");
       } else {
         setPromotions([]);
-        setError(response.data.message || "Invalid response format from server");
+        setError(response.data.message || "Unexpected response format from server");
       }
     } catch (err) {
       setPromotions([]);
@@ -223,9 +223,9 @@ const PromotionsManagement = () => {
         <div className="overflow-x-auto">
           <table className="min-w-full bg-white border">
             <thead>
-              <tr className="flex flex-wrap">
+              <tr className="flex w-full">
                 <th className="flex-1 px-3 py-2 border text-center">ID</th>
-                <th className="flex-[2] px-3 py-2 border text-center">Name</th>
+                <th className="flex-2 px-3 py-2 border text-center">Name</th>
                 <th className="flex-1 px-3 py-2 border text-center">Code</th>
                 <th className="flex-1 px-3 py-2 border text-center">Discount (%)</th>
                 <th className="flex-1 px-3 py-2 border text-center">Min Order</th>
@@ -241,9 +241,9 @@ const PromotionsManagement = () => {
             <tbody>
               {Array.isArray(promotions) && promotions.length > 0 ? (
                 promotions.map((promotion) => (
-                  <tr key={promotion.promotion_id} className="flex flex-wrap">
+                  <tr key={promotion.promotion_id} className="flex w-full">
                     <td className="flex-1 px-3 py-2 border text-center">{promotion.promotion_id}</td>
-                    <td className="flex-[2] px-3 py-2 border text-center">{promotion.name}</td>
+                    <td className="flex-2 px-3 py-2 border text-center">{promotion.name}</td>
                     <td className="flex-1 px-3 py-2 border text-center">{promotion.code}</td>
                     <td className="flex-1 px-3 py-2 border text-center">{promotion.discount_percentage || 0}%</td>
                     <td className="flex-1 px-3 py-2 border text-center">{promotion.min_order_value || 0}</td>
@@ -274,7 +274,7 @@ const PromotionsManagement = () => {
                   </tr>
                 ))
               ) : (
-                <tr className="flex flex-wrap">
+                <tr className="flex w-full">
                   <td colSpan="12" className="flex-1 px-3 py-2 border text-center">
                     No promotions found
                   </td>

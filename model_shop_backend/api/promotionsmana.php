@@ -65,8 +65,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
             echo json_encode(['status' => 'error', 'message' => 'Failed to fetch promotion: ' . $e->getMessage()]);
         }
     } else {
-        $search = isset($_GET['search']) ? '%' . $_GET['search'] . '%' : '%';
-        $status = isset($_GET['status']) ? $_GET['status'] : '';
+        $search = isset($_GET['search']) ? '%' . trim($_GET['search']) . '%' : '%';
+        $status = isset($_GET['status']) ? trim($_GET['status']) : '';
         try {
             $query = "
                 SELECT p.promotion_id, p.name, p.code, p.discount_percentage, p.start_date, p.end_date, p.status,
@@ -249,7 +249,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'PUT') {
             WHERE promotion_id = ?
         ");
         $stmt->execute([$name, $code, $discount_percentage, $start_date, $end_date, $status, $min_order_value, $max_discount_value, $usage_count, $is_active, $id]);
-        echo json_encode(['status' => 'success', 'message' => 'Promotion updated']);
+
+        if ($stmt->rowCount() > 0) {
+            echo json_encode(['status' => 'success', 'message' => 'Promotion updated']);
+        } else {
+            echo json_encode(['status' => 'error', 'message' => 'No changes made to promotion']);
+        }
     } catch (PDOException $e) {
         http_response_code(500);
         echo json_encode(['status' => 'error', 'message' => 'Failed to update promotion: ' . $e->getMessage()]);

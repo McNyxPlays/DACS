@@ -264,13 +264,13 @@ const MainContent = ({ activeTab, setActiveTab, className }) => {
                             {imageLoaded[fullImageUrl] === undefined ? (
                               <div className="w-full h-48 bg-gray-200 rounded-lg animate-pulse"></div>
                             ) : (
-                              <div className="w-full h-48 bg-black flex items-center justify-center rounded-lg">
+                              <div className="w-full h-80 bg-black flex items-center justify-center rounded-lg">
                                 <img
                                   src={
                                     imageLoaded[fullImageUrl] ? fullImageUrl : "/Uploads/placeholder.jpg"
                                   }
                                   alt="Post Image"
-                                  className="max-w-full h-48 object-contain border-l-2 border-r-2 border-gray-700 rounded-lg"
+                                  className="max-w-full h-80 object-contain border-l-2 border-r-2 border-gray-700 rounded-lg"
                                   onError={(e) => (e.target.src = "/Uploads/placeholder.jpg")}
                                 />
                               </div>

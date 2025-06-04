@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import api from "../../../api/index";
+import api, { addUser } from "../../../api/index";
 
 const AddUser = () => {
   const [formData, setFormData] = useState({
@@ -24,33 +24,47 @@ const AddUser = () => {
     });
   };
 
+  const validateForm = () => {
+    if (!formData.email) {
+      setError("Email is required");
+      return false;
+    }
+    if (!formData.password) {
+      setError("Password is required");
+      return false;
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+      setError("Invalid email format");
+      return false;
+    }
+    return true;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError("");
+
+    if (!validateForm()) return;
+
     try {
       const data = new FormData();
       Object.keys(formData).forEach((key) => {
         if (key === "is_active") {
           data.append(key, formData[key] ? "1" : "0");
         } else {
-          data.append(key, formData[key]);
+          data.append(key, formData[key] || "");
         }
       });
 
-      const response = await api.post("/Usersmana.php", data, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
+      const response = await addUser(data);
       if (response.data.success) {
         navigate("/admin/users");
       } else {
         setError(response.data.message || "Failed to add user");
       }
     } catch (err) {
-      if (err.response && err.response.data.message) {
-        setError(err.response.data.message);
-      } else {
-        setError("Failed to add user");
-      }
-      console.error(err);
+      setError(err.response?.data?.message || "Failed to add user");
+      console.error("Add user error:", err);
     }
   };
 
@@ -85,7 +99,7 @@ const AddUser = () => {
                 placeholder="Enter password"
               />
             </div>
-            ?, <div>
+            <div>
               <label className="block text-gray-700 mb-2">Full Name</label>
               <input
                 type="text"
@@ -106,7 +120,7 @@ const AddUser = () => {
                 value={formData.phone_number}
                 onChange={handleChange}
                 className="w-full px-3 py-2 rounded-lg border focus:outline-none focus:ring-2 focus:ring-primary"
-                placeholder="Phone number"
+                placeholder="Phone number (10-15 digits)"
               />
             </div>
             <div>

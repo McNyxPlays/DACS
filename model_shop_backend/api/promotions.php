@@ -1,62 +1,51 @@
 <?php
-session_start();
 header('Content-Type: application/json');
 header('Access-Control-Allow-Origin: http://localhost:5173');
-header('Access-Control-Allow-Methods: POST');
-header('Access-Control-Allow-Headers: Content-Type');
 header('Access-Control-Allow-Credentials: true');
+header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');
+header('Access-Control-Allow-Headers: Content-Type, X-CSRF-Token');
 
-require_once '../config/database.php';
-
-$conn = db_connect();
-if (!$conn) {
-    http_response_code(500);
-    echo json_encode(['status' => 'error', 'message' => 'Database connection failed']);
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    http_response_code(204);
     exit;
 }
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $input = json_decode(file_get_contents('php://input'), true);
-    if (!isset($input['code'])) {
+session_start();
+// Tạo CSRF token nếu chưa tồn tại
+if (!isset($_SESSION['csrf_token'])) {
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+}
+if (!isset($_SERVER['HTTP_X_CSRF_TOKEN']) || $_SERVER['HTTP_X_CSRF_TOKEN'] !== $_SESSION['csrf_token']) {
+    http_response_code(403);
+    echo json_encode(['status' => 'error', 'message' => 'Invalid CSRF token']);
+    exit;
+}
+
+$response = ['status' => 'error', 'message' => 'Invalid request'];
+
+$data = json_decode(file_get_contents('php://input'), true);
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($data['code'])) {
+    $promoCode = $data['code'];
+    $totalAmount = $data['total_amount'] ?? 0;
+    $userId = $data['user_id'] ?? null;
+    $guestEmail = $data['guest_email'] ?? null;
+
+    // Logic kiểm tra mã khuyến mãi
+    if ($promoCode === 'DISCOUNT10' && $totalAmount > 100) {
+        $response = [
+            'status' => 'success',
+            'discount' => 10.0, // Giảm 10 USD
+            'promotion_id' => 1
+        ];
+        http_response_code(200);
+    } else {
+        $response['message'] = 'Invalid promo code';
         http_response_code(400);
-        echo json_encode(['status' => 'error', 'message' => 'Missing promo code']);
-        exit;
     }
-
-    $code = trim($input['code']);
-    $total_amount = isset($input['total_amount']) ? floatval($input['total_amount']) : 0;
-
-    try {
-        $stmt = $conn->prepare("
-            SELECT promotion_id, discount_percentage, min_order_value, max_discount_value
-            FROM promotions
-            WHERE code = ? AND is_active = TRUE
-            AND start_date <= NOW() AND end_date >= NOW()
-            AND min_order_value <= ?
-        ");
-        $stmt->execute([$code, $total_amount]);
-        $promotion = $stmt->fetch(PDO::FETCH_ASSOC);
-
-        if ($promotion) {
-            $discount = $promotion['discount_percentage'] * $total_amount / 100;
-            if ($promotion['max_discount_value'] > 0 && $discount > $promotion['max_discount_value']) {
-                $discount = $promotion['max_discount_value'];
-            }
-            echo json_encode([
-                'status' => 'success',
-                'discount' => $discount,
-                'promotion_id' => $promotion['promotion_id']
-            ]);
-        } else {
-            echo json_encode(['status' => 'error', 'message' => 'Invalid or expired promo code']);
-        }
-    } catch (PDOException $e) {
-        http_response_code(500);
-        echo json_encode(['status' => 'error', 'message' => 'Server error']);
-    }
-    exit;
+} else {
+    http_response_code(400);
 }
 
-http_response_code(405);
-echo json_encode(['status' => 'error', 'message' => 'Method not allowed']);
+echo json_encode($response);
 ?>

@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useParams, Link } from "react-router-dom";
-import api from "../../../api/index";
-import { FaUser, FaTrash } from "react-icons/fa";
+import api, { getUserById, updateUserById } from "../../../api/index";
 
 const EditUser = () => {
   const { id } = useParams();
@@ -14,14 +13,13 @@ const EditUser = () => {
     gender: "",
     is_active: true,
   });
-  const [imagePreview, setImagePreview] = useState(null);
   const [error, setError] = useState("");
   const navigate = useNavigate();
 
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        const response = await api.get(`/Usersmana.php?id=${id}`);
+        const response = await getUserById(id);
         if (response.data.success && response.data.data.length > 0) {
           const user = response.data.data[0];
           setFormData({
@@ -33,13 +31,11 @@ const EditUser = () => {
             gender: user.gender || "",
             is_active: Boolean(user.is_active),
           });
-          setImagePreview(user.profile_image ? `/Uploads/${user.profile_image}` : null);
         } else {
           setError("User not found");
         }
       } catch (err) {
         setError("Failed to fetch user: " + (err.response?.data?.message || err.message));
-        console.error(err);
       }
     };
     const checkAuth = async () => {
@@ -66,46 +62,39 @@ const EditUser = () => {
     });
   };
 
-  const handleRemoveImage = async () => {
-    if (!window.confirm("Are you sure you want to remove the profile image?")) return;
-    try {
-      const data = new FormData();
-      data.append("remove_image", "true");
-      const response = await api.put(`/Usersmana.php?id=${id}`, data, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
-      if (response.data.success) {
-        setImagePreview(null);
-      } else {
-        setError(response.data.message || "Failed to remove image");
-      }
-    } catch (err) {
-      setError("Failed to remove image: " + (err.response?.data?.message || err.message));
-      console.error("Error:", err.response?.data || err);
+  const validateForm = () => {
+    if (formData.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+      setError("Invalid email format");
+      return false;
     }
+    return true;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError("");
+
+    if (!validateForm()) return;
 
     try {
       const data = new FormData();
-      Object.keys(formData).forEach((key) => {
-        data.append(key, key === "is_active" ? (formData[key] ? "1" : "0") : formData[key]);
-      });
-      console.log("Sending data:", Object.fromEntries(data));
+      data.append("email", formData.email || "");
+      data.append("full_name", formData.full_name || "");
+      data.append("phone_number", formData.phone_number || "");
+      data.append("address", formData.address || "");
+      data.append("role", formData.role || "user");
+      data.append("gender", formData.gender || "");
+      data.append("is_active", formData.is_active ? "1" : "0");
 
-      const response = await api.put(`/Usersmana.php?id=${id}`, data, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
+      const response = await updateUserById(id, data);
       if (response.data.success) {
         navigate("/admin/users");
       } else {
         setError(response.data.message || "Failed to update user");
       }
     } catch (err) {
-      setError("Failed to update user: " + (err.response?.data?.message || err.message));
-      console.error("Error:", err.response?.data || err);
+      setError(err.response?.data?.message || "Failed to update user");
+      console.error("Update user error:", err);
     }
   };
 
@@ -123,7 +112,6 @@ const EditUser = () => {
                 name="email"
                 value={formData.email}
                 onChange={handleChange}
-                required
                 className="w-full px-3 py-2 rounded-lg border focus:outline-none focus:ring-2 focus:ring-primary"
               />
             </div>
@@ -145,6 +133,7 @@ const EditUser = () => {
                 value={formData.phone_number}
                 onChange={handleChange}
                 className="w-full px-3 py-2 rounded-lg border focus:outline-none focus:ring-2 focus:ring-primary"
+                placeholder="Phone number (10-15 digits)"
               />
             </div>
           </div>
@@ -199,30 +188,6 @@ const EditUser = () => {
               onChange={handleChange}
               className="w-full px-3 py-2 rounded-lg border focus:outline-none focus:ring-2 focus:ring-primary h-24"
             />
-          </div>
-          <div>
-            <label className="block text-gray-700 mb-2">Profile Image</label>
-            <div className="mt-2 flex items-center">
-              {imagePreview ? (
-                <>
-                  <img
-                    src={imagePreview}
-                    alt="Profile Preview"
-                    className="w-20 h-20 object-cover rounded-lg border-2 border-gray-200 mr-4"
-                  />
-                  <button
-                    onClick={handleRemoveImage}
-                    className="bg-red-500 text-white px-3 py-1 rounded-lg hover:bg-red-600 flex items-center"
-                  >
-                    <FaTrash className="mr-1" /> Remove
-                  </button>
-                </>
-              ) : (
-                <div className="w-20 h-20 bg-white border-2 border-gray-200 rounded-lg flex items-center justify-center">
-                  <FaUser className="text-gray-600" size={32} />
-                </div>
-              )}
-            </div>
           </div>
           <div className="flex gap-4">
             <button
