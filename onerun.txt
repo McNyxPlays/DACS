@@ -15,4 +15,3 @@ Up code của bạn lên GitHub:
 git init
 # Kết nối đến GitHub (chỉ cần 1 lần)
 git remote add origin https://github.com/USERNAME/REPO.git
-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
