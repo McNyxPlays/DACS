@@ -1,5 +1,5 @@
 -- Chèn danh mục
-INSERT INTO categories (name, description) VALUES
+INSERT IGNORE INTO categories (name, description) VALUES
 ('Gundam Kits', 'Model kits for Gundam enthusiasts to assemble and customize.'),
 ('DIY Models', 'Do-it-yourself model kits for various hobbies.'),
 ('Game Figures', 'Collectible figures from popular video games.'),
@@ -7,7 +7,7 @@ INSERT INTO categories (name, description) VALUES
 ('Tools & Paints', 'Tools and paints for assembling and customizing model kits.');
 
 -- Chèn thương hiệu
-INSERT INTO brands (name, description) VALUES
+INSERT IGNORE INTO brands (name, description) VALUES
 ('Bandai', 'Leading manufacturer of Gundam model kits and anime figures.'),
 ('Kotobukiya', 'Known for high-quality anime and game figures.'),
 ('Tamiya', 'Specializes in tools, paints, and DIY model kits.'),
@@ -15,47 +15,45 @@ INSERT INTO brands (name, description) VALUES
 ('Square Enix', 'Produces game figures from their franchises like Final Fantasy.');
 
 -- Chèn cửa hàng
-INSERT INTO stores (name, address, phone_number, is_active) VALUES
+INSERT IGNORE INTO stores (name, address, phone_number, is_active) VALUES
 ('Store 1', '123 Nguyen Hue, District 1, Ho Chi Minh City', '0901234567', TRUE),
 ('Store 2', '456 Le Loi, District 3, Ho Chi Minh City', '0901234568', TRUE),
 ('Store 3', '789 Tran Hung Dao, District 5, Ho Chi Minh City', '0901234569', TRUE);
 
 -- Chèn khuyến mãi
-INSERT INTO promotions (name, code, discount_percentage, start_date, end_date, min_order_value, max_discount_value, is_active) VALUES
-('Summer Sale', 'SUMMER2025', 10.00, '2025-06-01 00:00:00', '2025-12-31 23:59:59', 100.00, 50.00, TRUE),
-('New Year Sale', 'NEWYEAR2025', 15.00, '2025-01-01 00:00:00', '2025-12-31 23:59:59', 200.00, 75.00, TRUE),
-('Test Promotion', 'TEST1', 5.00, '2025-06-01 00:00:00', '2025-12-31 23:59:59', 50.00, 20.00, TRUE);
-
+INSERT IGNORE INTO promotions (name, code, discount_percentage, start_date, end_date, is_active) VALUES
+('Summer Sale', 'SUMMER2025', 10.00, '2025-06-01 00:00:00', '2025-12-31 23:59:59', TRUE),
+('New Year Sale', 'NEWYEAR2025', 15.00, '2025-01-01 00:00:00', '2025-12-31 23:59:59', TRUE),
+('Test Promotion', 'TEST1', 5.00, '2025-06-01 00:00:00', '2025-12-31 23:59:59', TRUE);
 
 -- Chèn thông báo
-INSERT INTO notifications (user_id, message, type, created_at) VALUES
+INSERT IGNORE INTO notifications (user_id, message, type, created_at) VALUES
 (1, 'Welcome to Model Shop! Start exploring our collections.', 'system', '2025-05-19 11:10:00'),
 (1, 'Your account has been successfully created.', 'system', '2025-05-19 11:11:00'),
 (1, 'Check out our new Gundam Kits collection!', 'custom', '2025-05-19 11:12:00');
 
 -- Chèn người dùng
-INSERT INTO users (email, password, full_name, created_at) VALUES
+INSERT IGNORE INTO users (email, password, full_name, created_at) VALUES
 (TRIM('user1@example.com'), 'hashedpassword1', 'John Doe', '2025-05-19 10:00:00'),
 (TRIM('user2@example.com'), 'hashedpassword2', 'Jane Smith', '2025-05-20 09:00:00'),
 (TRIM('user3@example.com'), 'hashedpassword3', 'Lycon', '2025-04-20 05:00:00');
 
-
 -- Chèn bài đăng
-INSERT INTO posts (user_id, content, post_time_status, created_at) VALUES
+INSERT IGNORE INTO posts (user_id, content, post_time_status, created_at) VALUES
 (2, 'Excited to share my latest Gundam build! Check out the details in the photos.', 'new', '2025-05-30 10:00:00');
 
 -- Chèn cuộc trò chuyện
-INSERT INTO conversations (user1_id, user2_id) VALUES
+INSERT IGNORE INTO conversations (user1_id, user2_id) VALUES
 (1, 2),
 (1, 3);
 
 -- Chèn tin nhắn
-INSERT INTO messages (sender_id, receiver_id, conversation_id, content) VALUES
+INSERT IGNORE INTO messages (sender_id, receiver_id, conversation_id, content) VALUES
 (1, 2, 1, 'Chào bạn, mình quan tâm đến mô hình bạn đang bán.'),
 (1, 3, 2, 'Bạn có thể cho mình thêm thông tin về sản phẩm không?');
 
 -- Chèn sản phẩm
-INSERT INTO products (category_id, brand_id, name, price, stock_quantity, discount, description, status, created_at) VALUES
+INSERT IGNORE INTO products (category_id, brand_id, name, price, stock_quantity, discount, description, status, created_at) VALUES
 (1, 1, 'HG Gundam RX-78-2', 25.00, 50, 0.00, 'High Grade Gundam RX-78-2 model kit, 1/144 scale.', 'new', '2025-04-01 10:00:00'),
 (1, 1, 'MG Gundam Wing', 45.00, 30, 5.00, 'Master Grade Gundam Wing model kit, 1/100 scale.', 'sale', '2025-04-02 12:00:00'),
 (1, 1, 'RG Gundam Unicorn', 35.00, 20, 0.00, 'Real Grade Gundam Unicorn model kit, 1/144 scale.', 'hot', '2025-04-03 14:00:00'),
