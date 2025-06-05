@@ -80,7 +80,7 @@ const OrderSuccess = () => {
               </div>
               <div className="flex justify-between">
                 <span>Shipping</span>
-                <span>{formatCurrency(order.shipping_cost)}</span>
+                <span>{order.shipping_cost === 0 ? "Free" : formatCurrency(order.shipping_cost)}</span>
               </div>
               {order.discount_amount > 0 && (
                 <div className="flex justify-between">

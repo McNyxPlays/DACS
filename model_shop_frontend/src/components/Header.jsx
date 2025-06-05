@@ -121,7 +121,7 @@ const Header = ({
     }
 
     return () => {
-      window.removeEventListener("cartUpdated", handleCartUpdate);
+      window.removeEventListener("cartUpdate", handleCartUpdate);
     };
   }, [user, sessionKey]);
 
@@ -217,7 +217,12 @@ const Header = ({
                 </span>
               )}
             </NavLink>
-
+            <NavLink
+              to="/orderstatus"
+              className="w-10 h-10 flex items-center justify-center text-gray-700 hover:bg-gray-100 rounded-full"
+            >
+              <i className="ri-truck-line ri-xl"></i>
+            </NavLink>
             {user && user.role === "admin" && (
               <NavLink
                 to="/admin"
@@ -521,6 +526,14 @@ const Header = ({
               <span>Sign In</span>
             </button>
           )}
+          <NavLink
+            to="/orderstatus"
+            className="flex items-center gap-2 py-2 text-gray-600 hover:text-primary"
+            onClick={toggleNav}
+          >
+            <i className="ri-truck-line"></i>
+            <span>Check Order Status</span>
+          </NavLink>
         </nav>
       </div>
     </header>

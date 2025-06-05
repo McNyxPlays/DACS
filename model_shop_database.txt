@@ -342,8 +342,6 @@ CREATE TABLE IF NOT EXISTS promotions (
     start_date TIMESTAMP NULL,
     end_date TIMESTAMP NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    min_order_value DECIMAL(10, 2) DEFAULT 0.00,
-    max_discount_value DECIMAL(10, 2) DEFAULT 0.00,
     status ENUM('active', 'inactive', 'expired') NOT NULL DEFAULT 'active';
     usage_count INT NOT NULL DEFAULT 0,
     is_active BOOLEAN DEFAULT TRUE,

@@ -12,8 +12,6 @@ const AddPromotions = () => {
     start_date: "",
     end_date: "",
     status: "active",
-    min_order_value: 0,
-    max_discount_value: 0,
     usage_count: 0,
     is_active: true,
   });
@@ -46,14 +44,6 @@ const AddPromotions = () => {
     }
     if (formData.discount_percentage < 0 || formData.discount_percentage > 100) {
       setError("Discount percentage must be between 0 and 100");
-      return;
-    }
-    if (formData.min_order_value < 0) {
-      setError("Minimum order value cannot be negative");
-      return;
-    }
-    if (formData.max_discount_value < 0) {
-      setError("Maximum discount value cannot be negative");
       return;
     }
     if (formData.usage_count < 0) {
@@ -124,32 +114,6 @@ const AddPromotions = () => {
               required
               min="0"
               max="100"
-              step="0.01"
-              className="w-full px-3 py-2 rounded-lg border focus:outline-none focus:ring-2 focus:ring-primary"
-            />
-          </div>
-          <div className="mb-4">
-            <label className="block text-gray-700 mb-2">Minimum Order Value</label>
-            <input
-              type="number"
-              name="min_order_value"
-              value={formData.min_order_value}
-              onChange={handleChange}
-              required
-              min="0"
-              step="0.01"
-              className="w-full px-3 py-2 rounded-lg border focus:outline-none focus:ring-2 focus:ring-primary"
-            />
-          </div>
-          <div className="mb-4">
-            <label className="block text-gray-700 mb-2">Maximum Discount Value</label>
-            <input
-              type="number"
-              name="max_discount_value"
-              value={formData.max_discount_value}
-              onChange={handleChange}
-              required
-              min="0"
               step="0.01"
               className="w-full px-3 py-2 rounded-lg border focus:outline-none focus:ring-2 focus:ring-primary"
             />

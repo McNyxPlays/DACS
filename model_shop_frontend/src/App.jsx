@@ -20,6 +20,7 @@ import Messages from "./features/UserProfile/Messages/Messages";
 import Checkout from "./features/Checkout/Checkout";
 import OrderSuccess from "./features/Checkout/OrderSuccess";
 import Notifications from "./features/UserProfile/Notifications/Notifications";
+import OrderStatus from "./features/Checkout/OrderStatus";
 import api from "./api/index";
 
 const Layout = ({
@@ -204,6 +205,7 @@ const App = () => {
             </ProtectedRoute>
           }
         />
+        <Route path="/orderstatus" element={<OrderStatus />} />
       </Route>
     </Routes>
   );
